@@ -27,7 +27,11 @@ const COMPOSE_FILENAMES = [
   'docker-compose.yaml',
 ]
 
-export type StackFiles = { compose: string; composeFile: string; env: string | null }
+export type StackFiles = {
+  compose: string
+  composeFile: string
+  env: string | null
+}
 
 export const getStackFiles = createServerFn()
   .inputValidator(z.object({ stackName: z.string().min(1) }))
@@ -45,28 +49,41 @@ export const getStackFiles = createServerFn()
     }
     if (!compose) throw new Error(`No compose file found in ${stackName}`)
 
-    const envContent = await readFile(join(dir, '.env'), 'utf8').catch(() => null)
+    const envContent = await readFile(join(dir, '.env'), 'utf8').catch(
+      () => null,
+    )
 
     return { compose, composeFile, env: envContent }
   })
 
 export const saveStackFiles = createServerFn()
-  .inputValidator(z.object({
-    stackName: z.string().min(1),
-    composeFile: z.string().min(1),
-    compose: z.string(),
-    env: z.string().nullable(),
-  }))
-  .handler(async ({ data: { stackName, composeFile, compose, env: envContent } }) => {
-    const dir = join(env.STACKS_DIR, stackName)
-    await writeFile(join(dir, composeFile), compose, 'utf8')
-    if (envContent !== null) {
-      await writeFile(join(dir, '.env'), envContent, 'utf8')
-    }
-  })
+  .inputValidator(
+    z.object({
+      stackName: z.string().min(1),
+      composeFile: z.string().min(1),
+      compose: z.string(),
+      env: z.string().nullable(),
+    }),
+  )
+  .handler(
+    async ({ data: { stackName, composeFile, compose, env: envContent } }) => {
+      const dir = join(env.STACKS_DIR, stackName)
+      await writeFile(join(dir, composeFile), compose, 'utf8')
+      if (envContent !== null) {
+        await writeFile(join(dir, '.env'), envContent, 'utf8')
+      }
+    },
+  )
 
 export const streamLogs = createServerFn()
   .inputValidator(z.object({ stackName: z.string().min(1) }))
   .handler(async function* ({ data: { stackName } }) {
     yield* docker.streamStackLogs(stackName)
+  })
+
+export const createDotEnv = createServerFn()
+  .inputValidator(z.object({ stackName: z.string().min(1) }))
+  .handler(async ({ data: { stackName } }) => {
+    const dir = join(env.STACKS_DIR, stackName)
+    await writeFile(join(dir, '.env'), '# VAR1=example', 'utf8')
   })

@@ -3,8 +3,17 @@ import { z } from 'zod'
 
 export const env = createEnv({
   server: {
-    SERVER_URL: z.string().url().optional(),
+    NODE_ENV: z._default(
+      z.enum(['development', 'test', 'production']),
+      'development',
+    ),
+    BETTER_AUTH_URL: z.url().optional(),
     STACKS_DIR: z.string().min(1),
+    DATABASE_PATH: z._default(z.string(), './db.sqlite'),
+    OAUTH_PROVIDER_ID: z.string(),
+    OAUTH_CLIENT_ID: z.string(),
+    OAUTH_CLIENT_SECRET: z.string(),
+    OAUTH_DISCOVERY_URL: z.url(),
   },
 
   /**
@@ -13,9 +22,7 @@ export const env = createEnv({
    */
   clientPrefix: 'VITE_',
 
-  client: {
-    VITE_APP_TITLE: z.string().min(1).optional(),
-  },
+  client: {},
 
   /**
    * What object holds the environment variables at runtime. This is usually

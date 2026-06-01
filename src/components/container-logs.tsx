@@ -1,5 +1,7 @@
+import { Button } from '#/components/ui/button'
 import { streamLogs } from '#/lib/functions'
 import { useVirtualizer } from '@tanstack/react-virtual'
+import { PlayCircleIcon, SquareStopIcon, StopCircleIcon } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 export function ContainerLogs({ stackName }: { stackName: string }) {
@@ -7,7 +9,7 @@ export function ContainerLogs({ stackName }: { stackName: string }) {
   const [streaming, setStreaming] = useState(false)
   const parentRef = useRef<HTMLDivElement>(null)
   const bottomRef = useRef(true)
-  const stopRef = useRef(false)
+  const stopRef = useRef<(() => void) | null>(null)
 
   const virtualizer = useVirtualizer({
     count: lines.length,
@@ -17,86 +19,86 @@ export function ContainerLogs({ stackName }: { stackName: string }) {
   })
 
   const startStreaming = useCallback(async () => {
-    stopRef.current = false
     setStreaming(true)
     setLines([])
-    for await (const msg of await streamLogs({ data: { stackName } })) {
-      if (stopRef.current) break
-      const text = typeof msg === 'string' ? msg : Buffer.from(msg).toString('utf8')
-      const newLines = text.split('\n').filter(Boolean)
-      setLines((prev) => [...prev, ...newLines])
+
+    const stopPromise = new Promise<void>((resolve) => {
+      stopRef.current = resolve
+    })
+    const stopped = { done: true as const, value: undefined }
+
+    const iter = (await streamLogs({ data: { stackName } }))[
+      Symbol.asyncIterator
+    ]()
+    try {
+      while (true) {
+        const result = await Promise.race([
+          iter.next(),
+          stopPromise.then(() => stopped),
+        ])
+        if (result.done) break
+        const text =
+          typeof result.value === 'string'
+            ? result.value
+            : Buffer.from(result.value).toString('utf8')
+        setLines((prev) => [...prev, ...text.split('\n').filter(Boolean)])
+      }
+    } finally {
+      await iter.return?.()
+      stopRef.current = null
+      setStreaming(false)
     }
-    setStreaming(false)
   }, [stackName])
 
   const stopStreaming = useCallback(() => {
-    stopRef.current = true
+    stopRef.current?.()
   }, [])
 
   useEffect(() => {
     if (bottomRef.current && lines.length > 0) {
-      virtualizer.scrollToIndex(lines.length - 1, { align: 'end' })
+      const el = parentRef.current
+      if (el) el.scrollTop = el.scrollHeight
     }
-  }, [lines.length, virtualizer])
-
-  const handleScroll = () => {
-    const el = parentRef.current
-    if (!el) return
-    bottomRef.current = el.scrollTop + el.clientHeight >= el.scrollHeight - 40
-  }
+  }, [lines.length])
 
   return (
-    <div style={{ fontFamily: 'monospace' }}>
-      <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
-        <button onClick={startStreaming} disabled={streaming}>
-          {streaming ? 'Streaming...' : 'Start Logs'}
-        </button>
-        <button onClick={stopStreaming} disabled={!streaming}>
-          Stop
-        </button>
+    <>
+      <div className="flex gap-2 mb-3">
+        <Button onClick={streaming ? stopStreaming : startStreaming} size="sm">
+          {streaming ? (
+            <>
+              <StopCircleIcon /> Streaming...
+            </>
+          ) : (
+            <>
+              <PlayCircleIcon /> Start
+            </>
+          )}
+        </Button>
       </div>
       <div
         ref={parentRef}
-        onScroll={handleScroll}
-        style={{
-          height: '600px',
-          overflow: 'auto',
-          background: '#0d1117',
-          color: '#c9d1d9',
-          borderRadius: '6px',
-          padding: '8px',
-          fontSize: '12px',
-          lineHeight: '20px',
-        }}
+        className="h-[68vh] overflow-auto bg-card text-card-foreground rounded-md text-xs leading-5 font-mono"
       >
         <div
-          style={{
-            height: `${virtualizer.getTotalSize()}px`,
-            width: '100%',
-            position: 'relative',
-          }}
+          style={{ height: `${virtualizer.getTotalSize()}px` }}
+          className="w-full relative"
         >
           {virtualizer.getVirtualItems().map((item) => (
             <div
               key={item.key}
               style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
                 height: `${item.size}px`,
                 transform: `translateY(${item.start}px)`,
-                whiteSpace: 'pre',
               }}
+              className="absolute top-0 left-0 w-full whitespace-pre"
             >
               {lines[item.index]}
             </div>
           ))}
         </div>
       </div>
-      <div style={{ marginTop: '8px', color: '#666', fontSize: '12px' }}>
-        {lines.length} lines
-      </div>
-    </div>
+      <div className="mt-2 text-[#666] text-xs">{lines.length} lines</div>
+    </>
   )
 }

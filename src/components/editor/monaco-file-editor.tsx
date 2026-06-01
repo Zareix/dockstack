@@ -1,0 +1,78 @@
+import { Editor, loader } from '@monaco-editor/react'
+import * as monaco from 'monaco-editor'
+import { configureMonacoYaml } from 'monaco-yaml'
+import EditorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker'
+import { Spinner } from '#/components/ui/spinner'
+
+const COMPOSE_SCHEMA_URL =
+  'https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json'
+
+window.MonacoEnvironment = {
+  getWorker(_, label) {
+    switch (label) {
+      case 'yaml':
+        return new Worker(new URL('./yaml.worker.js', import.meta.url), {
+          type: 'module',
+        })
+      default:
+        return new EditorWorker()
+    }
+  },
+}
+loader.config({ monaco })
+
+type MonacoFileEditorProps = {
+  value: string
+  filename?: string
+  onChange?: (value: string) => void
+  readOnly?: boolean
+}
+
+export default function MonacoFileEditor({
+  value,
+  filename = 'file.yaml',
+  onChange,
+  readOnly = false,
+}: MonacoFileEditorProps) {
+  return (
+    <Editor
+      value={value}
+      path={filename}
+      language={filename.endsWith('.env') ? 'ini' : 'yaml'}
+      theme="vs-dark"
+      className="rounded-lg overflow-hidden"
+      loading={<Spinner />}
+      beforeMount={(m) =>
+        configureMonacoYaml(m, {
+          enableSchemaRequest: true,
+          hover: true,
+          completion: true,
+          validate: true,
+          format: { enable: true },
+          schemas: [
+            {
+              uri: COMPOSE_SCHEMA_URL,
+              fileMatch: [
+                '**/compose.yaml',
+                '**/compose.yml',
+                '**/docker-compose.yml',
+                '**/docker-compose.yaml',
+              ],
+            },
+          ],
+        })
+      }
+      height="70vh"
+      options={{
+        readOnly,
+        minimap: { enabled: false },
+        fontSize: 13,
+        lineNumbers: 'on',
+        scrollBeyondLastLine: false,
+        wordWrap: 'on',
+        tabSize: 2,
+      }}
+      onChange={(v) => onChange?.(v ?? '')}
+    />
+  )
+}
