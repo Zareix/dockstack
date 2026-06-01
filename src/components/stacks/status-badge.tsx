@@ -18,6 +18,7 @@ const statusVariant: Record<
       'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-400',
   },
   stopped: { variant: 'destructive', className: '' },
+  down: { variant: 'destructive', className: '' },
   unknown: { variant: 'outline', className: 'text-muted-foreground' },
 }
 

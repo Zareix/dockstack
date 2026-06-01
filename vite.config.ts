@@ -10,7 +10,7 @@ import { nitro } from 'nitro/vite'
 const config = defineConfig({
   resolve: { tsconfigPaths: true },
   optimizeDeps: {
-    exclude: ['dockerode'],
+    exclude: ['dockerode', 'dockerode-compose'],
   },
   plugins: [
     devtools(),

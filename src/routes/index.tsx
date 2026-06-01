@@ -1,4 +1,5 @@
-import { listStacks } from '#/lib/functions'
+import { CreateStackDialog } from '#/components/create-stack-dialog'
+import { StatusBadge } from '#/components/stacks/status-badge'
 import {
   Table,
   TableBody,
@@ -7,9 +8,9 @@ import {
   TableHeader,
   TableRow,
 } from '#/components/ui/table'
+import { listStacks } from '#/lib/functions'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { StatusBadge } from '#/components/status-badge'
 
 export const Route = createFileRoute('/')({ component: Home })
 
@@ -21,7 +22,12 @@ function Home() {
 
   return (
     <>
-      <h1 className="text-3xl font-bold mb-8">Dockstack</h1>
+      <div className="flex items-center mb-8">
+        <h1 className="text-3xl font-bold">Dockstack</h1>
+        <div className="ml-auto">
+          <CreateStackDialog />
+        </div>
+      </div>
 
       <Table>
         <TableHeader>
@@ -33,10 +39,7 @@ function Home() {
         <TableBody>
           {stacksQuery.isLoading && (
             <TableRow>
-              <TableCell
-                colSpan={2}
-                className="text-center text-muted-foreground"
-              >
+              <TableCell colSpan={2} className="text-center text-muted-foreground">
                 Loading...
               </TableCell>
             </TableRow>
@@ -66,10 +69,7 @@ function Home() {
           ))}
           {stacksQuery.data?.length === 0 && (
             <TableRow>
-              <TableCell
-                colSpan={2}
-                className="text-center text-muted-foreground"
-              >
+              <TableCell colSpan={2} className="text-center text-muted-foreground">
                 No stacks found
               </TableCell>
             </TableRow>

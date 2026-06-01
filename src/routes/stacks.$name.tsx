@@ -1,58 +1,111 @@
 import { ContainerLogs } from '#/components/container-logs'
-import { createDotEnv, getStackFiles, saveStackFiles } from '#/lib/functions'
+import { StackFiles } from '#/components/stacks/files'
+import { StackServices } from '#/components/stacks/services'
+import { StatusBadge } from '#/components/stacks/status-badge'
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '#/components/ui/alert-dialog'
 import { Button } from '#/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '#/components/ui/tabs'
+import {
+  getStackStatus,
+  stackDestroy,
+  stackDown,
+  stackPull,
+  stackRestart,
+  stackUp,
+} from '#/lib/functions'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { createFileRoute, Link } from '@tanstack/react-router'
-import { lazy, Suspense, useEffect, useState } from 'react'
-import { Spinner } from '#/components/ui/spinner'
-import { ChevronLeftIcon } from 'lucide-react'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import {
+  ChevronLeftIcon,
+  DownloadIcon,
+  PlayIcon,
+  RefreshCwIcon,
+  SquareIcon,
+  Trash2Icon,
+} from 'lucide-react'
+import { toast } from 'sonner'
 
 export const Route = createFileRoute('/stacks/$name')({
   component: RouteComponent,
 })
 
-const Editor = lazy(() => import('#/components/editor/monaco-file-editor'))
-
 function RouteComponent() {
   const { name } = Route.useParams()
   const queryClient = useQueryClient()
+  const navigate = useNavigate()
 
-  const filesQuery = useQuery({
-    queryKey: ['stack-files', name],
-    queryFn: () => getStackFiles({ data: { stackName: name } }),
+  const statusQuery = useQuery({
+    queryKey: ['stack-status', name],
+    queryFn: () => getStackStatus({ data: { stackName: name } }),
+    refetchInterval: 5000,
   })
 
-  const [compose, setCompose] = useState('')
-  const [envContent, setEnvContent] = useState<string | null>(null)
+  const invalidateStatus = () => {
+    queryClient.invalidateQueries({ queryKey: ['stack-status', name] })
+    queryClient.invalidateQueries({ queryKey: ['stack-services', name] })
+  }
 
-  useEffect(() => {
-    if (!filesQuery.data) return
-    setCompose(filesQuery.data.compose)
-    setEnvContent(filesQuery.data.env)
-  }, [filesQuery.data])
-
-  const saveMutation = useMutation({
-    mutationFn: () =>
-      saveStackFiles({
-        data: {
-          stackName: name,
-          composeFile: filesQuery.data!.composeFile,
-          compose,
-          env: envContent,
-        },
-      }),
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: ['stack-files', name] }),
-  })
-  const createDotEnvMutation = useMutation({
-    mutationFn: () => createDotEnv({ data: { stackName: name } }),
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: ['stack-files', name] }),
+  const upMutation = useMutation({
+    mutationFn: () => stackUp({ data: { stackName: name } }),
+    onError: (error) => toast.error(error.message),
+    onSuccess: () => {
+      toast.success('Up')
+      invalidateStatus()
+    },
   })
 
-  const isDirty =
-    compose !== filesQuery.data?.compose || envContent !== filesQuery.data.env
+  const downMutation = useMutation({
+    mutationFn: () => stackDown({ data: { stackName: name } }),
+    onError: (error) => toast.error(error.message),
+    onSuccess: () => {
+      toast.success('Down')
+      invalidateStatus()
+    },
+  })
+
+  const restartMutation = useMutation({
+    mutationFn: () => stackRestart({ data: { stackName: name } }),
+    onError: (error) => toast.error(error.message),
+    onSuccess: () => {
+      toast.success('Restarted')
+      invalidateStatus()
+    },
+  })
+
+  const pullMutation = useMutation({
+    mutationFn: () => stackPull({ data: { stackName: name } }),
+    onError: (error) => toast.error(error.message),
+    onSuccess: () => {
+      toast.success('Pulled')
+      invalidateStatus()
+    },
+  })
+
+  const destroyMutation = useMutation({
+    mutationFn: () => stackDestroy({ data: { stackName: name } }),
+    onError: (error) => toast.error(error.message),
+    onSuccess: () => {
+      toast.success(`Stack "${name}" destroyed`)
+      queryClient.invalidateQueries({ queryKey: ['stacks'] })
+      navigate({ to: '/' })
+    },
+  })
+
+  const anyPending =
+    upMutation.isPending ||
+    downMutation.isPending ||
+    restartMutation.isPending ||
+    pullMutation.isPending ||
+    destroyMutation.isPending
 
   return (
     <>
@@ -62,89 +115,85 @@ function RouteComponent() {
           Back
         </Button>
       </Link>
-      <header className="flex items-center">
+      <header className="md:flex items-center gap-3">
         <h2 className="text-2xl font-bold">{name}</h2>
+        {statusQuery.data && <StatusBadge status={statusQuery.data} />}
 
-        <div className="ml-auto flex items-center gap-3">
+        <div className="ml-auto mt-4 md:mt-0 flex flex-wrap items-center gap-2">
+          <AlertDialog>
+            <AlertDialogTrigger
+              render={
+                <Button variant="destructive" disabled={anyPending}>
+                  <Trash2Icon />
+                  {destroyMutation.isPending ? 'Destroying...' : 'Destroy'}
+                </Button>
+              }
+            />
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Destroy "{name}"?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will run <code>docker compose down</code> and permanently
+                  delete all stack files. This cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogCancel
+                  variant="destructive"
+                  onClick={() => destroyMutation.mutate()}
+                >
+                  Destroy
+                </AlertDialogCancel>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
           <Button
-            onClick={() => saveMutation.mutate()}
-            disabled={!isDirty || saveMutation.isPending}
+            variant="outline"
+            onClick={() => pullMutation.mutate()}
+            disabled={anyPending}
           >
-            {saveMutation.isPending ? 'Saving...' : 'Save'}
+            <DownloadIcon />
+            {pullMutation.isPending ? 'Pulling...' : 'Pull'}
           </Button>
-          {saveMutation.isSuccess && !isDirty && (
-            <span className="text-sm text-muted-foreground">Saved</span>
-          )}
-          {saveMutation.isError && (
-            <span className="text-sm text-destructive">
-              {saveMutation.error.message}
-            </span>
-          )}
+          <Button
+            variant="outline"
+            onClick={() => restartMutation.mutate()}
+            disabled={anyPending}
+          >
+            <RefreshCwIcon />
+            {restartMutation.isPending ? 'Restarting...' : 'Restart'}
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => downMutation.mutate()}
+            disabled={anyPending}
+          >
+            <SquareIcon />
+            {downMutation.isPending ? 'Stopping...' : 'Down'}
+          </Button>
+          <Button onClick={() => upMutation.mutate()} disabled={anyPending}>
+            <PlayIcon />
+            {upMutation.isPending ? 'Starting...' : 'Up'}
+          </Button>
         </div>
       </header>
 
-      <Tabs defaultValue="files" className="mt-4">
+      <Tabs defaultValue="services" className="mt-4">
         <TabsList>
+          <TabsTrigger value="services">Services</TabsTrigger>
           <TabsTrigger value="files">Files</TabsTrigger>
           <TabsTrigger value="logs">Logs</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="files">
-          {filesQuery.isLoading && (
-            <p className="text-muted-foreground text-sm ">Loading...</p>
-          )}
-          {filesQuery.error && (
-            <p className="text-destructive text-sm ">
-              {filesQuery.error.message}
-            </p>
-          )}
-          {filesQuery.data && (
-            <>
-              <div className=" grid grid-cols-12 gap-4">
-                <div className="col-span-7">
-                  <p className="text-xs text-muted-foreground font-mono mb-2">
-                    {filesQuery.data.composeFile}
-                  </p>
-                  <Suspense fallback={<Spinner />}>
-                    <Editor
-                      value={compose}
-                      filename={filesQuery.data.composeFile}
-                      onChange={setCompose}
-                    />
-                  </Suspense>
-                </div>
-                <div className="col-span-5">
-                  <p className="text-xs text-muted-foreground font-mono mb-2">
-                    .env
-                  </p>
-                  {envContent !== null ? (
-                    <Suspense fallback={<Spinner />}>
-                      <Editor
-                        value={envContent}
-                        filename=".env"
-                        onChange={setEnvContent}
-                      />
-                    </Suspense>
-                  ) : (
-                    <div className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground flex items-center">
-                      <Button
-                        onClick={() => createDotEnvMutation.mutate()}
-                        variant="ghost"
-                      >
-                        Create .env
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </>
-          )}
+        <TabsContent value="services">
+          <StackServices stackName={name} />
         </TabsContent>
-
+        <TabsContent value="files">
+          <StackFiles stackName={name} />
+        </TabsContent>
         <TabsContent value="logs">
-          <div className="">
-            <ContainerLogs stackName={name} />
-          </div>
+          <ContainerLogs stackName={name} />
         </TabsContent>
       </Tabs>
     </>

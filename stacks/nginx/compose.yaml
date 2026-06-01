@@ -1,0 +1,11 @@
+services:
+  nginx:
+    image: nginx:latest
+    ports:
+      - '8080:80'
+
+  nginx-2:
+    image: nginx:latest
+    ports:
+      - '${PORT2}:80'
+    container_name: nginx___2
