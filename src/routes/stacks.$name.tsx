@@ -1,8 +1,11 @@
 import { ContainerLogs } from '#/components/container-logs'
-import { getStackFiles } from '#/lib/functions'
+import { FileEditor } from '#/components/file-editor'
+import { getStackFiles, saveStackFiles } from '#/lib/functions'
+import { Button } from '#/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '#/components/ui/tabs'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
+import { useEffect, useState } from 'react'
 
 export const Route = createFileRoute('/stacks/$name')({
   component: RouteComponent,
@@ -10,14 +13,41 @@ export const Route = createFileRoute('/stacks/$name')({
 
 function RouteComponent() {
   const { name } = Route.useParams()
+  const queryClient = useQueryClient()
 
   const filesQuery = useQuery({
     queryKey: ['stack-files', name],
     queryFn: () => getStackFiles({ data: { stackName: name } }),
   })
 
+  const [compose, setCompose] = useState('')
+  const [envContent, setEnvContent] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!filesQuery.data) return
+    setCompose(filesQuery.data.compose)
+    setEnvContent(filesQuery.data.env)
+  }, [filesQuery.data])
+
+  const saveMutation = useMutation({
+    mutationFn: () =>
+      saveStackFiles({
+        data: {
+          stackName: name,
+          composeFile: filesQuery.data!.composeFile,
+          compose,
+          env: envContent,
+        },
+      }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['stack-files', name] }),
+  })
+
+  const isDirty =
+    compose !== filesQuery.data?.compose ||
+    envContent !== filesQuery.data?.env
+
   return (
-    <div className="p-8 max-w-4xl mx-auto">
+    <>
       <h2 className="text-2xl font-bold mb-6">{name}</h2>
 
       <Tabs defaultValue="files">
@@ -34,26 +64,41 @@ function RouteComponent() {
             <p className="text-destructive text-sm mt-4">{filesQuery.error.message}</p>
           )}
           {filesQuery.data && (
-            <div className="mt-4 grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-xs text-muted-foreground font-mono mb-1">compose.yaml</p>
-                <pre className="rounded-lg bg-muted p-4 text-sm overflow-auto max-h-[60vh] font-mono">
-                  {filesQuery.data.compose}
-                </pre>
+            <>
+              <div className="mt-4 grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-xs text-muted-foreground font-mono mb-2">
+                    {filesQuery.data.composeFile}
+                  </p>
+                  <FileEditor value={compose} language="yaml" compose onChange={setCompose} />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground font-mono mb-2">.env</p>
+                  {envContent !== null ? (
+                    <FileEditor value={envContent} language="env" onChange={setEnvContent} />
+                  ) : (
+                    <div className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
+                      No .env file
+                    </div>
+                  )}
+                </div>
               </div>
-              <div>
-                <p className="text-xs text-muted-foreground font-mono mb-1">.env</p>
-                {filesQuery.data.env ? (
-                  <pre className="rounded-lg bg-muted p-4 text-sm overflow-auto max-h-[60vh] font-mono">
-                    {filesQuery.data.env}
-                  </pre>
-                ) : (
-                  <div className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
-                    No .env file
-                  </div>
+
+              <div className="mt-4 flex items-center gap-3">
+                <Button
+                  onClick={() => saveMutation.mutate()}
+                  disabled={!isDirty || saveMutation.isPending}
+                >
+                  {saveMutation.isPending ? 'Saving...' : 'Save'}
+                </Button>
+                {saveMutation.isSuccess && !isDirty && (
+                  <span className="text-sm text-muted-foreground">Saved</span>
+                )}
+                {saveMutation.isError && (
+                  <span className="text-sm text-destructive">{saveMutation.error.message}</span>
                 )}
               </div>
-            </div>
+            </>
           )}
         </TabsContent>
 
@@ -63,6 +108,6 @@ function RouteComponent() {
           </div>
         </TabsContent>
       </Tabs>
-    </div>
+    </>
   )
 }

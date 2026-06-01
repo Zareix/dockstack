@@ -47,7 +47,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        <main className="p-8 max-w-3xl mx-auto">{children}</main>
+        <main className="p-8 max-w-5xl mx-auto">{children}</main>
         <TanStackDevtools
           config={{
             position: 'bottom-right',
