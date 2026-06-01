@@ -24,6 +24,8 @@ export function ContainerLogs({ stackName }: { stackName: string }) {
     anchorTo: 'end',
     followOnAppend: true,
     scrollEndThreshold: 50,
+    paddingStart: 100,
+    paddingEnd: 100,
   })
 
   const startStreaming = useCallback(async () => {
@@ -89,7 +91,7 @@ export function ContainerLogs({ stackName }: { stackName: string }) {
       </div>
       <div
         ref={parentRef}
-        className="h-[68vh] overflow-auto bg-card text-card-foreground rounded-md text-xs leading-5 font-mono p-2"
+        className="h-[68vh] overflow-auto bg-card text-card-foreground rounded-md text-xs leading-5 font-mono"
       >
         <div className="w-full relative">
           {virtualizer.getVirtualItems().map((item) => {
