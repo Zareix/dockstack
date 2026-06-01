@@ -171,9 +171,15 @@ export function StackServices({ stackName }: { stackName: string }) {
             </TableCell>
             <TableCell className="font-mono text-xs">
               {c.ports.length
-                ? c.ports
-                    .map((p) => `${p.host}:${p.container}/${p.protocol}`)
-                    .join(', ')
+                ? c.ports.map((p) => (
+                    <a
+                      href={`http://${p.hostName}:${p.hostPort}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {`${p.hostPort}:${p.containerPort}/${p.protocol}`}
+                    </a>
+                  ))
                 : '—'}
             </TableCell>
             <TableCell className="text-right">

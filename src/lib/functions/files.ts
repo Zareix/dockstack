@@ -18,7 +18,9 @@ export const getStackFiles = createServerFn()
     const composeFile = await docker.findComposePath(stackName)
     const compose = await Bun.file(composeFile).text()
     if (!compose) throw new Error(`No compose file found in ${stackName}`)
-    const envContent = await Bun.file(join(dir, '.env')).text().catch(() => null)
+    const envContent = await Bun.file(join(dir, '.env'))
+      .text()
+      .catch(() => null)
     return { compose, composeFile: path.basename(composeFile), env: envContent }
   })
 
@@ -31,13 +33,15 @@ export const saveStackFiles = createServerFn()
       env: z.string().nullable(),
     }),
   )
-  .handler(async ({ data: { stackName, composeFile, compose, env: envContent } }) => {
-    const dir = join(env.STACKS_DIR, stackName)
-    await writeFile(join(dir, composeFile), compose, 'utf8')
-    if (envContent !== null) {
-      await writeFile(join(dir, '.env'), envContent, 'utf8')
-    }
-  })
+  .handler(
+    async ({ data: { stackName, composeFile, compose, env: envContent } }) => {
+      const dir = join(env.STACKS_DIR, stackName)
+      await writeFile(join(dir, composeFile), compose, 'utf8')
+      if (envContent !== null) {
+        await writeFile(join(dir, '.env'), envContent, 'utf8')
+      }
+    },
+  )
 
 export const createStack = createServerFn()
   .inputValidator(z.object({ stackName: z.string().min(1) }))
@@ -45,7 +49,7 @@ export const createStack = createServerFn()
     const dir = join(env.STACKS_DIR, stackName)
     await Bun.write(
       join(dir, 'compose.yaml'),
-      `services:\n  app:\n    image: \n`,
+      `services:\n  app:\n    image: nginx\n`,
     )
   })
 

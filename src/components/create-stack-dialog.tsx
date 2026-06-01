@@ -12,6 +12,7 @@ import { Label } from '#/components/ui/label'
 import { createStack } from '#/lib/functions'
 import { useForm } from '@tanstack/react-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useNavigate } from '@tanstack/react-router'
 import { PlusIcon } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
@@ -23,6 +24,7 @@ const schema = z.object({
 
 export function CreateStackDialog() {
   const [open, setOpen] = useState(false)
+  const navigate = useNavigate()
   const queryClient = useQueryClient()
 
   const mutation = useMutation({
@@ -32,6 +34,7 @@ export function CreateStackDialog() {
       queryClient.invalidateQueries({ queryKey: ['stacks'] })
       setOpen(false)
       form.reset()
+      navigate({ to: `/stacks/${stackName}` })
     },
     onError: (e) => toast.error(e.message),
   })
@@ -68,7 +71,10 @@ export function CreateStackDialog() {
                 const isInvalid =
                   field.state.meta.isTouched && !field.state.meta.isValid
                 return (
-                  <div data-invalid={isInvalid || undefined} className="grid gap-2">
+                  <div
+                    data-invalid={isInvalid || undefined}
+                    className="grid gap-2"
+                  >
                     <Label htmlFor={field.name}>Name</Label>
                     <Input
                       id={field.name}

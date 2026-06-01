@@ -8,6 +8,7 @@ export const env = createEnv({
       'development',
     ),
     BETTER_AUTH_URL: z.url().optional(),
+    SERVER_HOST: z.string().min(1),
     STACKS_DIR: z.string().min(1),
     DATABASE_PATH: z._default(z.string(), './db.sqlite'),
     OAUTH_PROVIDER_ID: z.string(),

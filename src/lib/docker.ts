@@ -64,7 +64,12 @@ export const streamStackLogs = async function* (stackName: string) {
         }
       }
       if (buf) {
-        queue.push({ containerName, message: buf, stream: streamType, timestamp: '' })
+        queue.push({
+          containerName,
+          message: buf,
+          stream: streamType,
+          timestamp: '',
+        })
         const fn = notify
         if (fn) fn()
       }
@@ -79,7 +84,15 @@ export const streamStackLogs = async function* (stackName: string) {
     ;(async () => {
       try {
         const proc = Bun.spawn(
-          ['docker', 'logs', '--follow', '--timestamps', '--tail', '1000', info.Id],
+          [
+            'docker',
+            'logs',
+            '--follow',
+            '--timestamps',
+            '--tail',
+            '1000',
+            info.Id,
+          ],
           { stdout: 'pipe', stderr: 'pipe' },
         )
         await Promise.all([
@@ -139,7 +152,12 @@ export type ContainerInfo = {
   name: string
   state: string
   status: string
-  ports: { host: number; container: number; protocol: string }[]
+  ports: {
+    hostPort: number
+    containerPort: number
+    protocol: string
+    hostName: string
+  }[]
 }
 
 export const getStackContainers = async (
@@ -152,17 +170,27 @@ export const getStackContainers = async (
     }),
   })
 
-  return containers.map((c) => ({
-    id: c.Id.slice(0, 12),
-    name: c.Names[0]?.replace(/^\//, '') ?? c.Id.slice(0, 12),
-    state: c.State,
-    status: c.Status,
-    ports: c.Ports.filter((p) => p.PublicPort).map((p) => ({
-      host: p.PublicPort!,
-      container: p.PrivatePort,
-      protocol: p.Type,
-    })),
-  }))
+  return containers
+    .map((c) => ({
+      id: c.Id.slice(0, 12),
+      name: c.Names[0]?.replace(/^\//, '') ?? c.Id.slice(0, 12),
+      state: c.State,
+      status: c.Status,
+      ports: c.Ports.filter((p) => p.PublicPort)
+        .map((p) => ({
+          hostPort: p.PublicPort!,
+          containerPort: p.PrivatePort,
+          protocol: p.Type,
+          hostName: env.SERVER_HOST,
+        }))
+        .filter(
+          (p, i, a) =>
+            a.findIndex(
+              (p2) => p.hostPort === p2.hostPort && p.protocol === p2.protocol,
+            ) === i,
+        ),
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name))
 }
 
 export const containerStart = (id: string) =>
