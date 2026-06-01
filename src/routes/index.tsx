@@ -1,0 +1,94 @@
+import { listStacks } from '#/lib/functions'
+import type { StackStatus } from '#/lib/docker'
+import { Badge } from '#/components/ui/badge'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '#/components/ui/table'
+import { useQuery } from '@tanstack/react-query'
+import { createFileRoute, Link } from '@tanstack/react-router'
+
+export const Route = createFileRoute('/')({ component: Home })
+
+const statusVariant: Record<StackStatus, { variant: 'default' | 'secondary' | 'destructive' | 'outline'; className: string }> = {
+  running:  { variant: 'default',     className: 'bg-green-600 text-white dark:bg-green-700' },
+  partial:  { variant: 'secondary',   className: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-400' },
+  stopped:  { variant: 'destructive', className: '' },
+  unknown:  { variant: 'outline',     className: 'text-muted-foreground' },
+}
+
+function StatusBadge({ status }: { status: StackStatus }) {
+  const { variant, className } = statusVariant[status]
+  return <Badge variant={variant} className={className}>{status}</Badge>
+}
+
+function Home() {
+  const stacksQuery = useQuery({
+    queryKey: ['stacks'],
+    queryFn: listStacks,
+  })
+
+  return (
+    <>
+      <h1 className="text-3xl font-bold mb-8">DockStack</h1>
+
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Stack</TableHead>
+            <TableHead>Status</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {stacksQuery.isLoading && (
+            <TableRow>
+              <TableCell
+                colSpan={2}
+                className="text-center text-muted-foreground"
+              >
+                Loading...
+              </TableCell>
+            </TableRow>
+          )}
+          {stacksQuery.error && (
+            <TableRow>
+              <TableCell colSpan={2} className="text-center text-destructive">
+                {stacksQuery.error.message}
+              </TableCell>
+            </TableRow>
+          )}
+          {stacksQuery.data?.map(({ name, status }) => (
+            <TableRow key={name}>
+              <TableCell>
+                <Link
+                  to="/stacks/$name"
+                  params={{ name }}
+                  className="font-medium hover:underline"
+                >
+                  {name}
+                </Link>
+              </TableCell>
+              <TableCell>
+                <StatusBadge status={status} />
+              </TableCell>
+            </TableRow>
+          ))}
+          {stacksQuery.data?.length === 0 && (
+            <TableRow>
+              <TableCell
+                colSpan={2}
+                className="text-center text-muted-foreground"
+              >
+                No stacks found
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+    </>
+  )
+}
