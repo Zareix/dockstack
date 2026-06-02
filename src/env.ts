@@ -8,13 +8,14 @@ export const env = createEnv({
       'development',
     ),
     BETTER_AUTH_URL: z.url().optional(),
+    ADMIN_EMAIL: z.email(),
     SERVER_HOST: z.string().min(1),
     STACKS_DIR: z.string().min(1),
     DATABASE_PATH: z._default(z.string(), './db.sqlite'),
-    OAUTH_PROVIDER_ID: z.string(),
-    OAUTH_CLIENT_ID: z.string(),
-    OAUTH_CLIENT_SECRET: z.string(),
-    OAUTH_DISCOVERY_URL: z.url(),
+    OAUTH_PROVIDER_ID: z.string().optional(),
+    OAUTH_CLIENT_ID: z.string().optional(),
+    OAUTH_CLIENT_SECRET: z.string().optional(),
+    OAUTH_DISCOVERY_URL: z.url().optional(),
   },
 
   /**

@@ -13,3 +13,4 @@ __unconfig*
 todos.json
 data/stacks
 auth-schema.ts
+db.sqlite*

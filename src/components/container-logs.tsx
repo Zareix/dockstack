@@ -41,6 +41,7 @@ export function ContainerLogs({ stackName }: { stackName: string }) {
       Symbol.asyncIterator
     ]()
     try {
+      // eslint-disable-next-line
       while (true) {
         const result = await Promise.race([
           iter.next(),
@@ -50,6 +51,7 @@ export function ContainerLogs({ stackName }: { stackName: string }) {
         setLines((prev) => [...prev, result.value])
       }
     } finally {
+      // eslint-disable-next-line
       await iter.return?.()
       stopRef.current = null
       setStreaming(false)

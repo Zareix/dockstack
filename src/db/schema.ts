@@ -13,6 +13,12 @@ export const user = sqliteTable('user', {
   updatedAt: integer('updated_at', { mode: 'timestamp_ms' })
     .$onUpdate(() => new Date())
     .notNull(),
+  role: text('role'),
+  banned: integer('banned', { mode: 'boolean' }).default(false),
+  banReason: text('ban_reason'),
+  banExpires: integer('ban_expires', { mode: 'timestamp_ms' }),
+  username: text('username').unique(),
+  displayUsername: text('display_username'),
 })
 
 export const session = sqliteTable(
@@ -30,6 +36,7 @@ export const session = sqliteTable(
     userId: text('user_id')
       .notNull()
       .references(() => user.id, { onDelete: 'cascade' }),
+    impersonatedBy: text('impersonated_by'),
   },
   (table) => [index('session_userId_idx').on(table.userId)],
 )

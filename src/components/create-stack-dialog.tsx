@@ -22,7 +22,7 @@ const schema = z.object({
   name: z.string().min(1, 'Name is required'),
 })
 
-export function CreateStackDialog() {
+export function CreateStackButton() {
   const [open, setOpen] = useState(false)
   const navigate = useNavigate()
   const queryClient = useQueryClient()

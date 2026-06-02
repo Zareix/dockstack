@@ -11,6 +11,8 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as StacksNameRouteImport } from './routes/stacks.$name'
+import { Route as SettingsPathRouteImport } from './routes/settings/$path'
+import { Route as AuthPathRouteImport } from './routes/auth/$path'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
 const IndexRoute = IndexRouteImport.update({
@@ -23,6 +25,16 @@ const StacksNameRoute = StacksNameRouteImport.update({
   path: '/stacks/$name',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SettingsPathRoute = SettingsPathRouteImport.update({
+  id: '/settings/$path',
+  path: '/settings/$path',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthPathRoute = AuthPathRouteImport.update({
+  id: '/auth/$path',
+  path: '/auth/$path',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -31,30 +43,49 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth/$path': typeof AuthPathRoute
+  '/settings/$path': typeof SettingsPathRoute
   '/stacks/$name': typeof StacksNameRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth/$path': typeof AuthPathRoute
+  '/settings/$path': typeof SettingsPathRoute
   '/stacks/$name': typeof StacksNameRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/auth/$path': typeof AuthPathRoute
+  '/settings/$path': typeof SettingsPathRoute
   '/stacks/$name': typeof StacksNameRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/stacks/$name' | '/api/auth/$'
+  fullPaths:
+    | '/'
+    | '/auth/$path'
+    | '/settings/$path'
+    | '/stacks/$name'
+    | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/stacks/$name' | '/api/auth/$'
-  id: '__root__' | '/' | '/stacks/$name' | '/api/auth/$'
+  to: '/' | '/auth/$path' | '/settings/$path' | '/stacks/$name' | '/api/auth/$'
+  id:
+    | '__root__'
+    | '/'
+    | '/auth/$path'
+    | '/settings/$path'
+    | '/stacks/$name'
+    | '/api/auth/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthPathRoute: typeof AuthPathRoute
+  SettingsPathRoute: typeof SettingsPathRoute
   StacksNameRoute: typeof StacksNameRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
@@ -75,6 +106,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StacksNameRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/settings/$path': {
+      id: '/settings/$path'
+      path: '/settings/$path'
+      fullPath: '/settings/$path'
+      preLoaderRoute: typeof SettingsPathRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/$path': {
+      id: '/auth/$path'
+      path: '/auth/$path'
+      fullPath: '/auth/$path'
+      preLoaderRoute: typeof AuthPathRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -87,6 +132,8 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthPathRoute: AuthPathRoute,
+  SettingsPathRoute: SettingsPathRoute,
   StacksNameRoute: StacksNameRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }

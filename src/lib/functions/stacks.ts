@@ -8,15 +8,17 @@ import { z } from 'zod'
 export type { StackStatus } from '#/lib/docker'
 export type Stack = { name: string; status: docker.StackStatus }
 
-export const listStacks = createServerFn().handler(async (): Promise<Stack[]> => {
-  const names = await readdir(env.STACKS_DIR)
-  return Promise.all(
-    names.map(async (name) => ({
-      name,
-      status: await docker.getStackStatus(name),
-    })),
-  )
-})
+export const listStacks = createServerFn().handler(
+  async (): Promise<Stack[]> => {
+    const names = await readdir(env.STACKS_DIR)
+    return Promise.all(
+      names.map(async (name) => ({
+        name,
+        status: await docker.getStackStatus(name),
+      })),
+    )
+  },
+)
 
 export const getStackStatus = createServerFn()
   .inputValidator(z.object({ stackName: z.string().min(1) }))
@@ -33,6 +35,10 @@ const stackNameSchema = z.object({ stackName: z.string().min(1) })
 export const stackUp = createServerFn()
   .inputValidator(stackNameSchema)
   .handler(({ data: { stackName } }) => docker.stackUp(stackName))
+
+export const stackStop = createServerFn()
+  .inputValidator(stackNameSchema)
+  .handler(({ data: { stackName } }) => docker.stackStop(stackName))
 
 export const stackDown = createServerFn()
   .inputValidator(stackNameSchema)

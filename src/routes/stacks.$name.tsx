@@ -1,3 +1,4 @@
+import { BackButton } from '#/components/back'
 import { ContainerLogs } from '#/components/container-logs'
 import { StackFiles } from '#/components/stacks/files'
 import { StackServices } from '#/components/stacks/services'
@@ -20,13 +21,15 @@ import {
   stackDown,
   stackPull,
   stackRestart,
+  stackStop,
   stackUp,
 } from '#/lib/functions'
+import { ensureSession } from '#/lib/functions/auth'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router'
 import {
-  ChevronLeftIcon,
   DownloadIcon,
+  PauseIcon,
   PlayIcon,
   RefreshCwIcon,
   SquareIcon,
@@ -35,10 +38,21 @@ import {
 import { toast } from 'sonner'
 
 export const Route = createFileRoute('/stacks/$name')({
-  component: RouteComponent,
+  async beforeLoad({ context: { queryClient }, location }) {
+    const session = await ensureSession(queryClient)()
+    if (!session) {
+      throw redirect({
+        to: '/auth/$path',
+        params: { path: 'sign-in' },
+        search: { redirectTo: location.href },
+      })
+    }
+    return { session }
+  },
+  component: StackPage,
 })
 
-function RouteComponent() {
+function StackPage() {
   const { name } = Route.useParams()
   const queryClient = useQueryClient()
   const navigate = useNavigate()
@@ -58,7 +72,16 @@ function RouteComponent() {
     mutationFn: () => stackUp({ data: { stackName: name } }),
     onError: (error) => toast.error(error.message),
     onSuccess: () => {
-      toast.success('Up')
+      toast.success(`"${name}" started`)
+      invalidateStatus()
+    },
+  })
+
+  const stopMutation = useMutation({
+    mutationFn: () => stackStop({ data: { stackName: name } }),
+    onError: (error) => toast.error(error.message),
+    onSuccess: () => {
+      toast.success(`"${name}" stopped`)
       invalidateStatus()
     },
   })
@@ -67,7 +90,7 @@ function RouteComponent() {
     mutationFn: () => stackDown({ data: { stackName: name } }),
     onError: (error) => toast.error(error.message),
     onSuccess: () => {
-      toast.success('Down')
+      toast.success(`"${name}" down`)
       invalidateStatus()
     },
   })
@@ -76,7 +99,7 @@ function RouteComponent() {
     mutationFn: () => stackRestart({ data: { stackName: name } }),
     onError: (error) => toast.error(error.message),
     onSuccess: () => {
-      toast.success('Restarted')
+      toast.success(`"${name}" restarted`)
       invalidateStatus()
     },
   })
@@ -85,7 +108,7 @@ function RouteComponent() {
     mutationFn: () => stackPull({ data: { stackName: name } }),
     onError: (error) => toast.error(error.message),
     onSuccess: () => {
-      toast.success('Pulled')
+      toast.success(`"${name}" pulled`)
       invalidateStatus()
     },
   })
@@ -102,6 +125,7 @@ function RouteComponent() {
 
   const anyPending =
     upMutation.isPending ||
+    stopMutation.isPending ||
     downMutation.isPending ||
     restartMutation.isPending ||
     pullMutation.isPending ||
@@ -109,15 +133,12 @@ function RouteComponent() {
 
   return (
     <>
-      <Link to="/">
-        <Button variant="link" size="xs" className="-ml-3">
-          <ChevronLeftIcon />
-          Back
-        </Button>
-      </Link>
+      <BackButton />
       <header className="md:flex items-center gap-3">
-        <h2 className="text-2xl font-bold">{name}</h2>
-        {statusQuery.data && <StatusBadge status={statusQuery.data} />}
+        <h2 className="text-2xl font-bold flex items-center gap-2">
+          <span>{name}</span>
+          {statusQuery.data && <StatusBadge status={statusQuery.data} />}
+        </h2>
 
         <div className="ml-auto mt-4 md:mt-0 flex flex-wrap items-center gap-2">
           <AlertDialog>
@@ -166,11 +187,19 @@ function RouteComponent() {
           </Button>
           <Button
             variant="outline"
+            onClick={() => stopMutation.mutate()}
+            disabled={anyPending}
+          >
+            <PauseIcon />
+            {stopMutation.isPending ? 'Stopping...' : 'Stop'}
+          </Button>
+          <Button
+            variant="outline"
             onClick={() => downMutation.mutate()}
             disabled={anyPending}
           >
             <SquareIcon />
-            {downMutation.isPending ? 'Stopping...' : 'Down'}
+            {downMutation.isPending ? 'Downing...' : 'Down'}
           </Button>
           <Button onClick={() => upMutation.mutate()} disabled={anyPending}>
             <PlayIcon />

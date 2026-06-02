@@ -47,6 +47,7 @@ export const streamStackLogs = async function* (stackName: string) {
     const reader = stream.getReader()
     let buf = ''
     try {
+      // eslint-disable-next-line
       while (true) {
         const { done: streamDone, value } = await reader.read()
         if (streamDone) break
@@ -132,6 +133,11 @@ export const stackUp = async (stackName: string) => {
   await Bun.$`docker compose -f ${composePath} up -d --remove-orphans`
 }
 
+export const stackStop = async (stackName: string) => {
+  const composePath = await findComposePath(stackName)
+  await Bun.$`docker compose -f ${composePath} stop`
+}
+
 export const stackDown = async (stackName: string) => {
   const composePath = await findComposePath(stackName)
   await Bun.$`docker compose -f ${composePath} down`
@@ -178,7 +184,7 @@ export const getStackContainers = async (
       status: c.Status,
       ports: c.Ports.filter((p) => p.PublicPort)
         .map((p) => ({
-          hostPort: p.PublicPort!,
+          hostPort: p.PublicPort,
           containerPort: p.PrivatePort,
           protocol: p.Type,
           hostName: env.SERVER_HOST,
