@@ -14,7 +14,16 @@ const config = defineConfig({
   },
   plugins: [
     devtools(),
-    nitro({ rollupConfig: { external: [/^@sentry\//] } }),
+    nitro({
+      rollupConfig: {
+        external: [
+          /^@sentry\//,
+          /^monaco-editor/,
+          /^monaco-yaml/,
+          /^@monaco-editor\//,
+        ],
+      },
+    }),
     tailwindcss(),
     tanstackStart(),
     viteReact(),

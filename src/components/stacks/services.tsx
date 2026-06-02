@@ -173,6 +173,7 @@ export function StackServices({ stackName }: { stackName: string }) {
               {c.ports.length
                 ? c.ports.map((p) => (
                     <a
+                      key={p.hostPort}
                       href={`http://${p.hostName}:${p.hostPort}`}
                       target="_blank"
                       rel="noopener noreferrer"

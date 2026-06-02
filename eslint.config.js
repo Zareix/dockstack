@@ -18,6 +18,7 @@ export default [
     ignores: [
       'eslint.config.js',
       'prettier.config.js',
+      '.output',
       'src/components/editor/yaml.worker.js',
       'src/components/ui',
       'src/components/auth',

@@ -26,7 +26,8 @@ import {
 } from '#/lib/functions'
 import { ensureSession } from '#/lib/functions/auth'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router'
+import { ClientOnly, createFileRoute, redirect } from '@tanstack/react-router'
+import { z } from 'zod'
 import {
   DownloadIcon,
   PauseIcon,
@@ -37,7 +38,12 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 
+const tabSchema = z.object({
+  tab: z.enum(['services', 'files', 'logs']).catch('services'),
+})
+
 export const Route = createFileRoute('/stacks/$name')({
+  validateSearch: tabSchema,
   async beforeLoad({ context: { queryClient }, location }) {
     const session = await ensureSession(queryClient)()
     if (!session) {
@@ -54,8 +60,9 @@ export const Route = createFileRoute('/stacks/$name')({
 
 function StackPage() {
   const { name } = Route.useParams()
+  const { tab } = Route.useSearch()
   const queryClient = useQueryClient()
-  const navigate = useNavigate()
+  const navigate = Route.useNavigate()
 
   const statusQuery = useQuery({
     queryKey: ['stack-status', name],
@@ -208,7 +215,13 @@ function StackPage() {
         </div>
       </header>
 
-      <Tabs defaultValue="services" className="mt-4">
+      <Tabs
+        value={tab}
+        onValueChange={(value) =>
+          navigate({ search: { tab: value as typeof tab } })
+        }
+        className="mt-4"
+      >
         <TabsList>
           <TabsTrigger value="services">Services</TabsTrigger>
           <TabsTrigger value="files">Files</TabsTrigger>
@@ -219,7 +232,9 @@ function StackPage() {
           <StackServices stackName={name} />
         </TabsContent>
         <TabsContent value="files">
-          <StackFiles stackName={name} />
+          <ClientOnly>
+            <StackFiles stackName={name} />
+          </ClientOnly>
         </TabsContent>
         <TabsContent value="logs">
           <ContainerLogs stackName={name} />

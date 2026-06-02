@@ -2,10 +2,9 @@ import { Button } from '#/components/ui/button'
 import { Spinner } from '#/components/ui/spinner'
 import { createDotEnv, getStackFiles, saveStackFiles } from '#/lib/functions'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { lazy, Suspense, useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { toast } from 'sonner'
-
-const Editor = lazy(() => import('#/components/editor/monaco-file-editor'))
+import Editor from '#/components/editor/monaco-file-editor'
 
 export function StackFiles({ stackName }: { stackName: string }) {
   const queryClient = useQueryClient()
