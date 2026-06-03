@@ -2,6 +2,7 @@
   "name": "dockstack",
   "private": true,
   "type": "module",
+  "version": "0.1.0",
   "imports": {
     "#/*": "./src/*"
   },
@@ -14,12 +15,13 @@
     "format": "prettier --write .",
     "check": "bun run lint && bun run format",
     "db:generate": "bunx drizzle-kit generate",
-    "auth:generate": "bunx --bun @better-auth/cli generate --config src/lib/auth/index.ts"
+    "auth:generate": "bunx --bun @better-auth/cli generate --config src/lib/auth/index.ts --output src/db/schema/auth-schema.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.5.0",
     "@better-auth-ui/core": "^1.6.8",
     "@better-auth-ui/react": "^1.6.8",
+    "@better-auth/api-key": "^1.6.11",
     "@fontsource-variable/geist": "^5.2.9",
     "@monaco-editor/react": "^4.7.0",
     "@t3-oss/env-core": "^0.13.11",
@@ -53,7 +55,7 @@
     "react": "^19.2.6",
     "react-day-picker": "^10.0.1",
     "react-dom": "^19.2.6",
-    "shadcn": "^4.8.0",
+    "shadcn": "^4.8.1",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.6.0",
     "tailwindcss": "^4.3.0",

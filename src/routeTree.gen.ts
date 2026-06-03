@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as StacksNameRouteImport } from './routes/stacks.$name'
 import { Route as SettingsPathRouteImport } from './routes/settings/$path'
 import { Route as AuthPathRouteImport } from './routes/auth/$path'
+import { Route as ApiStacksRedeployRouteImport } from './routes/api/stacks/redeploy'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
 const IndexRoute = IndexRouteImport.update({
@@ -35,6 +36,11 @@ const AuthPathRoute = AuthPathRouteImport.update({
   path: '/auth/$path',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiStacksRedeployRoute = ApiStacksRedeployRouteImport.update({
+  id: '/api/stacks/redeploy',
+  path: '/api/stacks/redeploy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -47,6 +53,7 @@ export interface FileRoutesByFullPath {
   '/settings/$path': typeof SettingsPathRoute
   '/stacks/$name': typeof StacksNameRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/stacks/redeploy': typeof ApiStacksRedeployRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -54,6 +61,7 @@ export interface FileRoutesByTo {
   '/settings/$path': typeof SettingsPathRoute
   '/stacks/$name': typeof StacksNameRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/stacks/redeploy': typeof ApiStacksRedeployRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -62,6 +70,7 @@ export interface FileRoutesById {
   '/settings/$path': typeof SettingsPathRoute
   '/stacks/$name': typeof StacksNameRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/stacks/redeploy': typeof ApiStacksRedeployRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -71,8 +80,15 @@ export interface FileRouteTypes {
     | '/settings/$path'
     | '/stacks/$name'
     | '/api/auth/$'
+    | '/api/stacks/redeploy'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth/$path' | '/settings/$path' | '/stacks/$name' | '/api/auth/$'
+  to:
+    | '/'
+    | '/auth/$path'
+    | '/settings/$path'
+    | '/stacks/$name'
+    | '/api/auth/$'
+    | '/api/stacks/redeploy'
   id:
     | '__root__'
     | '/'
@@ -80,6 +96,7 @@ export interface FileRouteTypes {
     | '/settings/$path'
     | '/stacks/$name'
     | '/api/auth/$'
+    | '/api/stacks/redeploy'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -88,6 +105,7 @@ export interface RootRouteChildren {
   SettingsPathRoute: typeof SettingsPathRoute
   StacksNameRoute: typeof StacksNameRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiStacksRedeployRoute: typeof ApiStacksRedeployRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -120,6 +138,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthPathRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/stacks/redeploy': {
+      id: '/api/stacks/redeploy'
+      path: '/api/stacks/redeploy'
+      fullPath: '/api/stacks/redeploy'
+      preLoaderRoute: typeof ApiStacksRedeployRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -136,6 +161,7 @@ const rootRouteChildren: RootRouteChildren = {
   SettingsPathRoute: SettingsPathRoute,
   StacksNameRoute: StacksNameRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiStacksRedeployRoute: ApiStacksRedeployRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

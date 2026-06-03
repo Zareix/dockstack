@@ -1,5 +1,6 @@
 import { env } from '#/env'
 import Docker from 'dockerode'
+import { readdir } from 'node:fs/promises'
 import { join } from 'node:path'
 
 const COMPOSE_FILENAMES = [
@@ -128,6 +129,10 @@ export const findComposePath = async (stackName: string): Promise<string> => {
   throw new Error(`No compose file found in ${stackName}`)
 }
 
+export const listStacks = async (): Promise<string[]> => {
+  return await readdir(env.STACKS_DIR)
+}
+
 export const stackUp = async (stackName: string) => {
   const composePath = await findComposePath(stackName)
   await Bun.$`docker compose -f ${composePath} up -d --remove-orphans`
@@ -151,6 +156,14 @@ export const stackRestart = async (stackName: string) => {
 export const stackPull = async (stackName: string) => {
   const composePath = await findComposePath(stackName)
   await Bun.$`docker compose -f ${composePath} pull`
+}
+
+export const stackUpServices = async (
+  stackName: string,
+  services: string[],
+) => {
+  const composePath = await findComposePath(stackName)
+  await Bun.$`docker compose -f ${composePath} up -d ${services}`
 }
 
 export type ContainerInfo = {
@@ -210,6 +223,56 @@ export const containerRestart = (id: string) =>
 
 export const containerRemove = (id: string) =>
   dockerClient.getContainer(id).remove({ force: true })
+
+export const getRunningServices = async (
+  stackName: string,
+): Promise<string[]> => {
+  const containers = await dockerClient.listContainers({
+    filters: JSON.stringify({
+      label: [`com.docker.compose.project=${stackName}`],
+      status: ['running'],
+    }),
+  })
+  return [
+    ...new Set(
+      containers
+        .map((c) => c.Labels['com.docker.compose.service'])
+        .filter(Boolean),
+    ),
+  ]
+}
+
+export type RedeployResult = {
+  name: string
+  action: 'redeployed' | 'skipped' | 'error'
+  services?: string[]
+  error?: string
+}
+
+export const redeployAllRunningStacks = async (): Promise<RedeployResult[]> => {
+  const names = await listStacks()
+
+  const results = await Promise.allSettled<RedeployResult>(
+    names.map(async (name) => {
+      const services = await getRunningServices(name)
+      if (services.length === 0) {
+        return { name, action: 'skipped' }
+      }
+      await stackUpServices(name, services)
+      return { name, action: 'redeployed', services }
+    }),
+  )
+
+  return results.map((r, i) =>
+    r.status === 'fulfilled'
+      ? r.value
+      : {
+          name: names[i],
+          action: 'error',
+          error: String(r.reason),
+        },
+  )
+}
 
 export const getStackStatus = async (
   stackName: string,

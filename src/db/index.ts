@@ -1,7 +1,7 @@
 import { Database } from 'bun:sqlite'
 import { drizzle } from 'drizzle-orm/bun-sqlite'
-import * as schema from './schema'
 import { env } from '@/env'
+import * as authSchema from './schema/auth-schema'
 
 const globalForDb = globalThis as unknown as {
   client?: Database
@@ -13,4 +13,6 @@ if (env.NODE_ENV !== 'production') globalForDb.client = client
 client.run('PRAGMA journal_mode = WAL;')
 client.run('PRAGMA foreign_keys = ON;')
 
-export const db = drizzle(client, { schema })
+export const db = drizzle(client, {
+  schema: authSchema,
+})

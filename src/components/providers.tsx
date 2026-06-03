@@ -8,6 +8,7 @@ import { AuthProvider } from './auth/auth-provider'
 import { Toaster } from './ui/sonner'
 import { useQuery } from '@tanstack/react-query'
 import { getSocialProviders } from '#/lib/functions/auth'
+import { apiKeyPlugin } from '#/lib/auth/api-key-plugin'
 
 export function Providers({ children }: { children: ReactNode }) {
   const providersQuery = useQuery({
@@ -37,7 +38,11 @@ export function Providers({ children }: { children: ReactNode }) {
               enabled: true,
             }}
             navigate={navigate}
-            plugins={[themePlugin({ useTheme }), usernamePlugin()]}
+            plugins={[
+              themePlugin({ useTheme }),
+              usernamePlugin(),
+              apiKeyPlugin(),
+            ]}
             Link={Link}
           >
             {children}

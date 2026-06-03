@@ -3,6 +3,7 @@ import { betterAuth } from 'better-auth'
 import { tanstackStartCookies } from 'better-auth/tanstack-start'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { admin, genericOAuth, username } from 'better-auth/plugins'
+import { apiKey } from '@better-auth/api-key'
 import { db } from '#/db'
 
 const oauthProviderId = env.OAUTH_PROVIDER_ID
@@ -32,6 +33,7 @@ export const auth = betterAuth({
       : null,
     admin(),
     username(),
+    apiKey(),
     tanstackStartCookies(),
   ].filter(Boolean),
 })

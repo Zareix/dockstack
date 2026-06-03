@@ -9,7 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from '#/components/ui/table'
-import type { ContainerInfo } from '#/lib/functions'
+import type { ContainerInfo } from '#/lib/docker'
 import {
   containerRemove,
   containerRestart,

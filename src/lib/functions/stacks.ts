@@ -1,16 +1,15 @@
 import { env } from '#/env'
 import * as docker from '#/lib/docker'
 import { createServerFn } from '@tanstack/react-start'
-import { readdir, rm } from 'node:fs/promises'
+import { rm } from 'node:fs/promises'
 import { join } from 'node:path'
 import { z } from 'zod'
 
-export type { StackStatus } from '#/lib/docker'
 export type Stack = { name: string; status: docker.StackStatus }
 
 export const listStacks = createServerFn().handler(
   async (): Promise<Stack[]> => {
-    const names = await readdir(env.STACKS_DIR)
+    const names = await docker.listStacks()
     return Promise.all(
       names.map(async (name) => ({
         name,
@@ -23,8 +22,6 @@ export const listStacks = createServerFn().handler(
 export const getStackStatus = createServerFn()
   .inputValidator(z.object({ stackName: z.string().min(1) }))
   .handler(({ data: { stackName } }) => docker.getStackStatus(stackName))
-
-export type { ContainerInfo } from '#/lib/docker'
 
 export const getStackContainers = createServerFn()
   .inputValidator(z.object({ stackName: z.string().min(1) }))
