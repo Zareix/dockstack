@@ -2,19 +2,19 @@ import {
   type ApiKeyAuthClient,
   useAuth,
   useAuthPlugin,
-  useListApiKeys
-} from "@better-auth-ui/react"
-import { useState } from "react"
+  useListApiKeys,
+} from '@better-auth-ui/react'
+import { useState } from 'react'
 
-import { Button } from "#/components/ui/button.tsx"
-import { Card, CardContent } from "#/components/ui/card.tsx"
-import { Separator } from "#/components/ui/separator.tsx"
-import { apiKeyPlugin } from "#/lib/auth/api-key-plugin.ts"
-import { cn } from "#/lib/utils.ts"
-import { ApiKey } from "./api-key"
-import { ApiKeySkeleton } from "./api-key-skeleton"
-import { ApiKeysEmpty } from "./api-keys-empty"
-import { CreateApiKeyDialog } from "./create-api-key-dialog"
+import { Button } from '#/components/ui/button.tsx'
+import { Card, CardContent } from '#/components/ui/card.tsx'
+import { Separator } from '#/components/ui/separator.tsx'
+import { apiKeyPlugin } from '#/lib/auth/api-key-plugin.ts'
+import { cn } from '#/lib/utils.ts'
+import { ApiKey } from './api-key'
+import { ApiKeySkeleton } from './api-key-skeleton'
+import { ApiKeysEmpty } from './api-keys-empty'
+import { CreateApiKeyDialog } from './create-api-key-dialog'
 
 export type ApiKeysProps = {
   className?: string
@@ -33,7 +33,7 @@ export function ApiKeys({
   organizationId,
   isPending: isPendingProp,
   hideCreate,
-  hideDelete
+  hideDelete,
 }: ApiKeysProps) {
   const { authClient } = useAuth()
   const { localization: apiKeyLocalization } = useAuthPlugin(apiKeyPlugin)
@@ -43,9 +43,9 @@ export function ApiKeys({
     {
       enabled: !isPendingProp,
       ...(organizationId
-        ? { query: { organizationId, configId: "organization" } }
-        : {})
-    }
+        ? { query: { organizationId, configId: 'organization' } }
+        : {}),
+    },
   )
 
   const isPending = isPendingProp || isListPending
@@ -53,7 +53,7 @@ export function ApiKeys({
   const [createOpen, setCreateOpen] = useState(false)
 
   return (
-    <div className={cn("flex flex-col gap-3", className)}>
+    <div className={cn('flex flex-col gap-3', className)}>
       <div className="flex items-end justify-between gap-3">
         <h2 className="truncate text-sm font-semibold">
           {apiKeyLocalization.apiKeys}

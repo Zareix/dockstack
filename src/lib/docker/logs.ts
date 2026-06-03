@@ -52,7 +52,12 @@ export const streamStackLogs = async function* (stackName: string) {
         }
       }
       if (buf) {
-        queue.push({ containerName, message: buf, stream: streamType, timestamp: '' })
+        queue.push({
+          containerName,
+          message: buf,
+          stream: streamType,
+          timestamp: '',
+        })
         const fn = notify
         if (fn) fn()
       }
@@ -62,11 +67,20 @@ export const streamStackLogs = async function* (stackName: string) {
   }
 
   for (const info of containers) {
-    const containerName = info.Names[0]?.replace(/^\//, '') ?? info.Id.slice(0, 12)
+    const containerName =
+      info.Names[0]?.replace(/^\//, '') ?? info.Id.slice(0, 12)
     ;(async () => {
       try {
         const proc = Bun.spawn(
-          ['docker', 'logs', '--follow', '--timestamps', '--tail', '1000', info.Id],
+          [
+            'docker',
+            'logs',
+            '--follow',
+            '--timestamps',
+            '--tail',
+            '1000',
+            info.Id,
+          ],
           { stdout: 'pipe', stderr: 'pipe' },
         )
         await Promise.all([

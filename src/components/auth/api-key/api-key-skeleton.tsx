@@ -1,7 +1,7 @@
-"use client"
+'use client'
 
-import { Card, CardContent } from "#/components/ui/card.tsx"
-import { Skeleton } from "#/components/ui/skeleton.tsx"
+import { Card, CardContent } from '#/components/ui/card.tsx'
+import { Skeleton } from '#/components/ui/skeleton.tsx'
 
 export function ApiKeySkeleton() {
   return (

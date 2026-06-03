@@ -20,14 +20,19 @@ export type ContainerInfo = {
 
 const containerStateToStatus = (state: string): StackStatus => {
   switch (state) {
-    case 'running': return 'running'
-    case 'restarting': return 'partial'
+    case 'running':
+      return 'running'
+    case 'restarting':
+      return 'partial'
     case 'exited':
-    case 'paused': return 'stopped'
+    case 'paused':
+      return 'stopped'
     case 'dead':
     case 'created':
-    case 'removing': return 'down'
-    default: return 'unknown'
+    case 'removing':
+      return 'down'
+    default:
+      return 'unknown'
   }
 }
 
@@ -53,12 +58,18 @@ const mapContainer = (c: Docker.ContainerInfo): ContainerInfo => ({
     ),
 })
 
-export const getStackContainers = async (stackName: string): Promise<ContainerInfo[]> => {
+export const getStackContainers = async (
+  stackName: string,
+): Promise<ContainerInfo[]> => {
   const containers = await dockerClient.listContainers({
     all: true,
-    filters: JSON.stringify({ label: [`com.docker.compose.project=${stackName}`] }),
+    filters: JSON.stringify({
+      label: [`com.docker.compose.project=${stackName}`],
+    }),
   })
-  return containers.map(mapContainer).sort((a, b) => a.name.localeCompare(b.name))
+  return containers
+    .map(mapContainer)
+    .sort((a, b) => a.name.localeCompare(b.name))
 }
 
 export const listAllContainers = async (): Promise<ContainerInfo[]> => {
@@ -67,7 +78,11 @@ export const listAllContainers = async (): Promise<ContainerInfo[]> => {
     .sort((a, b) => a.name.localeCompare(b.name))
 }
 
-export const containerStart = (id: string) => dockerClient.getContainer(id).start()
-export const containerStop = (id: string) => dockerClient.getContainer(id).stop()
-export const containerRestart = (id: string) => dockerClient.getContainer(id).restart()
-export const containerRemove = (id: string) => dockerClient.getContainer(id).remove({ force: true })
+export const containerStart = (id: string) =>
+  dockerClient.getContainer(id).start()
+export const containerStop = (id: string) =>
+  dockerClient.getContainer(id).stop()
+export const containerRestart = (id: string) =>
+  dockerClient.getContainer(id).restart()
+export const containerRemove = (id: string) =>
+  dockerClient.getContainer(id).remove({ force: true })

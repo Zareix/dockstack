@@ -3,9 +3,9 @@ import {
   type ListedApiKey,
   useAuth,
   useAuthPlugin,
-  useDeleteApiKey
-} from "@better-auth-ui/react"
-import { Key } from "lucide-react"
+  useDeleteApiKey,
+} from '@better-auth-ui/react'
+import { Key } from 'lucide-react'
 
 import {
   AlertDialog,
@@ -15,14 +15,14 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogMedia,
-  AlertDialogTitle
-} from "#/components/ui/alert-dialog.tsx"
-import { Button } from "#/components/ui/button.tsx"
-import { Field } from "#/components/ui/field.tsx"
-import { Input } from "#/components/ui/input.tsx"
-import { Label } from "#/components/ui/label.tsx"
-import { Spinner } from "#/components/ui/spinner.tsx"
-import { apiKeyPlugin } from "#/lib/auth/api-key-plugin.ts"
+  AlertDialogTitle,
+} from '#/components/ui/alert-dialog.tsx'
+import { Button } from '#/components/ui/button.tsx'
+import { Field } from '#/components/ui/field.tsx'
+import { Input } from '#/components/ui/input.tsx'
+import { Label } from '#/components/ui/label.tsx'
+import { Spinner } from '#/components/ui/spinner.tsx'
+import { apiKeyPlugin } from '#/lib/auth/api-key-plugin.ts'
 
 export type DeleteApiKeyDialogProps = {
   open: boolean
@@ -36,17 +36,17 @@ export function DeleteApiKeyDialog({
   open,
   onOpenChange,
   apiKey,
-  organizationId
+  organizationId,
 }: DeleteApiKeyDialogProps) {
   const { authClient, localization } = useAuth()
   const { localization: apiKeyLocalization } = useAuthPlugin(apiKeyPlugin)
-  const preview = `${apiKey.start}${"*".repeat(16)}`
+  const preview = `${apiKey.start}${'*'.repeat(16)}`
   const previewId = `delete-api-key-preview-${apiKey.id}`
   const { mutate: deleteApiKey, isPending: isDeleting } = useDeleteApiKey(
     authClient as ApiKeyAuthClient,
     {
-      onSuccess: () => onOpenChange(false)
-    }
+      onSuccess: () => onOpenChange(false),
+    },
   )
 
   return (
@@ -90,7 +90,7 @@ export function DeleteApiKeyDialog({
             onClick={() =>
               deleteApiKey({
                 keyId: apiKey.id,
-                ...(organizationId ? { configId: "organization" } : {})
+                ...(organizationId ? { configId: 'organization' } : {}),
               })
             }
           >

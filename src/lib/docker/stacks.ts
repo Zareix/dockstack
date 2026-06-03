@@ -48,12 +48,17 @@ export const stackPull = async (stackName: string) => {
   await Bun.$`docker compose -f ${composePath} pull`
 }
 
-export const stackUpServices = async (stackName: string, services: string[]) => {
+export const stackUpServices = async (
+  stackName: string,
+  services: string[],
+) => {
   const composePath = await findComposePath(stackName)
   await Bun.$`docker compose -f ${composePath} up -d ${services}`
 }
 
-export const getRunningServices = async (stackName: string): Promise<string[]> => {
+export const getRunningServices = async (
+  stackName: string,
+): Promise<string[]> => {
   const containers = await dockerClient.listContainers({
     filters: JSON.stringify({
       label: [`com.docker.compose.project=${stackName}`],
@@ -69,10 +74,14 @@ export const getRunningServices = async (stackName: string): Promise<string[]> =
   ]
 }
 
-export const getStackStatus = async (stackName: string): Promise<StackStatus> => {
+export const getStackStatus = async (
+  stackName: string,
+): Promise<StackStatus> => {
   const containers = await dockerClient.listContainers({
     all: true,
-    filters: JSON.stringify({ label: [`com.docker.compose.project=${stackName}`] }),
+    filters: JSON.stringify({
+      label: [`com.docker.compose.project=${stackName}`],
+    }),
   })
   if (containers.length === 0) return 'down'
   const running = containers.filter((c) => c.State === 'running').length

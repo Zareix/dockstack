@@ -1,9 +1,9 @@
-import { useAuthPlugin } from "@better-auth-ui/react"
-import { Key } from "lucide-react"
+import { useAuthPlugin } from '@better-auth-ui/react'
+import { Key } from 'lucide-react'
 
-import { Button } from "#/components/ui/button.tsx"
-import { Card, CardContent } from "#/components/ui/card.tsx"
-import { apiKeyPlugin } from "#/lib/auth/api-key-plugin.ts"
+import { Button } from '#/components/ui/button.tsx'
+import { Card, CardContent } from '#/components/ui/card.tsx'
+import { apiKeyPlugin } from '#/lib/auth/api-key-plugin.ts'
 
 export type ApiKeysEmptyProps = {
   onCreatePress: () => void

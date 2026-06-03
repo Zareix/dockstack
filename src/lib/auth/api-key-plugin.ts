@@ -1,8 +1,6 @@
 import { createAuthPlugin } from '@better-auth-ui/core'
-import {
-  type ApiKeyPluginOptions,
-  apiKeyPlugin as coreApiKeyPlugin,
-} from '@better-auth-ui/core/plugins'
+import { apiKeyPlugin as coreApiKeyPlugin } from '@better-auth-ui/core/plugins'
+import type { ApiKeyPluginOptions } from '@better-auth-ui/core/plugins'
 
 import { ApiKeys } from '#/components/auth/api-key/api-keys.tsx'
 
