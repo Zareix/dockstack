@@ -1,5 +1,4 @@
-import { BackButton } from '#/components/back'
-import { ContainerLogs } from '#/components/container-logs'
+import { ContainerLogs } from '#/components/stacks/logs'
 import { StackFiles } from '#/components/stacks/files'
 import { StackServices } from '#/components/stacks/services'
 import { StatusBadge } from '#/components/stacks/status-badge'
@@ -39,7 +38,7 @@ import {
 import { toast } from 'sonner'
 
 const tabSchema = z.object({
-  tab: z.enum(['services', 'files', 'logs']).catch('services'),
+  tab: z.enum(['services', 'files', 'logs']).default('services'),
 })
 
 export const Route = createFileRoute('/stacks/$name')({
@@ -79,7 +78,7 @@ function StackPage() {
     mutationFn: () => stackUp({ data: { stackName: name } }),
     onError: (error) => toast.error(error.message),
     onSuccess: () => {
-      toast.success(`"${name}" started`)
+      toast.success(`${name} started`)
       invalidateStatus()
     },
   })
@@ -88,7 +87,7 @@ function StackPage() {
     mutationFn: () => stackStop({ data: { stackName: name } }),
     onError: (error) => toast.error(error.message),
     onSuccess: () => {
-      toast.success(`"${name}" stopped`)
+      toast.success(`${name} stopped`)
       invalidateStatus()
     },
   })
@@ -97,7 +96,7 @@ function StackPage() {
     mutationFn: () => stackDown({ data: { stackName: name } }),
     onError: (error) => toast.error(error.message),
     onSuccess: () => {
-      toast.success(`"${name}" down`)
+      toast.success(`${name} down`)
       invalidateStatus()
     },
   })
@@ -106,7 +105,7 @@ function StackPage() {
     mutationFn: () => stackRestart({ data: { stackName: name } }),
     onError: (error) => toast.error(error.message),
     onSuccess: () => {
-      toast.success(`"${name}" restarted`)
+      toast.success(`${name} restarted`)
       invalidateStatus()
     },
   })
@@ -115,7 +114,7 @@ function StackPage() {
     mutationFn: () => stackPull({ data: { stackName: name } }),
     onError: (error) => toast.error(error.message),
     onSuccess: () => {
-      toast.success(`"${name}" pulled`)
+      toast.success(`${name} pulled`)
       invalidateStatus()
     },
   })
@@ -124,7 +123,7 @@ function StackPage() {
     mutationFn: () => stackDestroy({ data: { stackName: name } }),
     onError: (error) => toast.error(error.message),
     onSuccess: () => {
-      toast.success(`Stack "${name}" destroyed`)
+      toast.success(`Stack ${name} destroyed`)
       queryClient.invalidateQueries({ queryKey: ['stacks'] })
       navigate({ to: '/' })
     },
@@ -140,7 +139,6 @@ function StackPage() {
 
   return (
     <>
-      <BackButton />
       <header className="md:flex items-center gap-3">
         <h2 className="text-2xl font-bold flex items-center gap-2">
           <span>{name}</span>

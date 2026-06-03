@@ -12,7 +12,6 @@ import {
 import { cn } from '#/lib/utils.ts'
 import { AccountSettings } from './account/account-settings'
 import { SecuritySettings } from './security/security-settings'
-import { BackButton } from '#/components/back'
 
 export type SettingsProps = {
   className?: string
@@ -68,7 +67,6 @@ export function Settings({ className, view, path, hideNav }: SettingsProps) {
 
   return (
     <>
-      <BackButton />
       <Tabs
         value={currentView}
         className={cn('w-full gap-4 md:gap-6 mt-2', className)}

@@ -1,5 +1,4 @@
-import { UserButton } from '#/components/auth/user/user-button'
-import { CreateStackButton } from '#/components/create-stack-dialog'
+import { CreateStackButton } from '#/components/stacks/create-stack-dialog'
 import { StatusBadge } from '#/components/stacks/status-badge'
 import { Button } from '#/components/ui/button'
 import {
@@ -158,17 +157,16 @@ function Home() {
   return (
     <>
       <div className="flex items-center mb-8">
-        <h1 className="text-3xl font-bold">Dockstack</h1>
+        <h1 className="text-3xl font-bold">Stacks</h1>
         <div className="ml-auto flex items-center gap-2">
           <CreateStackButton />
-          <UserButton size="icon" />
         </div>
       </div>
 
       <Table className="text-base">
         <TableHeader>
           <TableRow>
-            <TableHead className="w-3/4">Stack</TableHead>
+            <TableHead className="w-3/4">Name</TableHead>
             <TableHead>Status</TableHead>
             <TableHead />
           </TableRow>
@@ -196,7 +194,10 @@ function Home() {
               key={name}
               className="cursor-pointer"
               onClick={() =>
-                navigate({ to: '/stacks/$name', params: { name } })
+                navigate({
+                  to: '/stacks/$name',
+                  params: { name },
+                })
               }
             >
               <TableCell className="font-medium">{name}</TableCell>

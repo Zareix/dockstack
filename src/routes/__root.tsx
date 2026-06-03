@@ -11,6 +11,7 @@ import appCss from '../styles.css?url'
 import type { QueryClient } from '@tanstack/react-query'
 import { Providers } from '#/components/providers'
 import { ReactQueryDevtoolsPanel } from '@tanstack/react-query-devtools'
+import { AppSidebar } from '#/components/app-sidebar'
 
 interface MyRouterContext {
   queryClient: QueryClient
@@ -54,9 +55,8 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body className="antialiased">
         <Providers>
-          <main className="p-4 md:p-8 max-w-5xl mx-auto min-h-screen">
-            {children}
-          </main>
+          <AppSidebar />
+          <main className="p-4 md:p-8 min-h-screen w-full">{children}</main>
         </Providers>
         <TanStackDevtools
           config={{

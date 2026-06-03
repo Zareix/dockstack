@@ -2,6 +2,10 @@ import * as docker from '#/lib/docker'
 import { createServerFn } from '@tanstack/react-start'
 import { z } from 'zod'
 
+export const listAllContainers = createServerFn().handler(() =>
+  docker.listAllContainers(),
+)
+
 const containerIdSchema = z.object({ id: z.string().min(1) })
 
 export const containerStart = createServerFn()

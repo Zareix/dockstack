@@ -9,6 +9,7 @@ import { Toaster } from './ui/sonner'
 import { useQuery } from '@tanstack/react-query'
 import { getSocialProviders } from '#/lib/functions/auth'
 import { apiKeyPlugin } from '#/lib/auth/api-key-plugin'
+import { SidebarProvider } from '#/components/ui/sidebar'
 
 export function Providers({ children }: { children: ReactNode }) {
   const providersQuery = useQuery({
@@ -45,7 +46,7 @@ export function Providers({ children }: { children: ReactNode }) {
             ]}
             Link={Link}
           >
-            {children}
+            <SidebarProvider>{children}</SidebarProvider>
             <Toaster />
           </AuthProvider>
         )
