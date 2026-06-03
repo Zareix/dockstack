@@ -1,0 +1,23 @@
+services:
+  dockstack:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 3000:3000
+    volumes:
+      - ./data/stacks:/app/stacks
+      - db:/app/data
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - BETTER_AUTH_URL=${BETTER_AUTH_URL}
+      - BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET}
+      - ADMIN_EMAIL=${ADMIN_EMAIL}
+      - OAUTH_PROVIDER_ID=${OAUTH_PROVIDER_ID}
+      - OAUTH_CLIENT_ID=${OAUTH_CLIENT_ID}
+      - OAUTH_CLIENT_SECRET=${OAUTH_CLIENT_SECRET}
+      - OAUTH_DISCOVERY_URL=${OAUTH_DISCOVERY_URL}
+      - SERVER_HOST=${SERVER_HOST}
+
+volumes:
+  db:

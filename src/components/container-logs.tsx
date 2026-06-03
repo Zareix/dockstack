@@ -10,6 +10,7 @@ import { useCallback, useLayoutEffect, useRef, useState } from 'react'
 export function ContainerLogs({ stackName }: { stackName: string }) {
   const [streaming, setStreaming] = useState(false)
   const [lines, setLines] = useState<LogEntry[]>([])
+
   const [showTimestamp, setShowTimestamp] = useState(false)
   const [didInitialScroll, setDidInitialScroll] = useState(false)
 
@@ -24,8 +25,6 @@ export function ContainerLogs({ stackName }: { stackName: string }) {
     anchorTo: 'end',
     followOnAppend: true,
     scrollEndThreshold: 50,
-    paddingStart: 100,
-    paddingEnd: 100,
   })
 
   const startStreaming = useCallback(async () => {
@@ -48,7 +47,11 @@ export function ContainerLogs({ stackName }: { stackName: string }) {
           stopPromise.then(() => stopped),
         ])
         if (result.done) break
-        setLines((prev) => [...prev, result.value])
+        setLines((prev) =>
+          [...prev, result.value].toSorted((a, b) =>
+            a.timestamp.localeCompare(b.timestamp),
+          ),
+        )
       }
     } finally {
       // eslint-disable-next-line
@@ -93,37 +96,41 @@ export function ContainerLogs({ stackName }: { stackName: string }) {
       </div>
       <div
         ref={parentRef}
-        className="h-[68vh] overflow-auto bg-card text-card-foreground rounded-md text-xs leading-5 font-mono"
+        className="h-[68vh] overflow-auto bg-card text-card-foreground rounded-md text-xs leading-5 font-mono px-2"
       >
         <div className="w-full relative">
-          {virtualizer.getVirtualItems().map((item) => {
-            const entry = lines[item.index]
-            return (
-              <div
-                key={item.key}
-                ref={virtualizer.measureElement}
-                data-index={item.index}
-                style={{
-                  transform: `translateY(${item.start}px)`,
-                }}
-                className="absolute w-full top-0 left-0 whitespace-pre flex gap-2"
-              >
-                {showTimestamp && (
-                  <span className="text-muted-foreground shrink-0">
-                    {entry.timestamp}
-                  </span>
-                )}
-                <span className="text-blue-400 shrink-0">
-                  [{entry.containerName}]
-                </span>
-                <span
-                  className={entry.stream === 'stderr' ? 'text-red-400' : ''}
+          {virtualizer
+            .getVirtualItems()
+
+            .map((item) => {
+              const entry = lines[item.index]
+              const date = new Date(entry.timestamp)
+              return (
+                <div
+                  key={item.key}
+                  ref={virtualizer.measureElement}
+                  data-index={item.index}
+                  style={{
+                    transform: `translateY(${item.start}px)`,
+                  }}
+                  className="absolute w-full top-0 left-0 whitespace-pre flex gap-2"
                 >
-                  {entry.message}
-                </span>
-              </div>
-            )
-          })}
+                  {showTimestamp && (
+                    <span className="text-muted-foreground shrink-0">
+                      {date.toLocaleDateString()} {date.toLocaleTimeString()}
+                    </span>
+                  )}
+                  <span className="text-blue-400 shrink-0">
+                    [{entry.containerName}]
+                  </span>
+                  <span
+                    className={entry.stream === 'stderr' ? 'text-red-400' : ''}
+                  >
+                    {entry.message}
+                  </span>
+                </div>
+              )
+            })}
         </div>
       </div>
       <div className="mt-2 text-muted-foreground text-xs">
