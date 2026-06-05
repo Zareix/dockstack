@@ -14,6 +14,7 @@ import { ContainerLogs } from '#/components/stacks/logs'
 import { StackFiles } from '#/components/stacks/files'
 import { StackServices } from '#/components/stacks/services'
 import { StatusBadge } from '#/components/stacks/status-badge'
+import { StackTerminal } from '#/components/stacks/terminal'
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -38,7 +39,7 @@ import {
 import { ensureSession } from '#/lib/functions/auth'
 
 const tabSchema = z.object({
-  tab: z.enum(['services', 'files', 'logs']).default('services'),
+  tab: z.enum(['services', 'files', 'logs', 'terminal']).default('services'),
 })
 
 export const Route = createFileRoute('/stacks/$name')({
@@ -224,6 +225,7 @@ function StackPage() {
           <TabsTrigger value="services">Services</TabsTrigger>
           <TabsTrigger value="files">Files</TabsTrigger>
           <TabsTrigger value="logs">Logs</TabsTrigger>
+          <TabsTrigger value="terminal">Terminal</TabsTrigger>
         </TabsList>
 
         <TabsContent value="services">
@@ -236,6 +238,11 @@ function StackPage() {
         </TabsContent>
         <TabsContent value="logs">
           <ContainerLogs stackName={name} />
+        </TabsContent>
+        <TabsContent value="terminal" className="h-[800px] flex flex-col">
+          <ClientOnly>
+            <StackTerminal stackName={name} />
+          </ClientOnly>
         </TabsContent>
       </Tabs>
     </>
