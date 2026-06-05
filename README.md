@@ -54,21 +54,21 @@ stacks/
 
 ## Environment variables
 
-| Variable              | Required | Default               | Description                                   |
-| --------------------- | -------- | --------------------- | --------------------------------------------- |
-| `BETTER_AUTH_SECRET`  | yes      | —                     | Secret key for session signing (min 32 chars) |
-| `BETTER_AUTH_URL`     | yes      | —                     | Public URL of the dockstack instance          |
-| `ADMIN_EMAIL`         | yes      | —                     | Email of the initial admin user               |
-| `OAUTH_PROVIDER_ID`   | yes      | —                     | Display name for the OAuth provider           |
-| `OAUTH_CLIENT_ID`     | yes      | —                     | OAuth client ID                               |
-| `OAUTH_CLIENT_SECRET` | yes      | —                     | OAuth client secret                           |
-| `OAUTH_DISCOVERY_URL` | yes      | —                     | OIDC discovery endpoint URL                   |
-| `SERVER_HOST`         | no       | `localhost`           | Host shown in port links in the UI            |
-| `STACKS_DIR`          | no       | `/app/stacks`         | Path to stacks directory inside container     |
-| `DATABASE_PATH`       | no       | `/app/data/db.sqlite` | Path to SQLite auth database                  |
-| `PORT`                | no       | `3000`                | HTTP port the server listens on               |
-| `DOCKER_SYSTEM_PRUNE_CRON` | no  | —                     | Cron expression to schedule automatic `docker system prune` (e.g. `0 3 * * *` for 3 AM daily) |
-| `DOCKER_SYSTEM_PRUNE_INCLUDE_VOLUMES` | no | `false`  | Set to `true` to also prune unused volumes during scheduled prune |
+| Variable                              | Required | Default               | Description                                                                                   |
+| ------------------------------------- | -------- | --------------------- | --------------------------------------------------------------------------------------------- |
+| `BETTER_AUTH_SECRET`                  | yes      | —                     | Secret key for session signing (min 32 chars)                                                 |
+| `BETTER_AUTH_URL`                     | yes      | —                     | Public URL of the dockstack instance                                                          |
+| `ADMIN_EMAIL`                         | yes      | —                     | Email of the initial admin user                                                               |
+| `OAUTH_PROVIDER_ID`                   | yes      | —                     | Display name for the OAuth provider                                                           |
+| `OAUTH_CLIENT_ID`                     | yes      | —                     | OAuth client ID                                                                               |
+| `OAUTH_CLIENT_SECRET`                 | yes      | —                     | OAuth client secret                                                                           |
+| `OAUTH_DISCOVERY_URL`                 | yes      | —                     | OIDC discovery endpoint URL                                                                   |
+| `SERVER_HOST`                         | no       | `localhost`           | Host shown in port links in the UI                                                            |
+| `STACKS_DIR`                          | no       | `/app/stacks`         | Path to stacks directory inside container                                                     |
+| `DATABASE_PATH`                       | no       | `/app/data/db.sqlite` | Path to SQLite auth database                                                                  |
+| `PORT`                                | no       | `3000`                | HTTP port the server listens on                                                               |
+| `DOCKER_SYSTEM_PRUNE_CRON`            | no       | —                     | Cron expression to schedule automatic `docker system prune` (e.g. `0 3 * * *` for 3 AM daily) |
+| `DOCKER_SYSTEM_PRUNE_INCLUDE_VOLUMES` | no       | `false`               | Set to `true` to also prune unused volumes during scheduled prune                             |
 
 ## Webhook redeploy
 

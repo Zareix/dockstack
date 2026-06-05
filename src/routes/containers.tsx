@@ -126,7 +126,11 @@ function ContainersPage() {
         <PruneContainersButton />
       </div>
       <div className="container mx-auto">
-        <DataTable columns={columns} data={query.data ?? []} isLoading={query.isLoading} />
+        <DataTable
+          columns={columns}
+          data={query.data ?? []}
+          isLoading={query.isLoading}
+        />
       </div>
     </>
   )

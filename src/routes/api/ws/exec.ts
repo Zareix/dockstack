@@ -73,13 +73,29 @@ const hooks = defineHooks({
     }
 
     try {
-      const msg = message.json()
+      const msg = message.json<
+        | {
+            type: 'init'
+            containerId: string
+            cols?: number
+            rows?: number
+            shell?: string
+          }
+        | {
+            type: 'resize'
+            cols: number
+            rows: number
+          }
+        | {
+            type: 'close'
+          }
+      >()
 
       if (msg.type === 'init') {
-        const containerId = msg.containerId as string
-        const cols = (msg.cols as number) ?? 80
-        const rows = (msg.rows as number) ?? 24
-        const shell = (msg.shell as string) ?? '/bin/sh'
+        const containerId = msg.containerId
+        const cols = msg.cols ?? 80
+        const rows = msg.rows ?? 24
+        const shell = msg.shell ?? '/bin/sh'
 
         try {
           const container = dockerClient.getContainer(containerId)
@@ -126,8 +142,8 @@ const hooks = defineHooks({
         const session = sessions.get(peer.id)
         if (session) {
           await session.exec.resize({
-            h: msg.rows as number,
-            w: msg.cols as number,
+            h: msg.rows,
+            w: msg.cols,
           })
         }
         return

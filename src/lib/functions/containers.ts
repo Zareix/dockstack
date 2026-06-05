@@ -24,4 +24,6 @@ export const containerRemove = createServerFn()
   .inputValidator(containerIdSchema)
   .handler(({ data: { id } }) => docker.containerRemove(id))
 
-export const containerPrune = createServerFn().handler(() => docker.containerPrune())
+export const containerPrune = createServerFn().handler(() =>
+  docker.containerPrune(),
+)
