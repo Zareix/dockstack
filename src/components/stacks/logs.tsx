@@ -1,11 +1,11 @@
-import { Button } from '#/components/ui/button'
-import { Label } from '#/components/ui/label'
-import { Switch } from '#/components/ui/switch'
-import type { LogEntry } from '#/lib/functions'
-import { streamLogs } from '#/lib/functions'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { PlayCircleIcon, StopCircleIcon } from 'lucide-react'
 import { useCallback, useLayoutEffect, useRef, useState } from 'react'
+import type { LogEntry } from '#/lib/functions'
+import { Button } from '#/components/ui/button'
+import { Label } from '#/components/ui/label'
+import { Switch } from '#/components/ui/switch'
+import { streamLogs } from '#/lib/functions'
 
 export function ContainerLogs({ stackName }: { stackName: string }) {
   const [streaming, setStreaming] = useState(false)
@@ -48,7 +48,7 @@ export function ContainerLogs({ stackName }: { stackName: string }) {
         ])
         if (result.done) break
         setLines((prev) =>
-          [...prev, result.value].toSorted((a, b) =>
+          [...prev, result.value].sort((a, b) =>
             a.timestamp.localeCompare(b.timestamp),
           ),
         )

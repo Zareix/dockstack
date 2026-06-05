@@ -2,7 +2,7 @@
   "name": "dockstack",
   "private": true,
   "type": "module",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "imports": {
     "#/*": "./src/*"
   },
@@ -13,7 +13,7 @@
     "test": "bun test",
     "lint": "eslint --fix",
     "format": "prettier --write .",
-    "check": "bun run lint && bun run format",
+    "check": "bun run format && bun run lint",
     "db:generate": "bunx drizzle-kit generate",
     "auth:generate": "bunx --bun @better-auth/cli generate --config src/lib/auth/index.ts --output src/db/schema/auth-schema.ts"
   },
@@ -35,6 +35,7 @@
     "@tanstack/react-router-devtools": "latest",
     "@tanstack/react-router-ssr-query": "latest",
     "@tanstack/react-start": "latest",
+    "@tanstack/react-table": "^8.21.3",
     "@tanstack/react-virtual": "^3.13.26",
     "@tanstack/router-plugin": "^1.168.11",
     "@types/dockerode-compose": "^1.4.2",

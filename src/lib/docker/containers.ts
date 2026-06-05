@@ -1,7 +1,7 @@
-import { env } from '#/env'
 import { dockerClient } from './client'
-import type { StackStatus } from './stacks'
 import type Docker from 'dockerode'
+import type { StackStatus } from './stacks'
+import { env } from '#/env'
 
 export type ContainerInfo = {
   id: string
@@ -86,3 +86,5 @@ export const containerRestart = (id: string) =>
   dockerClient.getContainer(id).restart()
 export const containerRemove = (id: string) =>
   dockerClient.getContainer(id).remove({ force: true })
+
+export const containerPrune = () => dockerClient.pruneContainers({})

@@ -1,9 +1,9 @@
 import { createAuthPlugin } from '@better-auth-ui/core'
 import { themePlugin as coreThemePlugin } from '@better-auth-ui/core/plugins'
-import type { ThemeLocalization } from '@better-auth-ui/core/plugins'
 
 import { Appearance } from '#/components/auth/theme/appearance.tsx'
 import { ThemeToggleItem } from '#/components/auth/theme/theme-toggle-item.tsx'
+import type { ThemeLocalization } from '@better-auth-ui/core/plugins'
 
 /**
  * Hook shape compatible with `next-themes`' `useTheme` and similar APIs. The

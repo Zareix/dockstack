@@ -1,5 +1,5 @@
 export * from './client'
-export * from './stacks'
 export * from './containers'
 export * from './images'
 export * from './logs'
+export * from './stacks'

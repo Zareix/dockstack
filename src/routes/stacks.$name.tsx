@@ -1,3 +1,15 @@
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { ClientOnly, createFileRoute, redirect } from '@tanstack/react-router'
+import { z } from 'zod'
+import {
+  DownloadIcon,
+  PauseIcon,
+  PlayIcon,
+  RefreshCwIcon,
+  SquareIcon,
+  Trash2Icon,
+} from 'lucide-react'
+import { toast } from 'sonner'
 import { ContainerLogs } from '#/components/stacks/logs'
 import { StackFiles } from '#/components/stacks/files'
 import { StackServices } from '#/components/stacks/services'
@@ -24,18 +36,6 @@ import {
   stackUp,
 } from '#/lib/functions'
 import { ensureSession } from '#/lib/functions/auth'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { ClientOnly, createFileRoute, redirect } from '@tanstack/react-router'
-import { z } from 'zod'
-import {
-  DownloadIcon,
-  PauseIcon,
-  PlayIcon,
-  RefreshCwIcon,
-  SquareIcon,
-  Trash2Icon,
-} from 'lucide-react'
-import { toast } from 'sonner'
 
 const tabSchema = z.object({
   tab: z.enum(['services', 'files', 'logs']).default('services'),
@@ -64,14 +64,14 @@ function StackPage() {
   const navigate = Route.useNavigate()
 
   const statusQuery = useQuery({
-    queryKey: ['stack-status', name],
+    queryKey: ['stacks', name, 'status'],
     queryFn: () => getStackStatus({ data: { stackName: name } }),
     refetchInterval: 5000,
   })
 
   const invalidateStatus = () => {
-    queryClient.invalidateQueries({ queryKey: ['stack-status', name] })
-    queryClient.invalidateQueries({ queryKey: ['stack-services', name] })
+    queryClient.invalidateQueries({ queryKey: ['stacks', name, 'status'] })
+    queryClient.invalidateQueries({ queryKey: ['stacks', name, 'services'] })
   }
 
   const upMutation = useMutation({

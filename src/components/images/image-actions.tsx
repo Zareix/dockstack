@@ -1,9 +1,9 @@
-import { Button } from '#/components/ui/button'
-import type { ImageInfo } from '#/lib/docker'
-import { imageRemove } from '#/lib/functions'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Trash2Icon } from 'lucide-react'
 import { toast } from 'sonner'
+import type { ImageInfo } from '#/lib/docker'
+import { imageRemove } from '#/lib/functions'
+import { Button } from '#/components/ui/button'
 
 export function ImageActions({ image }: { image: ImageInfo }) {
   const queryClient = useQueryClient()

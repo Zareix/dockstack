@@ -10,6 +10,9 @@ export type ImageInfo = {
 export const imageRemove = (id: string) =>
   dockerClient.getImage(id).remove({ force: true })
 
+export const imagePrune = () =>
+  dockerClient.pruneImages({ filters: '{"dangling":["false"]}' })
+
 export const listImages = async (): Promise<ImageInfo[]> => {
   return (await dockerClient.listImages())
     .map((i) => ({

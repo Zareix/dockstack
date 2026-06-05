@@ -1,6 +1,6 @@
+import { createFileRoute } from '@tanstack/react-router'
 import { auth } from '#/lib/auth'
 import { redeployAllRunningStacks } from '#/lib/docker'
-import { createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/api/stacks/redeploy')({
   server: {

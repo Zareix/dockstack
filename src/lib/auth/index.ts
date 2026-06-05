@@ -1,9 +1,9 @@
-import { env } from '#/env'
 import { betterAuth } from 'better-auth'
 import { tanstackStartCookies } from 'better-auth/tanstack-start'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { admin, genericOAuth, username } from 'better-auth/plugins'
 import { apiKey } from '@better-auth/api-key'
+import { env } from '#/env'
 import { db } from '#/db'
 
 const oauthProviderId = env.OAUTH_PROVIDER_ID

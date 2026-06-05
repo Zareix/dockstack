@@ -1,3 +1,4 @@
+import { useQuery } from '@tanstack/react-query'
 import { ContainerActions } from '#/components/containers/container-actions'
 import { StatusBadge } from '#/components/stacks/status-badge'
 import { Spinner } from '#/components/ui/spinner'
@@ -10,11 +11,10 @@ import {
   TableRow,
 } from '#/components/ui/table'
 import { getStackContainers } from '#/lib/functions'
-import { useQuery } from '@tanstack/react-query'
 
 export function StackServices({ stackName }: { stackName: string }) {
   const query = useQuery({
-    queryKey: ['stack-services', stackName],
+    queryKey: ['stacks', stackName, 'services'],
     queryFn: () => getStackContainers({ data: { stackName } }),
     refetchInterval: 5000,
   })

@@ -1,4 +1,6 @@
-import { Button } from '#/components/ui/button'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { PlayIcon, RefreshCwIcon, SquareIcon, Trash2Icon } from 'lucide-react'
+import { toast } from 'sonner'
 import type { ContainerInfo } from '#/lib/docker'
 import {
   containerRemove,
@@ -6,9 +8,7 @@ import {
   containerStart,
   containerStop,
 } from '#/lib/functions'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { PlayIcon, RefreshCwIcon, SquareIcon, Trash2Icon } from 'lucide-react'
-import { toast } from 'sonner'
+import { Button } from '#/components/ui/button'
 
 export function ContainerActions({
   container,
@@ -20,12 +20,12 @@ export function ContainerActions({
   const queryClient = useQueryClient()
 
   const invalidate = () => {
-    queryClient.invalidateQueries({ queryKey: ['all-containers'] })
+    queryClient.invalidateQueries({ queryKey: ['containers'] })
     queryClient.invalidateQueries({
-      queryKey: stackName ? ['stack-status', stackName] : ['stack-status'],
+      queryKey: stackName ? ['stacks', stackName, 'status'] : ['stacks'],
     })
     queryClient.invalidateQueries({
-      queryKey: stackName ? ['stack-services', stackName] : ['stack-services'],
+      queryKey: stackName ? ['stacks', stackName, 'services'] : ['stacks'],
     })
   }
 

@@ -1,3 +1,14 @@
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router'
+import {
+  DownloadIcon,
+  MoreHorizontalIcon,
+  PauseIcon,
+  PlayIcon,
+  RefreshCwIcon,
+  SquareIcon,
+} from 'lucide-react'
+import { toast } from 'sonner'
 import { CreateStackButton } from '#/components/stacks/create-stack-dialog'
 import { StatusBadge } from '#/components/stacks/status-badge'
 import { Button } from '#/components/ui/button'
@@ -24,17 +35,6 @@ import {
   stackUp,
 } from '#/lib/functions'
 import { ensureSession } from '#/lib/functions/auth'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router'
-import {
-  DownloadIcon,
-  MoreHorizontalIcon,
-  PauseIcon,
-  PlayIcon,
-  RefreshCwIcon,
-  SquareIcon,
-} from 'lucide-react'
-import { toast } from 'sonner'
 
 export const Route = createFileRoute('/')({
   async beforeLoad({ context: { queryClient }, location }) {

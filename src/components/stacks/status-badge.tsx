@@ -1,5 +1,5 @@
-import { Badge } from '#/components/ui/badge'
 import type { StackStatus } from '#/lib/docker'
+import { Badge } from '#/components/ui/badge'
 
 const statusVariant: Record<
   StackStatus,

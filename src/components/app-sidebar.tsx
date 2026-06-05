@@ -1,3 +1,10 @@
+import { Link, useLocation } from '@tanstack/react-router'
+import { ContainerIcon, ImagesIcon, LayersIcon } from 'lucide-react'
+import { useAuth, useSession } from '@better-auth-ui/react'
+import type {
+  ValidateLinkOptions,
+  ValidateToPath,
+} from '@tanstack/react-router'
 import { UserButton } from '#/components/auth/user/user-button'
 import {
   Sidebar,
@@ -10,29 +17,38 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
-import { Link, useLocation } from '@tanstack/react-router'
-import { ContainerIcon, ImagesIcon, LayersIcon } from 'lucide-react'
 
-const LINKS = [
+const LINKS: Array<{
+  label: string
+  linkOptions: ValidateLinkOptions
+  icon: React.ReactNode
+}> = [
   {
     label: 'Stacks',
-    path: '/',
+    linkOptions: { to: '/' },
     icon: <LayersIcon className="size-5" />,
   },
   {
     label: 'Containers',
-    path: '/containers',
+    linkOptions: { to: '/containers' },
     icon: <ContainerIcon className="size-5" />,
   },
   {
     label: 'Images',
-    path: '/images',
+    linkOptions: { to: '/images' },
     icon: <ImagesIcon className="size-5" />,
   },
-]
+] as const
 
 export function AppSidebar() {
   const { pathname } = useLocation()
+  const { authClient } = useAuth()
+  const { data: session } = useSession(authClient)
+
+  if (!session) {
+    return null
+  }
+
   return (
     <Sidebar>
       <SidebarHeader className="flex-row items-center justify-between p-4">
@@ -44,11 +60,11 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {LINKS.map((l) => (
-                <SidebarMenuItem key={l.path}>
+              {LINKS.map((l, index) => (
+                <SidebarMenuItem key={index}>
                   <SidebarMenuButton
-                    render={<Link to={l.path} />}
-                    isActive={l.path === pathname}
+                    render={<Link {...l.linkOptions} />}
+                    isActive={l.linkOptions.to === pathname}
                   >
                     {l.icon}
                     {l.label}

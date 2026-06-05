@@ -1,16 +1,12 @@
-import { ImageActions } from '#/components/images/image-actions'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '#/components/ui/table'
-import { listImages } from '#/lib/functions'
-import { ensureSession } from '#/lib/functions/auth'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, redirect } from '@tanstack/react-router'
+import type { ImageInfo } from '#/lib/docker'
+import type { ColumnDef } from '@tanstack/react-table'
+import { ImageActions } from '#/components/images/image-actions'
+import { PruneImagesButton } from '#/components/images/prune-images-button'
+import { DataTable, SortableHeader } from '#/components/ui/data-table'
+import { listImages } from '#/lib/functions'
+import { ensureSession } from '#/lib/functions/auth'
 
 export const Route = createFileRoute('/images')({
   async beforeLoad({ context: { queryClient }, location }) {
@@ -31,6 +27,59 @@ function formatSize(bytes: number): string {
   return `${(bytes / 1e6).toFixed(0)} MB`
 }
 
+const columns: ColumnDef<ImageInfo>[] = [
+  {
+    accessorKey: 'tags',
+    header: ({ column }) => <SortableHeader column={column} label="Tag" />,
+    cell: ({ row }) => {
+      const tags: string[] = row.getValue('tags')
+      return (
+        <span className="font-mono text-sm">
+          {tags.length > 0 ? tags.join(', ') : '<none>'}
+        </span>
+      )
+    },
+    sortingFn: (a, b) => {
+      const tagA = a.original.tags[0] ?? ''
+      const tagB = b.original.tags[0] ?? ''
+      return tagA.localeCompare(tagB)
+    },
+  },
+  {
+    accessorKey: 'id',
+    header: ({ column }) => <SortableHeader column={column} label="ID" />,
+    cell: ({ row }) => (
+      <span className="font-mono text-sm text-muted-foreground">
+        {row.getValue('id')}
+      </span>
+    ),
+  },
+  {
+    accessorKey: 'size',
+    header: ({ column }) => <SortableHeader column={column} label="Size" />,
+    cell: ({ row }) => (
+      <span className="text-sm">{formatSize(row.getValue('size'))}</span>
+    ),
+  },
+  {
+    accessorKey: 'created',
+    header: ({ column }) => <SortableHeader column={column} label="Created" />,
+    cell: ({ row }) => (
+      <span className="text-sm text-muted-foreground">
+        {new Date(row.getValue('created') * 1000).toLocaleDateString()}
+      </span>
+    ),
+  },
+  {
+    id: 'actions',
+    cell: ({ row }) => (
+      <div className="text-right">
+        <ImageActions image={row.original} />
+      </div>
+    ),
+  },
+]
+
 function ImagesPage() {
   const query = useQuery({
     queryKey: ['images'],
@@ -39,64 +88,17 @@ function ImagesPage() {
 
   return (
     <>
-      <h1 className="text-3xl font-bold mb-8">Images</h1>
-      <Table className="text-base">
-        <TableHeader>
-          <TableRow>
-            <TableHead>Tag</TableHead>
-            <TableHead>ID</TableHead>
-            <TableHead>Size</TableHead>
-            <TableHead>Created</TableHead>
-            <TableHead />
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {query.isLoading && (
-            <TableRow>
-              <TableCell
-                colSpan={5}
-                className="text-center text-muted-foreground"
-              >
-                Loading...
-              </TableCell>
-            </TableRow>
-          )}
-          {query.error && (
-            <TableRow>
-              <TableCell colSpan={5} className="text-center text-destructive">
-                {query.error.message}
-              </TableCell>
-            </TableRow>
-          )}
-          {query.data?.map((img) => (
-            <TableRow key={img.id}>
-              <TableCell className="font-mono text-sm">
-                {img.tags.length > 0 ? img.tags.join(', ') : '<none>'}
-              </TableCell>
-              <TableCell className="font-mono text-sm text-muted-foreground">
-                {img.id}
-              </TableCell>
-              <TableCell className="text-sm">{formatSize(img.size)}</TableCell>
-              <TableCell className="text-sm text-muted-foreground">
-                {new Date(img.created * 1000).toLocaleDateString()}
-              </TableCell>
-              <TableCell className="text-right">
-                <ImageActions image={img} />
-              </TableCell>
-            </TableRow>
-          ))}
-          {query.data?.length === 0 && (
-            <TableRow>
-              <TableCell
-                colSpan={5}
-                className="text-center text-muted-foreground"
-              >
-                No images found
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="text-3xl font-bold">Images</h1>
+        <PruneImagesButton />
+      </div>
+      <div className="container mx-auto">
+        <DataTable
+          columns={columns}
+          data={query.data ?? []}
+          isLoading={query.isLoading}
+        />
+      </div>
     </>
   )
 }

@@ -6,11 +6,11 @@ import {
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 
+import { ReactQueryDevtoolsPanel } from '@tanstack/react-query-devtools'
 import appCss from '../styles.css?url'
 
 import type { QueryClient } from '@tanstack/react-query'
 import { Providers } from '#/components/providers'
-import { ReactQueryDevtoolsPanel } from '@tanstack/react-query-devtools'
 import { AppSidebar } from '#/components/app-sidebar'
 
 interface MyRouterContext {

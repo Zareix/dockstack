@@ -1,7 +1,7 @@
-import { env } from '#/env'
-import { readdir } from 'node:fs/promises'
+import { readdir, stat } from 'node:fs/promises'
 import { join } from 'node:path'
-import { dockerClient, COMPOSE_FILENAMES } from './client'
+import { COMPOSE_FILENAMES, dockerClient } from './client'
+import { env } from '#/env'
 
 export type StackStatus = 'running' | 'partial' | 'stopped' | 'down' | 'unknown'
 
@@ -21,7 +21,18 @@ export const findComposePath = async (stackName: string): Promise<string> => {
   throw new Error(`No compose file found in ${stackName}`)
 }
 
-export const listStacks = async (): Promise<string[]> => readdir(env.STACKS_DIR)
+export const listStacks = async (): Promise<string[]> => {
+  const entries = await readdir(env.STACKS_DIR)
+  return (
+    await Promise.all(
+      entries.map(async (name) =>
+        (await stat(join(env.STACKS_DIR, name))).isDirectory() ? name : null,
+      ),
+    )
+  )
+    .filter(Boolean)
+    .sort()
+}
 
 export const stackUp = async (stackName: string) => {
   const composePath = await findComposePath(stackName)

@@ -1,0 +1,32 @@
+{
+  "language_servers": ["!biome", "!typescript-language-server", "..."],
+  "languages": {
+    "JavaScript": {
+      "formatter": "prettier",
+      "code_actions_on_format": {
+        "source.removeUnusedImports": true,
+        "source.fixAll.eslint": true,
+        "sourceAll.organizeImports": true
+      }
+    },
+    "TypeScript": {
+      "formatter": "prettier",
+      "code_actions_on_format": {
+        "source.removeUnusedImports": true,
+        "source.fixAll.eslint": true,
+        "sourceAll.organizeImports": true
+      }
+    },
+    "TSX": {
+      "formatter": "prettier",
+      "code_actions_on_format": {
+        "source.removeUnusedImports": true,
+        "source.fixAll.eslint": true,
+        "sourceAll.organizeImports": true
+      }
+    },
+    "JSON": { "formatter": "prettier" },
+    "JSONC": { "formatter": "prettier" },
+    "CSS": { "formatter": "prettier" }
+  }
+}

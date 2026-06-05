@@ -1,6 +1,6 @@
-import * as docker from '#/lib/docker'
 import { createServerFn } from '@tanstack/react-start'
 import { z } from 'zod'
+import * as docker from '#/lib/docker'
 
 export const listAllContainers = createServerFn().handler(() =>
   docker.listAllContainers(),
@@ -23,3 +23,5 @@ export const containerRestart = createServerFn()
 export const containerRemove = createServerFn()
   .inputValidator(containerIdSchema)
   .handler(({ data: { id } }) => docker.containerRemove(id))
+
+export const containerPrune = createServerFn().handler(() => docker.containerPrune())

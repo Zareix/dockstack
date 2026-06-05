@@ -1,7 +1,7 @@
 import { Database } from 'bun:sqlite'
 import { drizzle } from 'drizzle-orm/bun-sqlite'
-import { env } from '@/env'
 import * as authSchema from './schema/auth-schema'
+import { env } from '@/env'
 
 const globalForDb = globalThis as unknown as {
   client?: Database
