@@ -32,4 +32,7 @@ ENV DATABASE_PATH=/app/data/db.sqlite
 
 EXPOSE 3000
 
+HEALTHCHECK --interval=30s --timeout=5s --start-period=2s --retries=3 \
+  CMD ["bun", "-e", "const r=await fetch('http://localhost:3000/api/health');process.exit(r.ok?0:1)"]
+
 CMD ["./.output/server/index.mjs"]

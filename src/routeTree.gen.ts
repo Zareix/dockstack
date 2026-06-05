@@ -15,6 +15,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as StacksNameRouteImport } from './routes/stacks.$name'
 import { Route as SettingsPathRouteImport } from './routes/settings/$path'
 import { Route as AuthPathRouteImport } from './routes/auth/$path'
+import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as ApiWsExecRouteImport } from './routes/api/ws/exec'
 import { Route as ApiStacksRedeployRouteImport } from './routes/api/stacks/redeploy'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
@@ -49,6 +50,11 @@ const AuthPathRoute = AuthPathRouteImport.update({
   path: '/auth/$path',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiHealthRoute = ApiHealthRouteImport.update({
+  id: '/api/health',
+  path: '/api/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiWsExecRoute = ApiWsExecRouteImport.update({
   id: '/api/ws/exec',
   path: '/api/ws/exec',
@@ -69,6 +75,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/containers': typeof ContainersRoute
   '/images': typeof ImagesRoute
+  '/api/health': typeof ApiHealthRoute
   '/auth/$path': typeof AuthPathRoute
   '/settings/$path': typeof SettingsPathRoute
   '/stacks/$name': typeof StacksNameRoute
@@ -80,6 +87,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/containers': typeof ContainersRoute
   '/images': typeof ImagesRoute
+  '/api/health': typeof ApiHealthRoute
   '/auth/$path': typeof AuthPathRoute
   '/settings/$path': typeof SettingsPathRoute
   '/stacks/$name': typeof StacksNameRoute
@@ -92,6 +100,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/containers': typeof ContainersRoute
   '/images': typeof ImagesRoute
+  '/api/health': typeof ApiHealthRoute
   '/auth/$path': typeof AuthPathRoute
   '/settings/$path': typeof SettingsPathRoute
   '/stacks/$name': typeof StacksNameRoute
@@ -105,6 +114,7 @@ export interface FileRouteTypes {
     | '/'
     | '/containers'
     | '/images'
+    | '/api/health'
     | '/auth/$path'
     | '/settings/$path'
     | '/stacks/$name'
@@ -116,6 +126,7 @@ export interface FileRouteTypes {
     | '/'
     | '/containers'
     | '/images'
+    | '/api/health'
     | '/auth/$path'
     | '/settings/$path'
     | '/stacks/$name'
@@ -127,6 +138,7 @@ export interface FileRouteTypes {
     | '/'
     | '/containers'
     | '/images'
+    | '/api/health'
     | '/auth/$path'
     | '/settings/$path'
     | '/stacks/$name'
@@ -139,6 +151,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ContainersRoute: typeof ContainersRoute
   ImagesRoute: typeof ImagesRoute
+  ApiHealthRoute: typeof ApiHealthRoute
   AuthPathRoute: typeof AuthPathRoute
   SettingsPathRoute: typeof SettingsPathRoute
   StacksNameRoute: typeof StacksNameRoute
@@ -191,6 +204,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthPathRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/health': {
+      id: '/api/health'
+      path: '/api/health'
+      fullPath: '/api/health'
+      preLoaderRoute: typeof ApiHealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/ws/exec': {
       id: '/api/ws/exec'
       path: '/api/ws/exec'
@@ -219,6 +239,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ContainersRoute: ContainersRoute,
   ImagesRoute: ImagesRoute,
+  ApiHealthRoute: ApiHealthRoute,
   AuthPathRoute: AuthPathRoute,
   SettingsPathRoute: SettingsPathRoute,
   StacksNameRoute: StacksNameRoute,

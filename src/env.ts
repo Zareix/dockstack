@@ -16,6 +16,8 @@ export const env = createEnv({
     OAUTH_CLIENT_ID: z.string().optional(),
     OAUTH_CLIENT_SECRET: z.string().optional(),
     OAUTH_DISCOVERY_URL: z.url().optional(),
+    DOCKER_SYSTEM_PRUNE_CRON: z.string().optional(),
+    DOCKER_SYSTEM_PRUNE_INCLUDE_VOLUMES: z.boolean().optional().default(false),
   },
 
   /**
