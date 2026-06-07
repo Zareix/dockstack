@@ -151,6 +151,7 @@ function SidebarProvider({
 
 function Sidebar({
   side = 'left',
+  mobileSide = 'left',
   variant = 'sidebar',
   collapsible = 'offcanvas',
   className,
@@ -159,6 +160,7 @@ function Sidebar({
   ...props
 }: React.ComponentProps<'div'> & {
   side?: 'left' | 'right'
+  mobileSide?: 'left' | 'right'
   variant?: 'sidebar' | 'floating' | 'inset'
   collapsible?: 'offcanvas' | 'icon' | 'none'
 }) {
@@ -193,7 +195,7 @@ function Sidebar({
               '--sidebar-width': SIDEBAR_WIDTH_MOBILE,
             } as React.CSSProperties
           }
-          side={side}
+          side={mobileSide}
         >
           <SheetHeader className="sr-only">
             <SheetTitle>Sidebar</SheetTitle>

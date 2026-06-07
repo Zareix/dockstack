@@ -51,7 +51,7 @@ export function AppSidebar() {
   }
 
   return (
-    <Sidebar side="right">
+    <Sidebar mobileSide="right">
       <SidebarHeader className="flex-row items-center justify-between p-4">
         <Link
           to="/"
