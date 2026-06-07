@@ -23,6 +23,7 @@ import {
 import { cn } from '#/lib/utils.ts'
 import { UserAvatar } from './user-avatar'
 import { UserView } from './user-view'
+import { useSidebar } from '#/components/ui/sidebar'
 
 /** Auth states a `UserButton` link can be visible in. */
 export type UserButtonLinkVisibility =
@@ -111,7 +112,7 @@ export function UserButton({
 }: UserButtonProps) {
   const { authClient, basePaths, viewPaths, localization, plugins, Link } =
     useAuth()
-
+  const { toggleSidebar } = useSidebar()
   const { data: session, isPending: sessionPending } = useSession(authClient)
 
   const userLinks = links?.flatMap((link, index) => {
@@ -184,6 +185,7 @@ export function UserButton({
                 render={
                   <Link
                     href={`${basePaths.settings}/${viewPaths.settings.account}`}
+                    onClick={() => toggleSidebar()}
                   />
                 }
               >

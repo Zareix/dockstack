@@ -40,7 +40,7 @@ export default function MonacoFileEditor({
       path={filename}
       language={filename.endsWith('.env') ? 'ini' : 'yaml'}
       theme="vs-dark"
-      className="rounded-lg overflow-hidden"
+      className="rounded-lg overflow-hidden h-[60vh] md:h-[70vh]"
       loading={<Spinner />}
       beforeMount={(m) =>
         configureMonacoYaml(m, {
@@ -62,7 +62,6 @@ export default function MonacoFileEditor({
           ],
         })
       }
-      height="70vh"
       options={{
         readOnly,
         minimap: { enabled: false },

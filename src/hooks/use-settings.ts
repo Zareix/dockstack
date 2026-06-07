@@ -1,12 +1,6 @@
-import { useQuery } from '@tanstack/react-query'
-import { getSettings } from '#/lib/functions/settings'
+import { useRouteContext } from '@tanstack/react-router'
 
 export const useSettings = () => {
-  const settingsQuery = useQuery({
-    queryKey: ['settings'],
-    queryFn: getSettings,
-  })
-  return {
-    appTitle: settingsQuery.data?.appTitle ?? 'Dockstack',
-  }
+  const settingsQuery = useRouteContext({ from: '__root__' })
+  return settingsQuery.appSettings
 }

@@ -104,7 +104,7 @@ export function ContainerLogs({ stackName }: { stackName: string }) {
       </div>
       <div
         ref={parentRef}
-        className="h-[68vh] overflow-auto bg-card text-card-foreground rounded-md text-xs leading-5 font-mono px-2"
+        className="h-[60vh] md:h-[68vh] overflow-auto bg-card text-card-foreground rounded-md text-xs leading-5 font-mono px-2"
       >
         <div className="w-full relative">
           {virtualizer

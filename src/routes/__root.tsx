@@ -10,17 +10,19 @@ import { ReactQueryDevtoolsPanel } from '@tanstack/react-query-devtools'
 import appCss from '../styles.css?url'
 
 import type { QueryClient } from '@tanstack/react-query'
+import type { getSettings } from '#/lib/functions/settings'
 import { Providers } from '#/components/providers'
 import { AppSidebar } from '#/components/app-sidebar'
-import { getSettings } from '#/lib/functions/settings'
+import { Navbar } from '#/components/navbar'
 
 interface MyRouterContext {
   queryClient: QueryClient
+  appSettings: Awaited<ReturnType<typeof getSettings>>
 }
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({
-  loader: async () => {
-    return await getSettings()
+  loader: ({ context }) => {
+    return context.appSettings
   },
   head: ({ loaderData }) => ({
     meta: [
@@ -60,6 +62,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <body className="antialiased">
         <Providers>
           <AppSidebar />
+          <Navbar />
           <main className="p-4 md:p-8 min-h-screen w-full">{children}</main>
         </Providers>
         <TanStackDevtools
