@@ -69,7 +69,7 @@ stacks/
 | `PORT`                                | no       | `3000`                | HTTP port the server listens on                                                               |
 | `DOCKER_SYSTEM_PRUNE_CRON`            | no       | —                     | Cron expression to schedule automatic `docker system prune` (e.g. `0 3 * * *` for 3 AM daily) |
 | `DOCKER_SYSTEM_PRUNE_INCLUDE_VOLUMES` | no       | `false`               | Set to `true` to also prune unused volumes during scheduled prune                             |
-| `REDEPLOY_SKIP`                       | no       | —                     | Comma-separated list of stack names to skip redeploying                                        |
+| `REDEPLOY_SKIP`                       | no       | —                     | Comma-separated list of stack names to skip redeploying                                       |
 
 ## Webhook redeploy
 
