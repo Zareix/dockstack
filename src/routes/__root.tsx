@@ -12,13 +12,17 @@ import appCss from '../styles.css?url'
 import type { QueryClient } from '@tanstack/react-query'
 import { Providers } from '#/components/providers'
 import { AppSidebar } from '#/components/app-sidebar'
+import { getSettings } from '#/lib/functions/settings'
 
 interface MyRouterContext {
   queryClient: QueryClient
 }
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({
-  head: () => ({
+  loader: async () => {
+    return await getSettings()
+  },
+  head: ({ loaderData }) => ({
     meta: [
       {
         charSet: 'utf-8',
@@ -28,7 +32,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
         content: 'width=device-width, initial-scale=1',
       },
       {
-        title: 'Dockstack',
+        title: loaderData?.appTitle,
       },
     ],
     links: [

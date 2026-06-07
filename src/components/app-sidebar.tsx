@@ -17,6 +17,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
+import { useSettings } from '#/hooks/use-settings'
 
 const LINKS: Array<{
   label: string
@@ -41,6 +42,7 @@ const LINKS: Array<{
 ] as const
 
 export function AppSidebar() {
+  const { appTitle } = useSettings()
   const { pathname } = useLocation()
   const { authClient } = useAuth()
   const { data: session } = useSession(authClient)
@@ -53,7 +55,7 @@ export function AppSidebar() {
     <Sidebar>
       <SidebarHeader className="flex-row items-center justify-between p-4">
         <Link to="/" className="flex items-center gap-2 font-semibold text-xl">
-          Dockstack
+          {appTitle}
         </Link>
       </SidebarHeader>
       <SidebarContent>
