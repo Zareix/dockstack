@@ -18,6 +18,17 @@ export const env = createEnv({
     OAUTH_DISCOVERY_URL: z.url().optional(),
     DOCKER_SYSTEM_PRUNE_CRON: z.string().optional(),
     DOCKER_SYSTEM_PRUNE_INCLUDE_VOLUMES: z.boolean().optional().default(false),
+    REDEPLOY_SKIP: z
+      .string()
+      .transform((val) =>
+        val
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean),
+      )
+      .pipe(z.array(z.string().min(1)))
+      .optional()
+      .default([]),
   },
 
   /**

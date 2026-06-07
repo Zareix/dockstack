@@ -1,5 +1,5 @@
 import { useVirtualizer } from '@tanstack/react-virtual'
-import { PlayCircleIcon, StopCircleIcon } from 'lucide-react'
+import { ListEnd, PlayCircleIcon, StopCircleIcon } from 'lucide-react'
 import { useCallback, useLayoutEffect, useRef, useState } from 'react'
 import type { LogEntry } from '#/lib/functions'
 import { Button } from '#/components/ui/button'
@@ -93,6 +93,14 @@ export function ContainerLogs({ stackName }: { stackName: string }) {
           />
           <Label htmlFor="timestamp">Timestamps</Label>
         </div>
+        <Button
+          onClick={() => virtualizer.scrollToEnd()}
+          variant="outline"
+          className="ml-auto"
+        >
+          <ListEnd />
+          Go to bottom
+        </Button>
       </div>
       <div
         ref={parentRef}

@@ -102,14 +102,17 @@ export const getStackStatus = async (
 }
 
 export const redeployAllRunningStacks = async (): Promise<RedeployResult[]> => {
+  const skipList = env.REDEPLOY_SKIP
   const names = await listStacks()
   const results = await Promise.allSettled<RedeployResult>(
-    names.map(async (name) => {
-      const services = await getRunningServices(name)
-      if (services.length === 0) return { name, action: 'skipped' }
-      await stackUpServices(name, services)
-      return { name, action: 'redeployed', services }
-    }),
+    names
+      .filter((name) => !skipList.includes(name))
+      .map(async (name) => {
+        const services = await getRunningServices(name)
+        if (services.length === 0) return { name, action: 'skipped' }
+        await stackUpServices(name, services)
+        return { name, action: 'redeployed', services }
+      }),
   )
   return results.map((r, i) =>
     r.status === 'fulfilled'

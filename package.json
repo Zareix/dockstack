@@ -2,7 +2,7 @@
   "name": "dockstack",
   "private": true,
   "type": "module",
-  "version": "0.4.2",
+  "version": "0.5.0",
   "imports": {
     "#/*": "./src/*"
   },

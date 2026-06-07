@@ -4,6 +4,7 @@ import { createServerFn } from '@tanstack/react-start'
 import { z } from 'zod'
 import * as docker from '#/lib/docker'
 import { env } from '#/env'
+import { authMiddleware } from '#/lib/auth/middleware'
 
 export type StackFiles = {
   compose: string
@@ -12,6 +13,7 @@ export type StackFiles = {
 }
 
 export const getStackFiles = createServerFn()
+  .middleware([authMiddleware])
   .inputValidator(z.object({ stackName: z.string().min(1) }))
   .handler(async ({ data: { stackName } }): Promise<StackFiles> => {
     const dir = join(env.STACKS_DIR, stackName)
@@ -25,6 +27,7 @@ export const getStackFiles = createServerFn()
   })
 
 export const saveStackFiles = createServerFn()
+  .middleware([authMiddleware])
   .inputValidator(
     z.object({
       stackName: z.string().min(1),
@@ -44,6 +47,7 @@ export const saveStackFiles = createServerFn()
   )
 
 export const createStack = createServerFn()
+  .middleware([authMiddleware])
   .inputValidator(z.object({ stackName: z.string().min(1) }))
   .handler(async ({ data: { stackName } }) => {
     const dir = join(env.STACKS_DIR, stackName)
@@ -54,6 +58,7 @@ export const createStack = createServerFn()
   })
 
 export const createDotEnv = createServerFn()
+  .middleware([authMiddleware])
   .inputValidator(z.object({ stackName: z.string().min(1) }))
   .handler(async ({ data: { stackName } }) => {
     const dir = join(env.STACKS_DIR, stackName)

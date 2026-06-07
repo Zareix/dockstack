@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Suspense, useEffect, useState } from 'react'
 import { toast } from 'sonner'
+import { PlusIcon } from 'lucide-react'
 import { Button } from '#/components/ui/button'
 import { Spinner } from '#/components/ui/spinner'
 import { createDotEnv, getStackFiles, saveStackFiles } from '#/lib/functions'
@@ -91,6 +92,7 @@ export function StackFiles({ stackName }: { stackName: string }) {
                     onClick={() => createDotEnvMutation.mutate()}
                     variant="ghost"
                   >
+                    <PlusIcon />
                     Create .env
                   </Button>
                 </div>

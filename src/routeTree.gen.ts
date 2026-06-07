@@ -16,6 +16,7 @@ import { Route as StacksNameRouteImport } from './routes/stacks.$name'
 import { Route as SettingsPathRouteImport } from './routes/settings/$path'
 import { Route as AuthPathRouteImport } from './routes/auth/$path'
 import { Route as ApiHealthRouteImport } from './routes/api/health'
+import { Route as ApiStacksRouteRouteImport } from './routes/api/stacks/route'
 import { Route as ApiWsExecRouteImport } from './routes/api/ws/exec'
 import { Route as ApiStacksRedeployRouteImport } from './routes/api/stacks/redeploy'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
@@ -55,15 +56,20 @@ const ApiHealthRoute = ApiHealthRouteImport.update({
   path: '/api/health',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiStacksRouteRoute = ApiStacksRouteRouteImport.update({
+  id: '/api/stacks',
+  path: '/api/stacks',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiWsExecRoute = ApiWsExecRouteImport.update({
   id: '/api/ws/exec',
   path: '/api/ws/exec',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiStacksRedeployRoute = ApiStacksRedeployRouteImport.update({
-  id: '/api/stacks/redeploy',
-  path: '/api/stacks/redeploy',
-  getParentRoute: () => rootRouteImport,
+  id: '/redeploy',
+  path: '/redeploy',
+  getParentRoute: () => ApiStacksRouteRoute,
 } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
@@ -75,6 +81,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/containers': typeof ContainersRoute
   '/images': typeof ImagesRoute
+  '/api/stacks': typeof ApiStacksRouteRouteWithChildren
   '/api/health': typeof ApiHealthRoute
   '/auth/$path': typeof AuthPathRoute
   '/settings/$path': typeof SettingsPathRoute
@@ -87,6 +94,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/containers': typeof ContainersRoute
   '/images': typeof ImagesRoute
+  '/api/stacks': typeof ApiStacksRouteRouteWithChildren
   '/api/health': typeof ApiHealthRoute
   '/auth/$path': typeof AuthPathRoute
   '/settings/$path': typeof SettingsPathRoute
@@ -100,6 +108,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/containers': typeof ContainersRoute
   '/images': typeof ImagesRoute
+  '/api/stacks': typeof ApiStacksRouteRouteWithChildren
   '/api/health': typeof ApiHealthRoute
   '/auth/$path': typeof AuthPathRoute
   '/settings/$path': typeof SettingsPathRoute
@@ -114,6 +123,7 @@ export interface FileRouteTypes {
     | '/'
     | '/containers'
     | '/images'
+    | '/api/stacks'
     | '/api/health'
     | '/auth/$path'
     | '/settings/$path'
@@ -126,6 +136,7 @@ export interface FileRouteTypes {
     | '/'
     | '/containers'
     | '/images'
+    | '/api/stacks'
     | '/api/health'
     | '/auth/$path'
     | '/settings/$path'
@@ -138,6 +149,7 @@ export interface FileRouteTypes {
     | '/'
     | '/containers'
     | '/images'
+    | '/api/stacks'
     | '/api/health'
     | '/auth/$path'
     | '/settings/$path'
@@ -151,12 +163,12 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ContainersRoute: typeof ContainersRoute
   ImagesRoute: typeof ImagesRoute
+  ApiStacksRouteRoute: typeof ApiStacksRouteRouteWithChildren
   ApiHealthRoute: typeof ApiHealthRoute
   AuthPathRoute: typeof AuthPathRoute
   SettingsPathRoute: typeof SettingsPathRoute
   StacksNameRoute: typeof StacksNameRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
-  ApiStacksRedeployRoute: typeof ApiStacksRedeployRoute
   ApiWsExecRoute: typeof ApiWsExecRoute
 }
 
@@ -211,6 +223,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiHealthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/stacks': {
+      id: '/api/stacks'
+      path: '/api/stacks'
+      fullPath: '/api/stacks'
+      preLoaderRoute: typeof ApiStacksRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/ws/exec': {
       id: '/api/ws/exec'
       path: '/api/ws/exec'
@@ -220,10 +239,10 @@ declare module '@tanstack/react-router' {
     }
     '/api/stacks/redeploy': {
       id: '/api/stacks/redeploy'
-      path: '/api/stacks/redeploy'
+      path: '/redeploy'
       fullPath: '/api/stacks/redeploy'
       preLoaderRoute: typeof ApiStacksRedeployRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof ApiStacksRouteRoute
     }
     '/api/auth/$': {
       id: '/api/auth/$'
@@ -235,16 +254,28 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface ApiStacksRouteRouteChildren {
+  ApiStacksRedeployRoute: typeof ApiStacksRedeployRoute
+}
+
+const ApiStacksRouteRouteChildren: ApiStacksRouteRouteChildren = {
+  ApiStacksRedeployRoute: ApiStacksRedeployRoute,
+}
+
+const ApiStacksRouteRouteWithChildren = ApiStacksRouteRoute._addFileChildren(
+  ApiStacksRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ContainersRoute: ContainersRoute,
   ImagesRoute: ImagesRoute,
+  ApiStacksRouteRoute: ApiStacksRouteRouteWithChildren,
   ApiHealthRoute: ApiHealthRoute,
   AuthPathRoute: AuthPathRoute,
   SettingsPathRoute: SettingsPathRoute,
   StacksNameRoute: StacksNameRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
-  ApiStacksRedeployRoute: ApiStacksRedeployRoute,
   ApiWsExecRoute: ApiWsExecRoute,
 }
 export const routeTree = rootRouteImport
