@@ -44,7 +44,9 @@ export function AppSidebar() {
   const { pathname } = useLocation()
   const { authClient } = useAuth()
   const { data: session } = useSession(authClient)
-  const { toggleSidebar } = useSidebar()
+  const { isMobile, toggleSidebar } = useSidebar()
+
+  const toggleSidebarOnMobile = () => (isMobile ? toggleSidebar() : null)
 
   if (!session) {
     return null
@@ -55,7 +57,7 @@ export function AppSidebar() {
       <SidebarHeader className="flex-row items-center justify-between p-4">
         <Link
           to="/"
-          onClick={() => toggleSidebar()}
+          onClick={toggleSidebarOnMobile}
           className="flex items-center gap-2 font-semibold text-xl"
         >
           {appTitle}
@@ -71,7 +73,7 @@ export function AppSidebar() {
                     render={
                       <Link
                         {...l.linkOptions}
-                        onClick={() => toggleSidebar()}
+                        onClick={toggleSidebarOnMobile}
                       />
                     }
                     isActive={l.linkOptions.to === pathname}

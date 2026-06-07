@@ -112,8 +112,10 @@ export function UserButton({
 }: UserButtonProps) {
   const { authClient, basePaths, viewPaths, localization, plugins, Link } =
     useAuth()
-  const { toggleSidebar } = useSidebar()
+  const { isMobile, toggleSidebar } = useSidebar()
   const { data: session, isPending: sessionPending } = useSession(authClient)
+
+  const toggleSidebarOnMobile = () => (isMobile ? toggleSidebar() : null)
 
   const userLinks = links?.flatMap((link, index) => {
     if (!isValidElement(link)) {
@@ -182,10 +184,10 @@ export function UserButton({
 
             {!hideSettings && (
               <DropdownMenuItem
+                onClick={toggleSidebarOnMobile}
                 render={
                   <Link
                     href={`${basePaths.settings}/${viewPaths.settings.account}`}
-                    onClick={() => toggleSidebar()}
                   />
                 }
               >
