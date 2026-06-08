@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useCallback } from 'react'
 import { ClientOnly, createFileRoute, redirect } from '@tanstack/react-router'
 import { z } from 'zod'
 import {
@@ -11,6 +12,7 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { ContainerLogs } from '#/components/stacks/logs'
+import { DeployDialog } from '#/components/stacks/deploy-dialog'
 import { StackFiles } from '#/components/stacks/files'
 import { StackServices } from '#/components/stacks/services'
 import { StatusBadge } from '#/components/stacks/status-badge'
@@ -34,7 +36,6 @@ import {
   stackPull,
   stackRestart,
   stackStop,
-  stackUp,
 } from '#/lib/functions'
 import { ensureSession } from '#/lib/functions/auth'
 
@@ -70,19 +71,10 @@ function StackPage() {
     refetchInterval: 5000,
   })
 
-  const invalidateStatus = () => {
+  const invalidateStatus = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: ['stacks', name, 'status'] })
     queryClient.invalidateQueries({ queryKey: ['stacks', name, 'services'] })
-  }
-
-  const upMutation = useMutation({
-    mutationFn: () => stackUp({ data: { stackName: name } }),
-    onError: (error) => toast.error(error.message),
-    onSuccess: () => {
-      toast.success(`${name} started`)
-      invalidateStatus()
-    },
-  })
+  }, [queryClient, name])
 
   const stopMutation = useMutation({
     mutationFn: () => stackStop({ data: { stackName: name } }),
@@ -131,7 +123,6 @@ function StackPage() {
   })
 
   const anyPending =
-    upMutation.isPending ||
     stopMutation.isPending ||
     downMutation.isPending ||
     restartMutation.isPending ||
@@ -207,10 +198,12 @@ function StackPage() {
             <SquareIcon />
             {downMutation.isPending ? 'Downing...' : 'Down'}
           </Button>
-          <Button onClick={() => upMutation.mutate()} disabled={anyPending}>
-            <PlayIcon />
-            {upMutation.isPending ? 'Starting...' : 'Up'}
-          </Button>
+          <DeployDialog stackName={name} onDone={invalidateStatus}>
+            <Button disabled={anyPending}>
+              <PlayIcon />
+              Up
+            </Button>
+          </DeployDialog>
         </div>
       </header>
 

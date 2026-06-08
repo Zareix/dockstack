@@ -64,3 +64,10 @@ export const stackPull = createServerFn()
   .middleware([authMiddleware])
   .inputValidator(stackNameSchema)
   .handler(({ data: { stackName } }) => docker.stackPull(stackName))
+
+export const streamStackUp = createServerFn()
+  .middleware([authMiddleware])
+  .inputValidator(stackNameSchema)
+  .handler(async function* ({ data: { stackName } }) {
+    yield* docker.streamStackUp(stackName)
+  })

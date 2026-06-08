@@ -39,6 +39,64 @@ export const stackUp = async (stackName: string) => {
   await Bun.$`docker compose -f ${composePath} up -d --remove-orphans`
 }
 
+export async function* streamStackUp(stackName: string): AsyncGenerator<string> {
+  const composePath = await findComposePath(stackName)
+  const proc = Bun.spawn(
+    ['docker', 'compose', '-f', composePath, 'up', '-d', '--remove-orphans'],
+    { stdout: 'pipe', stderr: 'pipe' },
+  )
+
+  const queue: string[] = []
+  let done = 0
+  let notify: (() => void) | null = null
+
+  const finish = () => {
+    done++
+    const fn = notify
+    if (fn) fn()
+  }
+
+  const processStream = async (stream: ReadableStream<Uint8Array>) => {
+    const reader = stream.getReader()
+    const decoder = new TextDecoder()
+    let buf = ''
+    try {
+      // eslint-disable-next-line
+      while (true) {
+        const { done: streamDone, value } = await reader.read()
+        if (streamDone) break
+        buf += decoder.decode(value, { stream: true })
+        const parts = buf.split('\n')
+        buf = parts.pop() ?? ''
+        for (const line of parts) {
+          if (!line) continue
+          queue.push(line)
+          const fn = notify
+          if (fn) fn()
+        }
+      }
+      if (buf) {
+        queue.push(buf)
+        const fn = notify
+        if (fn) fn()
+      }
+    } finally {
+      reader.releaseLock()
+    }
+  }
+
+  processStream(proc.stdout).finally(finish)
+  processStream(proc.stderr).finally(finish)
+
+  while (done < 2 || queue.length > 0) {
+    if (queue.length === 0) {
+      await new Promise<void>((r) => (notify = r))
+      notify = null
+    }
+    while (queue.length > 0) yield queue.shift()!
+  }
+}
+
 export const stackStop = async (stackName: string) => {
   const composePath = await findComposePath(stackName)
   await Bun.$`docker compose -f ${composePath} stop`
