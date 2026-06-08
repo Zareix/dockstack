@@ -17,6 +17,7 @@ import { Route as SettingsPathRouteImport } from './routes/settings/$path'
 import { Route as AuthPathRouteImport } from './routes/auth/$path'
 import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as ApiStacksRouteRouteImport } from './routes/api/stacks/route'
+import { Route as ApiWsLogsRouteImport } from './routes/api/ws/logs'
 import { Route as ApiWsExecRouteImport } from './routes/api/ws/exec'
 import { Route as ApiStacksRedeployRouteImport } from './routes/api/stacks/redeploy'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
@@ -61,6 +62,11 @@ const ApiStacksRouteRoute = ApiStacksRouteRouteImport.update({
   path: '/api/stacks',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiWsLogsRoute = ApiWsLogsRouteImport.update({
+  id: '/api/ws/logs',
+  path: '/api/ws/logs',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiWsExecRoute = ApiWsExecRouteImport.update({
   id: '/api/ws/exec',
   path: '/api/ws/exec',
@@ -89,6 +95,7 @@ export interface FileRoutesByFullPath {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/stacks/redeploy': typeof ApiStacksRedeployRoute
   '/api/ws/exec': typeof ApiWsExecRoute
+  '/api/ws/logs': typeof ApiWsLogsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -102,6 +109,7 @@ export interface FileRoutesByTo {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/stacks/redeploy': typeof ApiStacksRedeployRoute
   '/api/ws/exec': typeof ApiWsExecRoute
+  '/api/ws/logs': typeof ApiWsLogsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -116,6 +124,7 @@ export interface FileRoutesById {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/stacks/redeploy': typeof ApiStacksRedeployRoute
   '/api/ws/exec': typeof ApiWsExecRoute
+  '/api/ws/logs': typeof ApiWsLogsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -131,6 +140,7 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/api/stacks/redeploy'
     | '/api/ws/exec'
+    | '/api/ws/logs'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -144,6 +154,7 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/api/stacks/redeploy'
     | '/api/ws/exec'
+    | '/api/ws/logs'
   id:
     | '__root__'
     | '/'
@@ -157,6 +168,7 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/api/stacks/redeploy'
     | '/api/ws/exec'
+    | '/api/ws/logs'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -170,6 +182,7 @@ export interface RootRouteChildren {
   StacksNameRoute: typeof StacksNameRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiWsExecRoute: typeof ApiWsExecRoute
+  ApiWsLogsRoute: typeof ApiWsLogsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -230,6 +243,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiStacksRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/ws/logs': {
+      id: '/api/ws/logs'
+      path: '/api/ws/logs'
+      fullPath: '/api/ws/logs'
+      preLoaderRoute: typeof ApiWsLogsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/ws/exec': {
       id: '/api/ws/exec'
       path: '/api/ws/exec'
@@ -277,6 +297,7 @@ const rootRouteChildren: RootRouteChildren = {
   StacksNameRoute: StacksNameRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiWsExecRoute: ApiWsExecRoute,
+  ApiWsLogsRoute: ApiWsLogsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
