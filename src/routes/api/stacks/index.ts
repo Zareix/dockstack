@@ -1,11 +1,11 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { getStackStatus, listStacks } from '#/lib/docker'
-import { apiKeyMiddleware } from '#/lib/auth/middleware'
+import { apiKeyMiddleware, loggingMiddleware } from '#/lib/middleware'
 
-export const Route = createFileRoute('/api/stacks')({
+export const Route = createFileRoute('/api/stacks/')({
   server: {
+    middleware: [loggingMiddleware, apiKeyMiddleware],
     handlers: {
-      middleware: [apiKeyMiddleware],
       GET: async () => {
         const names = await listStacks()
         return Response.json(

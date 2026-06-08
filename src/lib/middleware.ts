@@ -34,3 +34,20 @@ export const apiKeyMiddleware = createMiddleware().server(
     return next()
   },
 )
+
+export const loggingFnMiddleware = createMiddleware({
+  type: 'function',
+}).server(async ({ next, serverFnMeta, method }) => {
+  console.log(`${method} ${serverFnMeta.name}`)
+  return next()
+})
+
+export const loggingMiddleware = createMiddleware().server(
+  async ({ next, request }) => {
+    const res = await next()
+    console.log(
+      `${request.method} ${new URL(request.url).pathname} ${res.response.status}`,
+    )
+    return res
+  },
+)

@@ -4,7 +4,7 @@ import { createServerFn } from '@tanstack/react-start'
 import { z } from 'zod'
 import * as docker from '#/lib/docker'
 import { env } from '#/env'
-import { authMiddleware } from '#/lib/auth/middleware'
+import { authMiddleware } from '#/lib/middleware'
 
 export type Stack = { name: string; status: docker.StackStatus }
 

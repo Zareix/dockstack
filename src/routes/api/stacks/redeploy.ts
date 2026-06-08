@@ -1,11 +1,11 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { apiKeyMiddleware } from '#/lib/auth/middleware'
+import { apiKeyMiddleware, loggingMiddleware } from '#/lib/middleware'
 import { redeployAllRunningStacks } from '#/lib/docker'
 
 export const Route = createFileRoute('/api/stacks/redeploy')({
   server: {
+    middleware: [loggingMiddleware, apiKeyMiddleware],
     handlers: {
-      middleware: [apiKeyMiddleware],
       POST: async () => {
         return Response.json(await redeployAllRunningStacks())
       },

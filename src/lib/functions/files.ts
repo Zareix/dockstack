@@ -4,7 +4,7 @@ import { createServerFn } from '@tanstack/react-start'
 import { z } from 'zod'
 import * as docker from '#/lib/docker'
 import { env } from '#/env'
-import { authMiddleware } from '#/lib/auth/middleware'
+import { authMiddleware } from '#/lib/middleware'
 
 export type StackFiles = {
   compose: string
@@ -48,12 +48,22 @@ export const saveStackFiles = createServerFn()
 
 export const createStack = createServerFn()
   .middleware([authMiddleware])
-  .inputValidator(z.object({ stackName: z.string().min(1) }))
+  .inputValidator(
+    z.object({
+      stackName: z
+        .string()
+        .min(1, 'Name is required')
+        .regex(
+          /^[a-zA-Z0-9_-]+$/,
+          'Only letters, numbers, hyphens, underscores',
+        ),
+    }),
+  )
   .handler(async ({ data: { stackName } }) => {
     const dir = join(env.STACKS_DIR, stackName)
     await Bun.write(
       join(dir, 'compose.yaml'),
-      `services:\n  app:\n    image: nginx\n`,
+      `services:\n  app:\n    image: ${stackName}\n    container_name: ${stackName}_app`,
     )
   })
 

@@ -63,7 +63,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <Providers>
           <AppSidebar />
           <Navbar />
-          <main className="p-4 md:p-8 min-h-screen w-full">{children}</main>
+          <main className="p-4 md:p-8 min-h-screen w-full isolate">
+            {children}
+          </main>
         </Providers>
         <TanStackDevtools
           config={{

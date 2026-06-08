@@ -1,7 +1,7 @@
 import { createServerFn } from '@tanstack/react-start'
 import { z } from 'zod'
 import * as docker from '#/lib/docker'
-import { authMiddleware } from '#/lib/auth/middleware'
+import { authMiddleware } from '#/lib/middleware'
 
 export type { LogEntry } from '#/lib/docker'
 

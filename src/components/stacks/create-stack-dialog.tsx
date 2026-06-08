@@ -17,9 +17,13 @@ import {
   DialogTrigger,
 } from '#/components/ui/dialog'
 import { Button } from '#/components/ui/button'
+import { FieldError } from '#/components/ui/field'
 
 const schema = z.object({
-  name: z.string().min(1, 'Name is required'),
+  name: z
+    .string()
+    .min(1, 'Name is required')
+    .regex(/^[a-zA-Z0-9_-]+$/, 'Only letters, numbers, hyphens, underscores'),
 })
 
 export function CreateStackButton() {
@@ -34,7 +38,12 @@ export function CreateStackButton() {
       queryClient.invalidateQueries({ queryKey: ['stacks'] })
       setOpen(false)
       form.reset()
-      navigate({ to: `/stacks/${stackName}` })
+      navigate({
+        to: `/stacks/${stackName}`,
+        search: {
+          tab: 'files',
+        },
+      })
     },
     onError: (e) => toast.error(e.message),
   })
@@ -42,7 +51,7 @@ export function CreateStackButton() {
   const form = useForm({
     defaultValues: { name: '' },
     validators: { onSubmit: schema },
-    onSubmit: ({ value }) => mutation.mutate(value.name.trim()),
+    onSubmit: ({ value }) => mutation.mutate(value.name),
   })
 
   return (
@@ -86,9 +95,7 @@ export function CreateStackButton() {
                       autoFocus
                     />
                     {isInvalid && (
-                      <p className="text-xs text-destructive">
-                        {field.state.meta.errors.join(', ')}
-                      </p>
+                      <FieldError errors={field.state.meta.errors} />
                     )}
                   </div>
                 )
