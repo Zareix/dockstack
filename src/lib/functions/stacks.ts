@@ -71,3 +71,31 @@ export const streamStackUp = createServerFn()
   .handler(async function* ({ data: { stackName } }) {
     yield* docker.streamStackUp(stackName)
   })
+
+export const streamStackStop = createServerFn()
+  .middleware([authMiddleware])
+  .inputValidator(stackNameSchema)
+  .handler(async function* ({ data: { stackName } }) {
+    yield* docker.streamStackStop(stackName)
+  })
+
+export const streamStackDown = createServerFn()
+  .middleware([authMiddleware])
+  .inputValidator(stackNameSchema)
+  .handler(async function* ({ data: { stackName } }) {
+    yield* docker.streamStackDown(stackName)
+  })
+
+export const streamStackRestart = createServerFn()
+  .middleware([authMiddleware])
+  .inputValidator(stackNameSchema)
+  .handler(async function* ({ data: { stackName } }) {
+    yield* docker.streamStackRestart(stackName)
+  })
+
+export const streamStackPull = createServerFn()
+  .middleware([authMiddleware])
+  .inputValidator(stackNameSchema)
+  .handler(async function* ({ data: { stackName } }) {
+    yield* docker.streamStackPull(stackName)
+  })

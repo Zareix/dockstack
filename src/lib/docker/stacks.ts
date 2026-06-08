@@ -39,10 +39,12 @@ export const stackUp = async (stackName: string) => {
   await Bun.$`docker compose -f ${composePath} up -d --remove-orphans`
 }
 
-export async function* streamStackUp(stackName: string): AsyncGenerator<string> {
-  const composePath = await findComposePath(stackName)
+async function* spawnCompose(
+  composePath: string,
+  args: string[],
+): AsyncGenerator<string> {
   const proc = Bun.spawn(
-    ['docker', 'compose', '-f', composePath, 'up', '-d', '--remove-orphans'],
+    ['docker', 'compose', '--progress', 'plain', '-f', composePath, ...args],
     { stdout: 'pipe', stderr: 'pipe' },
   )
 
@@ -95,6 +97,40 @@ export async function* streamStackUp(stackName: string): AsyncGenerator<string> 
     }
     while (queue.length > 0) yield queue.shift()!
   }
+}
+
+export async function* streamStackUp(
+  stackName: string,
+): AsyncGenerator<string> {
+  yield* spawnCompose(await findComposePath(stackName), [
+    'up',
+    '-d',
+    '--remove-orphans',
+  ])
+}
+
+export async function* streamStackStop(
+  stackName: string,
+): AsyncGenerator<string> {
+  yield* spawnCompose(await findComposePath(stackName), ['stop'])
+}
+
+export async function* streamStackDown(
+  stackName: string,
+): AsyncGenerator<string> {
+  yield* spawnCompose(await findComposePath(stackName), ['down'])
+}
+
+export async function* streamStackRestart(
+  stackName: string,
+): AsyncGenerator<string> {
+  yield* spawnCompose(await findComposePath(stackName), ['restart'])
+}
+
+export async function* streamStackPull(
+  stackName: string,
+): AsyncGenerator<string> {
+  yield* spawnCompose(await findComposePath(stackName), ['pull'])
 }
 
 export const stackStop = async (stackName: string) => {

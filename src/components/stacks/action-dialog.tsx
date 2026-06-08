@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { streamStackUp } from '#/lib/functions'
 import { Button } from '#/components/ui/button'
 import {
   Dialog,
@@ -11,17 +10,23 @@ import {
 } from '#/components/ui/dialog'
 
 type Props = {
-  stackName: string
+  title: string
+  action: () => Promise<AsyncIterable<string>>
   onDone?: () => void
   children: React.ReactElement
 }
 
-export function DeployDialog({ stackName, onDone, children }: Props) {
+export function StackActionDialog({ title, action, onDone, children }: Props) {
   const [open, setOpen] = useState(false)
   const [lines, setLines] = useState<string[]>([])
   const [running, setRunning] = useState(false)
   const stopRef = useRef<(() => void) | null>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
+
+  const actionRef = useRef(action)
+  actionRef.current = action
+  const onDoneRef = useRef(onDone)
+  onDoneRef.current = onDone
 
   const run = useCallback(async () => {
     setLines([])
@@ -30,9 +35,7 @@ export function DeployDialog({ stackName, onDone, children }: Props) {
     const stopPromise = new Promise<void>((r) => (stopRef.current = r))
     const stopped = { done: true as const, value: undefined }
 
-    const iter = (await streamStackUp({ data: { stackName } }))[
-      Symbol.asyncIterator
-    ]()
+    const iter = (await actionRef.current())[Symbol.asyncIterator]()
 
     try {
       // eslint-disable-next-line
@@ -45,13 +48,12 @@ export function DeployDialog({ stackName, onDone, children }: Props) {
         setLines((prev) => [...prev, result.value])
       }
     } finally {
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       await iter.return?.()
       stopRef.current = null
       setRunning(false)
-      onDone?.()
+      onDoneRef.current?.()
     }
-  }, [stackName, onDone])
+  }, [])
 
   useEffect(() => {
     if (open) run()
@@ -69,7 +71,7 @@ export function DeployDialog({ stackName, onDone, children }: Props) {
       <DialogContent className="max-w-3xl">
         <DialogHeader>
           <DialogTitle>
-            Deploying {stackName}
+            {title}
             {running && (
               <span className="ml-2 inline-block size-2 rounded-full bg-green-400 animate-pulse" />
             )}

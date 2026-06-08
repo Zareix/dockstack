@@ -12,7 +12,7 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { ContainerLogs } from '#/components/stacks/logs'
-import { DeployDialog } from '#/components/stacks/deploy-dialog'
+import { StackActionDialog } from '#/components/stacks/action-dialog'
 import { StackFiles } from '#/components/stacks/files'
 import { StackServices } from '#/components/stacks/services'
 import { StatusBadge } from '#/components/stacks/status-badge'
@@ -32,10 +32,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '#/components/ui/tabs'
 import {
   getStackStatus,
   stackDestroy,
-  stackDown,
-  stackPull,
-  stackRestart,
-  stackStop,
+  streamStackDown,
+  streamStackPull,
+  streamStackRestart,
+  streamStackStop,
+  streamStackUp,
 } from '#/lib/functions'
 import { ensureSession } from '#/lib/functions/auth'
 
@@ -76,42 +77,6 @@ function StackPage() {
     queryClient.invalidateQueries({ queryKey: ['stacks', name, 'services'] })
   }, [queryClient, name])
 
-  const stopMutation = useMutation({
-    mutationFn: () => stackStop({ data: { stackName: name } }),
-    onError: (error) => toast.error(error.message),
-    onSuccess: () => {
-      toast.success(`${name} stopped`)
-      invalidateStatus()
-    },
-  })
-
-  const downMutation = useMutation({
-    mutationFn: () => stackDown({ data: { stackName: name } }),
-    onError: (error) => toast.error(error.message),
-    onSuccess: () => {
-      toast.success(`${name} down`)
-      invalidateStatus()
-    },
-  })
-
-  const restartMutation = useMutation({
-    mutationFn: () => stackRestart({ data: { stackName: name } }),
-    onError: (error) => toast.error(error.message),
-    onSuccess: () => {
-      toast.success(`${name} restarted`)
-      invalidateStatus()
-    },
-  })
-
-  const pullMutation = useMutation({
-    mutationFn: () => stackPull({ data: { stackName: name } }),
-    onError: (error) => toast.error(error.message),
-    onSuccess: () => {
-      toast.success(`${name} pulled`)
-      invalidateStatus()
-    },
-  })
-
   const destroyMutation = useMutation({
     mutationFn: () => stackDestroy({ data: { stackName: name } }),
     onError: (error) => toast.error(error.message),
@@ -121,13 +86,6 @@ function StackPage() {
       navigate({ to: '/' })
     },
   })
-
-  const anyPending =
-    stopMutation.isPending ||
-    downMutation.isPending ||
-    restartMutation.isPending ||
-    pullMutation.isPending ||
-    destroyMutation.isPending
 
   return (
     <>
@@ -141,7 +99,10 @@ function StackPage() {
           <AlertDialog>
             <AlertDialogTrigger
               render={
-                <Button variant="destructive" disabled={anyPending}>
+                <Button
+                  variant="destructive"
+                  disabled={destroyMutation.isPending}
+                >
                   <Trash2Icon />
                   {destroyMutation.isPending ? 'Destroying...' : 'Destroy'}
                 </Button>
@@ -166,44 +127,61 @@ function StackPage() {
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
-          <Button
-            variant="outline"
-            onClick={() => pullMutation.mutate()}
-            disabled={anyPending}
+
+          <StackActionDialog
+            title={`Pulling ${name}`}
+            action={() => streamStackPull({ data: { stackName: name } })}
+            onDone={invalidateStatus}
           >
-            <DownloadIcon />
-            {pullMutation.isPending ? 'Pulling...' : 'Pull'}
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => restartMutation.mutate()}
-            disabled={anyPending}
+            <Button variant="outline">
+              <DownloadIcon />
+              Pull
+            </Button>
+          </StackActionDialog>
+
+          <StackActionDialog
+            title={`Restarting ${name}`}
+            action={() => streamStackRestart({ data: { stackName: name } })}
+            onDone={invalidateStatus}
           >
-            <RefreshCwIcon />
-            {restartMutation.isPending ? 'Restarting...' : 'Restart'}
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => stopMutation.mutate()}
-            disabled={anyPending}
+            <Button variant="outline">
+              <RefreshCwIcon />
+              Restart
+            </Button>
+          </StackActionDialog>
+
+          <StackActionDialog
+            title={`Stopping ${name}`}
+            action={() => streamStackStop({ data: { stackName: name } })}
+            onDone={invalidateStatus}
           >
-            <PauseIcon />
-            {stopMutation.isPending ? 'Stopping...' : 'Stop'}
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => downMutation.mutate()}
-            disabled={anyPending}
+            <Button variant="outline">
+              <PauseIcon />
+              Stop
+            </Button>
+          </StackActionDialog>
+
+          <StackActionDialog
+            title={`Taking down ${name}`}
+            action={() => streamStackDown({ data: { stackName: name } })}
+            onDone={invalidateStatus}
           >
-            <SquareIcon />
-            {downMutation.isPending ? 'Downing...' : 'Down'}
-          </Button>
-          <DeployDialog stackName={name} onDone={invalidateStatus}>
-            <Button disabled={anyPending}>
+            <Button variant="outline">
+              <SquareIcon />
+              Down
+            </Button>
+          </StackActionDialog>
+
+          <StackActionDialog
+            title={`Starting ${name}`}
+            action={() => streamStackUp({ data: { stackName: name } })}
+            onDone={invalidateStatus}
+          >
+            <Button>
               <PlayIcon />
               Up
             </Button>
-          </DeployDialog>
+          </StackActionDialog>
         </div>
       </header>
 
