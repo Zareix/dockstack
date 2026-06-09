@@ -23,8 +23,8 @@ export function PruneImagesButton() {
   const pruneM = useMutation({
     mutationFn: () => imagePrune(),
     onSuccess: (result) => {
-      const count = result.ImagesDeleted.length
-      const mb = (result.SpaceReclaimed / 1e6).toFixed(1)
+      const count = result.prunedImages.length
+      const mb = (result.spaceReclaimed / 1e6).toFixed(1)
       toast.success(
         `Pruned ${count} image${count !== 1 ? 's' : ''}, freed ${mb} MB`,
       )

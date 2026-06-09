@@ -2,7 +2,7 @@
   "name": "dockstack",
   "private": true,
   "type": "module",
-  "version": "0.6.1",
+  "version": "0.7.0",
   "imports": {
     "#/*": "./src/*"
   },
@@ -11,7 +11,7 @@
     "build": "bun run --bun vite build",
     "preview": "bun run --bun vite preview",
     "test": "bun test",
-    "lint": "eslint --fix",
+    "lint": "tsc --noEmit && eslint --fix",
     "format": "prettier --write .",
     "check": "bun run format && bun run lint",
     "db:generate": "bunx drizzle-kit generate",

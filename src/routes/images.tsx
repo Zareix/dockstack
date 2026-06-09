@@ -1,11 +1,13 @@
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, redirect } from '@tanstack/react-router'
-import type { ImageInfo } from '#/lib/docker'
+import type { ImageInfo, StaleStatus } from '#/lib/docker'
 import type { ColumnDef } from '@tanstack/react-table'
 import { ImageActions } from '#/components/images/image-actions'
 import { PruneImagesButton } from '#/components/images/prune-images-button'
+import { Badge } from '#/components/ui/badge'
+import { Spinner } from '#/components/ui/spinner'
 import { DataTable, SortableHeader } from '#/components/ui/data-table'
-import { listImages } from '#/lib/functions'
+import { checkImagesStale, listImages } from '#/lib/functions'
 import { ensureSession } from '#/lib/functions/auth'
 
 export const Route = createFileRoute('/images')({
@@ -27,64 +29,112 @@ function formatSize(bytes: number): string {
   return `${(bytes / 1e6).toFixed(0)} MB`
 }
 
-const columns: ColumnDef<ImageInfo>[] = [
-  {
-    accessorKey: 'tags',
-    header: ({ column }) => <SortableHeader column={column} label="Tag" />,
-    cell: ({ row }) => {
-      const tags: string[] = row.getValue('tags')
-      return (
-        <span className="font-mono text-sm">
-          {tags.length > 0 ? tags.join(', ') : '<none>'}
-        </span>
-      )
-    },
-    sortingFn: (a, b) => {
-      const tagA = a.original.tags[0] ?? ''
-      const tagB = b.original.tags[0] ?? ''
-      return tagA.localeCompare(tagB)
-    },
-  },
-  {
-    accessorKey: 'id',
-    header: ({ column }) => <SortableHeader column={column} label="ID" />,
-    cell: ({ row }) => (
-      <span className="font-mono text-sm text-muted-foreground">
-        {row.getValue('id')}
-      </span>
-    ),
-  },
-  {
-    accessorKey: 'size',
-    header: ({ column }) => <SortableHeader column={column} label="Size" />,
-    cell: ({ row }) => (
-      <span className="text-sm">{formatSize(row.getValue('size'))}</span>
-    ),
-  },
-  {
-    accessorKey: 'created',
-    header: ({ column }) => <SortableHeader column={column} label="Created" />,
-    cell: ({ row }) => (
-      <span className="text-sm text-muted-foreground">
-        {new Date(row.getValue('created') * 1000).toLocaleDateString()}
-      </span>
-    ),
-  },
-  {
-    id: 'actions',
-    cell: ({ row }) => (
-      <div className="text-right">
-        <ImageActions image={row.original} />
-      </div>
-    ),
-  },
-]
+function StaleCell({
+  imageId,
+  staleData,
+  isLoading,
+}: {
+  imageId: string
+  staleData: Record<string, StaleStatus> | undefined
+  isLoading: boolean
+}) {
+  if (isLoading) return <Spinner className="size-3" />
+  if (!staleData) return null
+  const status = staleData[imageId]
+  if (status === 'unknown')
+    return <span className="text-muted-foreground text-sm">—</span>
+  if (status === 'outdated') return <Badge variant="warning">Outdated</Badge>
+  return (
+    <Badge
+      variant="outline"
+      className="border-green-500 text-green-600 dark:text-green-400"
+    >
+      Up to date
+    </Badge>
+  )
+}
 
 function ImagesPage() {
-  const query = useQuery({
+  const imagesQuery = useQuery({
     queryKey: ['images'],
     queryFn: listImages,
   })
+
+  const staleQuery = useQuery({
+    queryKey: ['images-stale'],
+    queryFn: checkImagesStale,
+    enabled: !!imagesQuery.data,
+    staleTime: 60_000,
+  })
+
+  const columns: ColumnDef<ImageInfo>[] = [
+    {
+      accessorKey: 'tags',
+      header: ({ column }) => <SortableHeader column={column} label="Tag" />,
+      cell: ({ row }) => {
+        const tags: string[] = row.getValue('tags')
+        return (
+          <span className="font-mono text-sm">
+            {tags.length > 0 ? tags.join(', ') : '<none>'}
+          </span>
+        )
+      },
+      sortingFn: (a, b) => {
+        const tagA = a.original.tags[0] ?? ''
+        const tagB = b.original.tags[0] ?? ''
+        return tagA.localeCompare(tagB)
+      },
+    },
+    {
+      accessorKey: 'id',
+      header: ({ column }) => <SortableHeader column={column} label="ID" />,
+      cell: ({ row }) => (
+        <span className="font-mono text-sm text-muted-foreground">
+          {row.getValue('id')}
+        </span>
+      ),
+    },
+    {
+      accessorKey: 'size',
+      header: ({ column }) => <SortableHeader column={column} label="Size" />,
+      cell: ({ row }) => (
+        <span className="text-sm">{formatSize(row.getValue('size'))}</span>
+      ),
+    },
+    {
+      accessorKey: 'created',
+      header: ({ column }) => (
+        <SortableHeader column={column} label="Created" />
+      ),
+      cell: ({ row }) => (
+        <span className="text-sm text-muted-foreground">
+          {new Date(
+            // @ts-ignore It's typed as a number, but the ts can't infer the actual value
+            row.getValue('created') * 1000,
+          ).toLocaleDateString()}
+        </span>
+      ),
+    },
+    {
+      id: 'status',
+      header: 'Status',
+      cell: ({ row }) => (
+        <StaleCell
+          imageId={row.original.id}
+          staleData={staleQuery.data}
+          isLoading={staleQuery.isLoading}
+        />
+      ),
+    },
+    {
+      id: 'actions',
+      cell: ({ row }) => (
+        <div className="text-right">
+          <ImageActions image={row.original} />
+        </div>
+      ),
+    },
+  ]
 
   return (
     <>
@@ -95,8 +145,8 @@ function ImagesPage() {
       <div className="container mx-auto">
         <DataTable
           columns={columns}
-          data={query.data ?? []}
-          isLoading={query.isLoading}
+          data={imagesQuery.data ?? []}
+          isLoading={imagesQuery.isLoading}
         />
       </div>
     </>

@@ -15,3 +15,7 @@ export const imageRemove = createServerFn()
 export const imagePrune = createServerFn()
   .middleware([authMiddleware])
   .handler(() => docker.imagePrune())
+
+export const checkImagesStale = createServerFn()
+  .middleware([authMiddleware])
+  .handler(() => docker.checkImagesStale())

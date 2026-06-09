@@ -440,6 +440,7 @@ function SliderField({ name, field, isPending }: AdditionalFieldProps) {
         id={name}
         name={name}
         value={[value]}
+        // @ts-ignore
         onValueChange={([v]) => setValue(v ?? min)}
         min={min}
         max={max}

@@ -2,6 +2,7 @@ import { dockerClient } from './client'
 import type Docker from 'dockerode'
 import type { StackStatus } from './stacks'
 import { env } from '#/env'
+import { formatImageTag } from '#/lib/docker/images'
 
 export type ContainerInfo = {
   id: string
@@ -39,7 +40,7 @@ const containerStateToStatus = (state: string): StackStatus => {
 const mapContainer = (c: Docker.ContainerInfo): ContainerInfo => ({
   id: c.Id.slice(0, 12),
   name: c.Names[0]?.replace(/^\//, '') ?? c.Id.slice(0, 12),
-  image: c.Image,
+  image: formatImageTag(c.Image),
   stack: c.Labels['com.docker.compose.project'] ?? null,
   state: containerStateToStatus(c.State),
   status: c.Status,
