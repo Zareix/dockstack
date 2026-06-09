@@ -74,7 +74,7 @@ export const checkImagesStale = async (): Promise<
   const results: Record<string, StaleStatus> = {}
 
   await Promise.all(
-    images.map((image) => async () => {
+    images.map(async (image) => {
       if (image.tags.length === 0 || image.repoDigests.length === 0) {
         results[image.id] = 'unknown'
         return
