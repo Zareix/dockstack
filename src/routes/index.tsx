@@ -7,7 +7,7 @@ import { toast } from "sonner"
 import { CreateStackButton } from "#/components/stacks/create-stack-dialog"
 import { StatusBadge } from "#/components/stacks/status-badge"
 import { Button } from "#/components/ui/button"
-import { DataTable, SortableHeader } from "#/components/ui/data-table"
+import { DataTable, FilterableHeader, SortableHeader } from "#/components/ui/data-table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "#/components/ui/tooltip"
 import { listStacks, stackDown, stackPull, stackRestart, stackStop, stackUp } from "#/lib/functions"
 import { ensureSession } from "#/lib/functions/auth"
@@ -112,27 +112,6 @@ function StackActions({ name }: { name: string }) {
   )
 }
 
-const columns: ColumnDef<Stack>[] = [
-  {
-    accessorKey: "name",
-    header: ({ column }) => <SortableHeader column={column} label="Name" />,
-    cell: ({ row }) => <span className="font-medium">{row.getValue("name")}</span>,
-  },
-  {
-    accessorKey: "status",
-    header: ({ column }) => <SortableHeader column={column} label="Status" />,
-    cell: ({ row }) => <StatusBadge status={row.getValue("status")} />,
-  },
-  {
-    id: "actions",
-    cell: ({ row }) => (
-      <div className="text-right" onClick={(e) => e.stopPropagation()}>
-        <StackActions name={row.original.name} />
-      </div>
-    ),
-  },
-]
-
 function Home() {
   const navigate = useNavigate()
   const stacksQuery = useQuery({
@@ -140,9 +119,40 @@ function Home() {
     queryFn: listStacks,
   })
 
+  const columns: ColumnDef<Stack>[] = [
+    {
+      accessorKey: "name",
+      header: ({ column }) => <SortableHeader column={column} label="Name" />,
+      cell: ({ row }) => <span className="font-medium">{row.getValue("name")}</span>,
+    },
+    {
+      accessorKey: "status",
+      header: ({ column }) => (
+        <FilterableHeader
+          items={[
+            { label: "Status", value: "all" },
+            { label: "Running", value: "running" },
+            { label: "Stopped", value: "stopped" },
+          ]}
+          column={column}
+          disabled={stacksQuery.isLoading}
+        />
+      ),
+      cell: ({ row }) => <StatusBadge status={row.getValue("status")} />,
+    },
+    {
+      id: "actions",
+      cell: ({ row }) => (
+        <div className="text-right" onClick={(e) => e.stopPropagation()}>
+          <StackActions name={row.original.name} />
+        </div>
+      ),
+    },
+  ]
+
   return (
     <>
-      <div className="mb-8 flex items-center">
+      <div className="mb-6 flex items-center">
         <h1 className="text-3xl font-bold">Stacks</h1>
         <div className="ml-auto flex items-center gap-2">
           <CreateStackButton />

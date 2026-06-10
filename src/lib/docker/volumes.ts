@@ -10,6 +10,7 @@ export const listVolumes = async () => {
       ],
     ),
   )
+  // oxlint-disable-next-line typescript/no-unnecessary-condition
   return (volRes.Volumes ?? [])
     .map((v) => {
       const usage = usageMap.get(v.Name)

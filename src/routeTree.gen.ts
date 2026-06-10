@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as VolumesRouteImport } from './routes/volumes'
+import { Route as NetworksRouteImport } from './routes/networks'
 import { Route as ImagesRouteImport } from './routes/images'
 import { Route as ContainersRouteImport } from './routes/containers'
 import { Route as IndexRouteImport } from './routes/index'
@@ -26,6 +27,11 @@ import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 const VolumesRoute = VolumesRouteImport.update({
   id: '/volumes',
   path: '/volumes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NetworksRoute = NetworksRouteImport.update({
+  id: '/networks',
+  path: '/networks',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ImagesRoute = ImagesRouteImport.update({
@@ -93,6 +99,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/containers': typeof ContainersRoute
   '/images': typeof ImagesRoute
+  '/networks': typeof NetworksRoute
   '/volumes': typeof VolumesRoute
   '/api/health': typeof ApiHealthRoute
   '/auth/$path': typeof AuthPathRoute
@@ -108,6 +115,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/containers': typeof ContainersRoute
   '/images': typeof ImagesRoute
+  '/networks': typeof NetworksRoute
   '/volumes': typeof VolumesRoute
   '/api/health': typeof ApiHealthRoute
   '/auth/$path': typeof AuthPathRoute
@@ -124,6 +132,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/containers': typeof ContainersRoute
   '/images': typeof ImagesRoute
+  '/networks': typeof NetworksRoute
   '/volumes': typeof VolumesRoute
   '/api/health': typeof ApiHealthRoute
   '/auth/$path': typeof AuthPathRoute
@@ -141,6 +150,7 @@ export interface FileRouteTypes {
     | '/'
     | '/containers'
     | '/images'
+    | '/networks'
     | '/volumes'
     | '/api/health'
     | '/auth/$path'
@@ -156,6 +166,7 @@ export interface FileRouteTypes {
     | '/'
     | '/containers'
     | '/images'
+    | '/networks'
     | '/volumes'
     | '/api/health'
     | '/auth/$path'
@@ -171,6 +182,7 @@ export interface FileRouteTypes {
     | '/'
     | '/containers'
     | '/images'
+    | '/networks'
     | '/volumes'
     | '/api/health'
     | '/auth/$path'
@@ -187,6 +199,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ContainersRoute: typeof ContainersRoute
   ImagesRoute: typeof ImagesRoute
+  NetworksRoute: typeof NetworksRoute
   VolumesRoute: typeof VolumesRoute
   ApiHealthRoute: typeof ApiHealthRoute
   AuthPathRoute: typeof AuthPathRoute
@@ -206,6 +219,13 @@ declare module '@tanstack/react-router' {
       path: '/volumes'
       fullPath: '/volumes'
       preLoaderRoute: typeof VolumesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/networks': {
+      id: '/networks'
+      path: '/networks'
+      fullPath: '/networks'
+      preLoaderRoute: typeof NetworksRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/images': {
@@ -299,6 +319,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ContainersRoute: ContainersRoute,
   ImagesRoute: ImagesRoute,
+  NetworksRoute: NetworksRoute,
   VolumesRoute: VolumesRoute,
   ApiHealthRoute: ApiHealthRoute,
   AuthPathRoute: AuthPathRoute,

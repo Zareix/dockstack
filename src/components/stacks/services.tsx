@@ -13,6 +13,8 @@ import {
 } from "#/components/ui/table"
 import { getStackContainers } from "#/lib/functions"
 
+import { ContainersTable } from "../containers/table"
+
 export function StackServices({ stackName }: { stackName: string }) {
   const query = useQuery({
     queryKey: ["stacks", stackName, "services"],
@@ -25,45 +27,5 @@ export function StackServices({ stackName }: { stackName: string }) {
   if (!query.data?.length)
     return <p className="text-sm text-muted-foreground">No containers found.</p>
 
-  return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Name</TableHead>
-          <TableHead>State</TableHead>
-          <TableHead>Status</TableHead>
-          <TableHead>Ports</TableHead>
-          <TableHead />
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {query.data.map((c) => (
-          <TableRow key={c.id}>
-            <TableCell className="font-mono text-xs">{c.name}</TableCell>
-            <TableCell>
-              <StatusBadge status={c.state} />
-            </TableCell>
-            <TableCell className="text-xs text-muted-foreground">{c.status}</TableCell>
-            <TableCell className="font-mono text-xs">
-              {c.ports.length
-                ? c.ports.map((p) => (
-                    <a
-                      key={p.hostPort}
-                      href={`http://${p.hostName}:${p.hostPort}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {`${p.hostPort}:${p.containerPort}/${p.protocol}`}
-                    </a>
-                  ))
-                : "—"}
-            </TableCell>
-            <TableCell className="text-right">
-              <ContainerActions container={c} stackName={stackName} />
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
-  )
+  return <ContainersTable data={query.data ?? []} isLoading={query.isLoading} showStack={false} />
 }

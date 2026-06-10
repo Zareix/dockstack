@@ -1,6 +1,7 @@
 import {
   type Column,
   type ColumnDef,
+  type ColumnFiltersColumn,
   type ColumnFiltersState,
   flexRender,
   getCoreRowModel,
@@ -15,6 +16,13 @@ import { useState } from "react"
 
 import { Button } from "#/components/ui/button"
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "#/components/ui/select"
+import {
   Table,
   TableBody,
   TableCell,
@@ -23,7 +31,13 @@ import {
   TableRow,
 } from "#/components/ui/table"
 
-export function SortableHeader({ column, label }: { column: Column<any, any>; label: string }) {
+export function SortableHeader<TData, TValue>({
+  column,
+  label,
+}: {
+  column: Column<TData, TValue>
+  label: string
+}) {
   const sorted = column.getIsSorted()
   const Icon = sorted === "asc" ? ArrowUp : sorted === "desc" ? ArrowDown : null
   return (
@@ -36,6 +50,38 @@ export function SortableHeader({ column, label }: { column: Column<any, any>; la
       {label}
       {Icon && <Icon className="ml-2 h-4 w-4" />}
     </Button>
+  )
+}
+
+export function FilterableHeader<TData>({
+  column,
+  disabled,
+  items,
+}: {
+  column: ColumnFiltersColumn<TData>
+  disabled: boolean
+  items: { label: string; value: string }[]
+}) {
+  const current = column?.getFilterValue() ?? "all"
+
+  return (
+    <Select
+      value={current}
+      onValueChange={(v) => column?.setFilterValue(v === "all" ? undefined : v)}
+      disabled={disabled}
+      items={items}
+    >
+      <SelectTrigger size="sm" className="w-28 border-none shadow-none">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        {items.map((item) => (
+          <SelectItem key={item.value} value={item.value}>
+            {item.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   )
 }
 
@@ -72,53 +118,53 @@ export function DataTable<TData, TValue>({
     <div>
       {toolbar?.(table)}
       <div className="overflow-hidden rounded-md border">
-      <Table>
-        <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => {
-                return (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(header.column.columnDef.header, header.getContext())}
-                  </TableHead>
-                )
-              })}
-            </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody>
-          {isLoading ? (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="text-center text-muted-foreground">
-                Loading...
-              </TableCell>
-            </TableRow>
-          ) : table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row) => (
-              <TableRow
-                key={row.id}
-                data-state={row.getIsSelected() && "selected"}
-                className={onRowClick ? "cursor-pointer" : undefined}
-                onClick={onRowClick ? () => onRowClick(row.original) : undefined}
-              >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => {
+                  return (
+                    <TableHead key={header.id}>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(header.column.columnDef.header, header.getContext())}
+                    </TableHead>
+                  )
+                })}
               </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="text-center">
-                No results.
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {isLoading ? (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="text-center text-muted-foreground">
+                  Loading...
+                </TableCell>
+              </TableRow>
+            ) : table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                  className={onRowClick ? "cursor-pointer" : undefined}
+                  onClick={onRowClick ? () => onRowClick(row.original) : undefined}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="text-center">
+                  No results.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
       </div>
     </div>
   )

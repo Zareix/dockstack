@@ -4,13 +4,11 @@ import type { ColumnDef } from "@tanstack/react-table"
 
 import { StatusBadge } from "#/components/status-badge.tsx"
 import { DataTable, FilterableHeader, SortableHeader } from "#/components/ui/data-table"
-import { PruneVolumesButton } from "#/components/volumes/prune-volumes-button"
-import { VolumeActions } from "#/components/volumes/volume-actions"
-import type { VolumeInfo } from "#/lib/docker"
-import { listVolumes } from "#/lib/functions"
+import type { NetworkInfo } from "#/lib/docker"
+import { listNetworks } from "#/lib/functions"
 import { ensureSession } from "#/lib/functions/auth"
 
-export const Route = createFileRoute("/volumes")({
+export const Route = createFileRoute("/networks")({
   async beforeLoad({ context: { queryClient }, location }) {
     const session = await ensureSession(queryClient)()
     if (!session) {
@@ -21,16 +19,16 @@ export const Route = createFileRoute("/volumes")({
       })
     }
   },
-  component: VolumesPage,
+  component: NetworksPage,
 })
 
-function VolumesPage() {
+function NetworksPage() {
   const query = useQuery({
-    queryKey: ["volumes"],
-    queryFn: listVolumes,
+    queryKey: ["networks"],
+    queryFn: listNetworks,
   })
 
-  const columns: ColumnDef<VolumeInfo>[] = [
+  const columns: ColumnDef<NetworkInfo>[] = [
     {
       accessorKey: "name",
       header: ({ column }) => <SortableHeader column={column} label="Name" />,
@@ -59,37 +57,10 @@ function VolumesPage() {
       ),
     },
     {
-      accessorKey: "size",
-      header: ({ column }) => <SortableHeader column={column} label="Size" />,
-      cell: ({ row }) => {
-        const size: number = row.getValue("size")
-        const label =
-          size < 0
-            ? "—"
-            : size < 1e6
-              ? `${(size / 1e3).toFixed(1)} KB`
-              : `${(size / 1e6).toFixed(1)} MB`
-        return <span className="text-sm text-muted-foreground">{label}</span>
-      },
-    },
-    {
-      accessorKey: "created",
-      header: ({ column }) => <SortableHeader column={column} label="Created" />,
-      cell: ({ row }) => {
-        const val: string = row.getValue("created")
-        return (
-          <span className="text-sm text-muted-foreground">
-            {val ? new Date(val).toLocaleDateString() : "—"}
-          </span>
-        )
-      },
-    },
-    {
-      id: "actions",
+      accessorKey: "scope",
+      header: ({ column }) => <SortableHeader column={column} label="Scope" />,
       cell: ({ row }) => (
-        <div className="text-right">
-          <VolumeActions volume={row.original} />
-        </div>
+        <span className="text-sm text-muted-foreground">{row.getValue("scope")}</span>
       ),
     },
   ]
@@ -97,8 +68,7 @@ function VolumesPage() {
   return (
     <>
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Volumes</h1>
-        <PruneVolumesButton />
+        <h1 className="text-3xl font-bold">Networks</h1>
       </div>
       <div className="mx-auto md:max-w-4xl">
         <DataTable columns={columns} data={query.data ?? []} isLoading={query.isLoading} />

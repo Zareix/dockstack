@@ -4,8 +4,9 @@ import type { ColumnDef } from "@tanstack/react-table"
 
 import { ContainerActions } from "#/components/containers/container-actions"
 import { PruneContainersButton } from "#/components/containers/prune-containers-button"
+import { ContainersTable } from "#/components/containers/table.tsx"
 import { StatusBadge } from "#/components/stacks/status-badge"
-import { DataTable, SortableHeader } from "#/components/ui/data-table"
+import { DataTable, FilterableHeader, SortableHeader } from "#/components/ui/data-table"
 import type { ContainerInfo } from "#/lib/docker"
 import { listAllContainers } from "#/lib/functions"
 import { ensureSession } from "#/lib/functions/auth"
@@ -24,85 +25,6 @@ export const Route = createFileRoute("/containers")({
   component: ContainersPage,
 })
 
-const columns: ColumnDef<ContainerInfo>[] = [
-  {
-    accessorKey: "name",
-    header: ({ column }) => <SortableHeader column={column} label="Name" />,
-    cell: ({ row }) => <span className="font-mono text-sm">{row.getValue("name")}</span>,
-  },
-  {
-    accessorKey: "stack",
-    header: ({ column }) => <SortableHeader column={column} label="Stack" />,
-    cell: ({ row }) => {
-      const stack: string | null = row.getValue("stack")
-      return stack ? (
-        <Link to="/stacks/$name" params={{ name: stack }} className="text-sm hover:underline">
-          {stack}
-        </Link>
-      ) : (
-        <span className="text-sm text-muted-foreground">—</span>
-      )
-    },
-    sortingFn: (a, b) => {
-      const sa = a.original.stack ?? ""
-      const sb = b.original.stack ?? ""
-      return sa.localeCompare(sb)
-    },
-  },
-  {
-    accessorKey: "image",
-    header: ({ column }) => <SortableHeader column={column} label="Image" />,
-    cell: ({ row }) => (
-      <span className="font-mono text-sm text-muted-foreground">{row.getValue("image")}</span>
-    ),
-  },
-  {
-    accessorKey: "state",
-    header: ({ column }) => <SortableHeader column={column} label="State" />,
-    cell: ({ row }) => <StatusBadge status={row.getValue("state")} />,
-  },
-  {
-    accessorKey: "status",
-    header: ({ column }) => <SortableHeader column={column} label="Status" />,
-    cell: ({ row }) => (
-      <span className="text-sm text-muted-foreground">{row.getValue("status")}</span>
-    ),
-  },
-  {
-    accessorKey: "ports",
-    header: "Ports",
-    cell: ({ row }) => {
-      const ports: ContainerInfo["ports"] = row.getValue("ports")
-      return ports.length ? (
-        <div className="font-mono text-sm">
-          {ports.map((p) => (
-            <a
-              key={p.hostPort}
-              href={`http://${p.hostName}:${p.hostPort}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block hover:underline"
-            >
-              {p.hostPort}:{p.containerPort}/{p.protocol}
-            </a>
-          ))}
-        </div>
-      ) : (
-        "—"
-      )
-    },
-    enableSorting: false,
-  },
-  {
-    id: "actions",
-    cell: ({ row }) => (
-      <div className="text-right">
-        <ContainerActions container={row.original} />
-      </div>
-    ),
-  },
-]
-
 function ContainersPage() {
   const query = useQuery({
     queryKey: ["containers"],
@@ -112,13 +34,11 @@ function ContainersPage() {
 
   return (
     <>
-      <div className="mb-8 flex items-center justify-between">
+      <div className="mb-6 flex items-center justify-between">
         <h1 className="text-3xl font-bold">Containers</h1>
         <PruneContainersButton />
       </div>
-      <div className="mx-auto md:max-w-4xl">
-        <DataTable columns={columns} data={query.data ?? []} isLoading={query.isLoading} />
-      </div>
+      <ContainersTable data={query.data ?? []} isLoading={query.isLoading} />
     </>
   )
 }

@@ -59,7 +59,7 @@ export function ContainerActions({
   })
 
   const busy = startM.isPending || stopM.isPending || restartM.isPending || removeM.isPending
-  const running = container.state === "running"
+  const running = container.status === "running"
 
   return (
     <div className="flex items-center gap-1">

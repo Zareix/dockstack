@@ -1,6 +1,6 @@
 import { Badge } from "#/components/ui/badge"
 
-import type { ContainerInfo, StackStatus, StaleStatus, VolumeInfo } from "../lib/docker"
+import type { StackStatus, StaleStatus, VolumeInfo } from "../lib/docker"
 
 type StatusVariant = {
   variant: "default" | "secondary" | "destructive" | "outline" | "warning"
@@ -8,10 +8,9 @@ type StatusVariant = {
   label: string
 }
 
-const statusMap: Record<
-  VolumeInfo["status"] | StackStatus | ContainerInfo["state"] | StaleStatus,
-  StatusVariant
-> = {
+type Status = VolumeInfo["status"] | StackStatus | StaleStatus
+
+const statusMap: Record<Status, StatusVariant> = {
   running: {
     variant: "default",
     className: "bg-green-600 text-white dark:bg-green-700",
@@ -39,12 +38,8 @@ const statusMap: Record<
   unused: { variant: "outline", className: "text-muted-foreground", label: "Unused" },
 }
 
-export function StatusBadge({
-  status,
-}: {
-  status: VolumeInfo["status"] | StackStatus | ContainerInfo["state"] | StaleStatus
-}) {
-  const config = statusMap[status] ?? { variant: "outline" as const, label: status }
+export function StatusBadge({ status }: { status: Status }) {
+  const config = statusMap[status]
   return (
     <Badge variant={config.variant} className={config.className}>
       {config.label}

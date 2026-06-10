@@ -1,18 +1,11 @@
 import { useQuery } from "@tanstack/react-query"
 import { createFileRoute, redirect } from "@tanstack/react-router"
-import type { ColumnDef, Table } from "@tanstack/react-table"
+import type { ColumnDef } from "@tanstack/react-table"
 
 import { ImageActions } from "#/components/images/image-actions"
 import { PruneImagesButton } from "#/components/images/prune-images-button"
 import { StatusBadge } from "#/components/status-badge.tsx"
-import { DataTable, SortableHeader } from "#/components/ui/data-table"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "#/components/ui/select"
+import { DataTable, FilterableHeader, SortableHeader } from "#/components/ui/data-table"
 import { Spinner } from "#/components/ui/spinner"
 import type { ImageInfo, StaleStatus } from "#/lib/docker"
 import { checkImagesStale, listImages } from "#/lib/functions"
@@ -53,41 +46,6 @@ function StaleCell({
   return <span className="text-sm text-muted-foreground">—</span>
 }
 
-function StatusFilter({ table, disabled }: { table: Table<ImageInfo>; disabled: boolean }) {
-  const column = table.getColumn("status")
-  const current = (column?.getFilterValue() as StaleStatus | undefined) ?? "all"
-
-  const items = [
-    { label: "All", value: "all" },
-    { label: "Outdated", value: "outdated" },
-    { label: "Up to date", value: "up-to-date" },
-    { label: "Unknown", value: "unknown" },
-  ]
-
-  return (
-    <div className="mb-4">
-      <label className="text-sm text-muted-foreground">Status</label>
-      <Select
-        value={current}
-        onValueChange={(v) => column?.setFilterValue(v === "all" ? undefined : v)}
-        disabled={disabled}
-        items={items}
-      >
-        <SelectTrigger size="sm" className="w-30">
-          <SelectValue placeholder="Filter status" />
-        </SelectTrigger>
-        <SelectContent>
-          {items.map((item) => (
-            <SelectItem key={item.value} value={item.value}>
-              {item.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
-  )
-}
-
 function ImagesPage() {
   const imagesQuery = useQuery({
     queryKey: ["images"],
@@ -125,6 +83,29 @@ function ImagesPage() {
       ),
     },
     {
+      id: "status",
+      accessorFn: (row) => staleQuery.data?.[row.id] ?? null,
+      header: ({ column }) => (
+        <FilterableHeader
+          items={[
+            { label: "Status", value: "all" },
+            { label: "Outdated", value: "outdated" },
+            { label: "Up to date", value: "up-to-date" },
+            { label: "Unknown", value: "unknown" },
+          ]}
+          column={column}
+          disabled={staleQuery.isLoading}
+        />
+      ),
+      cell: ({ row }) => (
+        <StaleCell
+          imageId={row.original.id}
+          staleData={staleQuery.data}
+          isLoading={staleQuery.isLoading}
+        />
+      ),
+    },
+    {
       accessorKey: "size",
       header: ({ column }) => <SortableHeader column={column} label="Size" />,
       cell: ({ row }) => <span className="text-sm">{formatSize(row.getValue("size"))}</span>,
@@ -142,18 +123,6 @@ function ImagesPage() {
       ),
     },
     {
-      id: "status",
-      accessorFn: (row) => staleQuery.data?.[row.id] ?? null,
-      header: ({ column }) => <SortableHeader column={column} label="Status" />,
-      cell: ({ row }) => (
-        <StaleCell
-          imageId={row.original.id}
-          staleData={staleQuery.data}
-          isLoading={staleQuery.isLoading}
-        />
-      ),
-    },
-    {
       id: "actions",
       cell: ({ row }) => (
         <div className="text-right">
@@ -165,7 +134,7 @@ function ImagesPage() {
 
   return (
     <>
-      <div className="mb-8 flex items-center justify-between">
+      <div className="mb-6 flex items-center justify-between">
         <h1 className="text-3xl font-bold">Images</h1>
         <PruneImagesButton />
       </div>
@@ -174,9 +143,6 @@ function ImagesPage() {
           columns={columns}
           data={imagesQuery.data ?? []}
           isLoading={imagesQuery.isLoading}
-          toolbar={(table: Table<ImageInfo>) => (
-            <StatusFilter table={table} disabled={staleQuery.isLoading} />
-          )}
         />
       </div>
     </>

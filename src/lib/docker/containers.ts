@@ -11,8 +11,8 @@ export type ContainerInfo = {
   name: string
   image: string
   stack: string | null
-  state: StackStatus
-  status: string
+  status: StackStatus
+  uptime: string
   ports: {
     hostPort: number
     containerPort: number
@@ -44,8 +44,8 @@ const mapContainer = (c: Docker.ContainerInfo): ContainerInfo => ({
   name: c.Names[0]?.replace(/^\//, "") ?? c.Id.slice(0, 12),
   image: formatImageTag(c.Image),
   stack: c.Labels["com.docker.compose.project"] ?? null,
-  state: containerStateToStatus(c.State),
-  status: c.Status,
+  status: containerStateToStatus(c.State),
+  uptime: c.Status,
   ports: c.Ports.filter((p) => p.PublicPort)
     .map((p) => ({
       hostPort: p.PublicPort,
