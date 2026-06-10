@@ -1,34 +1,17 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router"
-import {
-  DownloadIcon,
-  MoreHorizontalIcon,
-  PauseIcon,
-  PlayIcon,
-  RefreshCwIcon,
-  SquareIcon,
-} from "lucide-react"
+import type { ColumnDef } from "@tanstack/react-table"
+import { DownloadIcon, PauseIcon, PlayIcon, RefreshCwIcon, SquareIcon } from "lucide-react"
 import { toast } from "sonner"
 
 import { CreateStackButton } from "#/components/stacks/create-stack-dialog"
 import { StatusBadge } from "#/components/stacks/status-badge"
 import { Button } from "#/components/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "#/components/ui/dropdown-menu"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "#/components/ui/table"
+import { DataTable, SortableHeader } from "#/components/ui/data-table"
+import { Tooltip, TooltipContent, TooltipTrigger } from "#/components/ui/tooltip"
 import { listStacks, stackDown, stackPull, stackRestart, stackStop, stackUp } from "#/lib/functions"
 import { ensureSession } from "#/lib/functions/auth"
+import type { Stack } from "#/lib/functions/stacks"
 
 export const Route = createFileRoute("/")({
   async beforeLoad({ context: { queryClient }, location }) {
@@ -97,31 +80,58 @@ function StackActions({ name }: { name: string }) {
     restartMutation.isPending ||
     pullMutation.isPending
 
+  const actions = [
+    { label: "Pull", icon: DownloadIcon, onClick: () => pullMutation.mutate() },
+    { label: "Restart", icon: RefreshCwIcon, onClick: () => restartMutation.mutate() },
+    { label: "Stop", icon: PauseIcon, onClick: () => stopMutation.mutate() },
+    { label: "Down", icon: SquareIcon, onClick: () => downMutation.mutate() },
+    { label: "Up", icon: PlayIcon, onClick: () => upMutation.mutate() },
+  ]
+
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger render={<Button variant="ghost" size="icon" className="size-8" />}>
-        <MoreHorizontalIcon />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => upMutation.mutate()} disabled={anyPending}>
-          <PlayIcon /> Up
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => stopMutation.mutate()} disabled={anyPending}>
-          <PauseIcon /> Stop
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => downMutation.mutate()} disabled={anyPending}>
-          <SquareIcon /> Down
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => restartMutation.mutate()} disabled={anyPending}>
-          <RefreshCwIcon /> Restart
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => pullMutation.mutate()} disabled={anyPending}>
-          <DownloadIcon /> Pull
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <div className="flex items-center justify-end gap-1">
+      {actions.map(({ label, icon: Icon, onClick }) => (
+        <Tooltip key={label}>
+          <TooltipTrigger
+            render={
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-8"
+                onClick={onClick}
+                disabled={anyPending}
+              >
+                <Icon className="size-4" />
+              </Button>
+            }
+          />
+          <TooltipContent>{label}</TooltipContent>
+        </Tooltip>
+      ))}
+    </div>
   )
 }
+
+const columns: ColumnDef<Stack>[] = [
+  {
+    accessorKey: "name",
+    header: ({ column }) => <SortableHeader column={column} label="Name" />,
+    cell: ({ row }) => <span className="font-medium">{row.getValue("name")}</span>,
+  },
+  {
+    accessorKey: "status",
+    header: ({ column }) => <SortableHeader column={column} label="Status" />,
+    cell: ({ row }) => <StatusBadge status={row.getValue("status")} />,
+  },
+  {
+    id: "actions",
+    cell: ({ row }) => (
+      <div className="text-right" onClick={(e) => e.stopPropagation()}>
+        <StackActions name={row.original.name} />
+      </div>
+    ),
+  },
+]
 
 function Home() {
   const navigate = useNavigate()
@@ -138,59 +148,14 @@ function Home() {
           <CreateStackButton />
         </div>
       </div>
-
-      <Table className="text-base">
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-3/4">Name</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead />
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {stacksQuery.isLoading && (
-            <TableRow>
-              <TableCell colSpan={3} className="text-center text-muted-foreground">
-                Loading...
-              </TableCell>
-            </TableRow>
-          )}
-          {stacksQuery.error && (
-            <TableRow>
-              <TableCell colSpan={3} className="text-center text-destructive">
-                {stacksQuery.error.message}
-              </TableCell>
-            </TableRow>
-          )}
-          {stacksQuery.data?.map(({ name, status }) => (
-            <TableRow
-              key={name}
-              className="cursor-pointer"
-              onClick={() =>
-                navigate({
-                  to: "/stacks/$name",
-                  params: { name },
-                })
-              }
-            >
-              <TableCell className="font-medium">{name}</TableCell>
-              <TableCell>
-                <StatusBadge status={status} />
-              </TableCell>
-              <TableCell className="w-px" onClick={(e) => e.stopPropagation()}>
-                <StackActions name={name} />
-              </TableCell>
-            </TableRow>
-          ))}
-          {stacksQuery.data?.length === 0 && (
-            <TableRow>
-              <TableCell colSpan={3} className="text-center text-muted-foreground">
-                No stacks found
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+      <div className="mx-auto md:max-w-4xl">
+        <DataTable
+          columns={columns}
+          data={stacksQuery.data ?? []}
+          isLoading={stacksQuery.isLoading}
+          onRowClick={({ name }) => navigate({ to: "/stacks/$name", params: { name } })}
+        />
+      </div>
     </>
   )
 }

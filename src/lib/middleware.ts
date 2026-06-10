@@ -34,7 +34,9 @@ export const apiKeyMiddleware = createMiddleware().server(async ({ request, next
 export const loggingFnMiddleware = createMiddleware({
   type: "function",
 }).server(async ({ next, serverFnMeta, method }) => {
-  console.log(`${method} ${serverFnMeta.name}`)
+  if (serverFnMeta.name !== "getSettings") {
+    console.log(`${method} ${serverFnMeta.name}`)
+  }
   return next()
 })
 

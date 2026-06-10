@@ -1,11 +1,18 @@
 import { useQuery } from "@tanstack/react-query"
 import { createFileRoute, redirect } from "@tanstack/react-router"
-import type { ColumnDef } from "@tanstack/react-table"
+import type { ColumnDef, Table } from "@tanstack/react-table"
 
 import { ImageActions } from "#/components/images/image-actions"
 import { PruneImagesButton } from "#/components/images/prune-images-button"
 import { Badge } from "#/components/ui/badge"
 import { DataTable, SortableHeader } from "#/components/ui/data-table"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "#/components/ui/select"
 import { Spinner } from "#/components/ui/spinner"
 import type { ImageInfo, StaleStatus } from "#/lib/docker"
 import { checkImagesStale, listImages } from "#/lib/functions"
@@ -50,6 +57,41 @@ function StaleCell({
       </Badge>
     )
   return <span className="text-sm text-muted-foreground">—</span>
+}
+
+function StatusFilter({ table, disabled }: { table: Table<ImageInfo>; disabled: boolean }) {
+  const column = table.getColumn("status")
+  const current = (column?.getFilterValue() as StaleStatus | undefined) ?? "all"
+
+  const items = [
+    { label: "All", value: "all" },
+    { label: "Outdated", value: "outdated" },
+    { label: "Up to date", value: "up-to-date" },
+    { label: "Unknown", value: "unknown" },
+  ]
+
+  return (
+    <div className="mb-4">
+      <label className="text-sm text-muted-foreground">Status</label>
+      <Select
+        value={current}
+        onValueChange={(v) => column?.setFilterValue(v === "all" ? undefined : v)}
+        disabled={disabled}
+        items={items}
+      >
+        <SelectTrigger size="sm" className="w-30">
+          <SelectValue placeholder="Filter status" />
+        </SelectTrigger>
+        <SelectContent>
+          {items.map((item) => (
+            <SelectItem key={item.value} value={item.value}>
+              {item.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  )
 }
 
 function ImagesPage() {
@@ -107,7 +149,8 @@ function ImagesPage() {
     },
     {
       id: "status",
-      header: "Status",
+      accessorFn: (row) => staleQuery.data?.[row.id] ?? null,
+      header: ({ column }) => <SortableHeader column={column} label="Status" />,
       cell: ({ row }) => (
         <StaleCell
           imageId={row.original.id}
@@ -132,11 +175,14 @@ function ImagesPage() {
         <h1 className="text-3xl font-bold">Images</h1>
         <PruneImagesButton />
       </div>
-      <div className="container mx-auto">
+      <div className="mx-auto md:max-w-4xl">
         <DataTable
           columns={columns}
           data={imagesQuery.data ?? []}
           isLoading={imagesQuery.isLoading}
+          toolbar={(table: Table<ImageInfo>) => (
+            <StatusFilter table={table} disabled={staleQuery.isLoading} />
+          )}
         />
       </div>
     </>

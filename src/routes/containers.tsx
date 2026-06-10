@@ -116,7 +116,7 @@ function ContainersPage() {
         <h1 className="text-3xl font-bold">Containers</h1>
         <PruneContainersButton />
       </div>
-      <div className="container mx-auto">
+      <div className="mx-auto md:max-w-4xl">
         <DataTable columns={columns} data={query.data ?? []} isLoading={query.isLoading} />
       </div>
     </>
