@@ -27,7 +27,7 @@ function processStream(
   let buf = ''
   return (async () => {
     try {
-      // eslint-disable-next-line
+      // oxlint-disable-next-line typescript/no-unnecessary-condition
       while (true) {
         const { done, value } = await reader.read()
         if (done) break
@@ -136,7 +136,7 @@ const hooks = defineHooks({
         return
       }
 
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+      // oxlint-disable-next-line typescript/no-unnecessary-condition
       if (msg.type === 'close') {
         const session = sessions.get(peer.id)
         if (session) {

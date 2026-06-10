@@ -1,32 +1,34 @@
 {
-  "language_servers": ["!biome", "!typescript-language-server", "..."],
+  "language_servers": ["!biome", "!eslint", "..."],
   "languages": {
     "JavaScript": {
       "formatter": "prettier",
       "code_actions_on_format": {
         "source.removeUnusedImports": true,
-        "source.fixAll.eslint": true,
-        "sourceAll.organizeImports": true
-      }
+        "source.fixAll.oxc": true,
+        "sourceAll.organizeImports": true,
+      },
     },
     "TypeScript": {
+      "language_servers": ["tsgo", "oxlint"],
       "formatter": "prettier",
       "code_actions_on_format": {
         "source.removeUnusedImports": true,
-        "source.fixAll.eslint": true,
-        "sourceAll.organizeImports": true
-      }
+        "source.fixAll.oxc": true,
+        "sourceAll.organizeImports": true,
+      },
     },
     "TSX": {
+      "language_servers": ["tsgo", "oxlint"],
       "formatter": "prettier",
       "code_actions_on_format": {
         "source.removeUnusedImports": true,
-        "source.fixAll.eslint": true,
-        "sourceAll.organizeImports": true
-      }
+        "source.fixAll.oxc": true,
+        "sourceAll.organizeImports": true,
+      },
     },
     "JSON": { "formatter": "prettier" },
     "JSONC": { "formatter": "prettier" },
-    "CSS": { "formatter": "prettier" }
-  }
+    "CSS": { "formatter": "prettier" },
+  },
 }

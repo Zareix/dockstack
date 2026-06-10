@@ -63,7 +63,7 @@ async function* spawnCompose(
     const decoder = new TextDecoder()
     let buf = ''
     try {
-      // eslint-disable-next-line
+      // oxlint-disable-next-line
       while (true) {
         const { done: streamDone, value } = await reader.read()
         if (streamDone) break

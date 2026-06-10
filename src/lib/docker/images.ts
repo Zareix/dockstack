@@ -25,9 +25,9 @@ export const imagePrune = async () => {
     filters: '{"dangling":["false"]}',
   })
   return {
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    // oxlint-disable-next-line typescript/no-unnecessary-condition
     prunedImages: res.ImagesDeleted ?? [],
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    // oxlint-disable-next-line typescript/no-unnecessary-condition
     spaceReclaimed: res.SpaceReclaimed ?? 0,
   }
 }

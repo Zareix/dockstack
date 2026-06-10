@@ -38,7 +38,6 @@ export function StackActionDialog({ title, action, onDone, children }: Props) {
     const iter = (await actionRef.current())[Symbol.asyncIterator]()
 
     try {
-      // eslint-disable-next-line
       while (true) {
         const result = await Promise.race([
           iter.next(),

@@ -3,7 +3,7 @@ import { createFileRoute, redirect } from '@tanstack/react-router'
 
 import { Auth } from '#/components/auth/auth'
 
-const validAuthPathSegments = new Set([...Object.values(viewPaths.auth)])
+const validAuthPathSegments = new Set(Object.values(viewPaths.auth))
 
 export const Route = createFileRoute('/auth/$path')({
   beforeLoad({ params: { path } }) {

@@ -4,7 +4,7 @@ import { createFileRoute, notFound, redirect } from '@tanstack/react-router'
 import { Settings } from '#/components/auth/settings/settings'
 import { ensureSession } from '#/lib/functions/auth'
 
-const validSettingsPaths = [...Object.values(viewPaths.settings)]
+const validSettingsPaths = Object.values(viewPaths.settings)
 
 export const Route = createFileRoute('/settings/$path')({
   async beforeLoad({ params: { path }, context: { queryClient }, location }) {

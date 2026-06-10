@@ -119,7 +119,7 @@ export function ContainerLogs({ stackName }: { stackName: string }) {
               a.timestamp.localeCompare(b.timestamp),
             ),
           )
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+          // oxlint-disable-next-line typescript/no-unnecessary-condition
         } else if (msg.type === 'end' || msg.type === 'error') {
           setStreaming(false)
           wsRef.current = null

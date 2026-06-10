@@ -41,17 +41,17 @@ function StaleCell({
   if (isLoading) return <Spinner className="size-3" />
   if (!staleData) return null
   const status = staleData[imageId]
-  if (status === 'unknown')
-    return <span className="text-muted-foreground text-sm">—</span>
   if (status === 'outdated') return <Badge variant="warning">Outdated</Badge>
-  return (
-    <Badge
-      variant="outline"
-      className="border-green-500 text-green-600 dark:text-green-400"
-    >
-      Up to date
-    </Badge>
-  )
+  if (status === 'up-to-date')
+    return (
+      <Badge
+        variant="outline"
+        className="border-green-500 text-green-600 dark:text-green-400"
+      >
+        Up to date
+      </Badge>
+    )
+  return <span className="text-muted-foreground text-sm">—</span>
 }
 
 function ImagesPage() {
