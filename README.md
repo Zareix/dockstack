@@ -28,14 +28,9 @@ services:
       - dockstack-db:/app/data # sqlite database for auth
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
-      - BETTER_AUTH_SECRET=changeme
+      - BETTER_AUTH_SECRET=changeme # generate with `openssl rand -hex 32`
       - BETTER_AUTH_URL=https://dockstack.example.com
       - ADMIN_EMAIL=you@example.com # default password is 'password'
-      # optional for OIDC/OAuth login
-      - OAUTH_PROVIDER_ID=my-provider
-      - OAUTH_CLIENT_ID=...
-      - OAUTH_CLIENT_SECRET=...
-      - OAUTH_DISCOVERY_URL=https://auth.example.com/.well-known/openid-configuration
 
 volumes:
   dockstack-db:
