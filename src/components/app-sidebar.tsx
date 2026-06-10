@@ -1,7 +1,7 @@
 import { useAuth, useSession } from "@better-auth-ui/react"
 import { Link, useLocation } from "@tanstack/react-router"
 import type { ValidateLinkOptions } from "@tanstack/react-router"
-import { ContainerIcon, ImagesIcon, LayersIcon } from "lucide-react"
+import { ContainerIcon, DatabaseIcon, ImagesIcon, LayersIcon } from "lucide-react"
 
 import { UserButton } from "#/components/auth/user/user-button"
 import { useSettings } from "#/hooks/use-settings"
@@ -37,6 +37,11 @@ const LINKS: Array<{
     label: "Images",
     linkOptions: { to: "/images" },
     icon: <ImagesIcon className="size-5" />,
+  },
+  {
+    label: "Volumes",
+    linkOptions: { to: "/volumes" },
+    icon: <DatabaseIcon className="size-5" />,
   },
 ] as const
 

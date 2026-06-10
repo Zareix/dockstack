@@ -4,7 +4,7 @@ import type { ColumnDef, Table } from "@tanstack/react-table"
 
 import { ImageActions } from "#/components/images/image-actions"
 import { PruneImagesButton } from "#/components/images/prune-images-button"
-import { Badge } from "#/components/ui/badge"
+import { StatusBadge } from "#/components/status-badge.tsx"
 import { DataTable, SortableHeader } from "#/components/ui/data-table"
 import {
   Select,
@@ -49,13 +49,7 @@ function StaleCell({
   if (isLoading) return <Spinner className="size-3" />
   if (!staleData) return null
   const status = staleData[imageId]
-  if (status === "outdated") return <Badge variant="warning">Outdated</Badge>
-  if (status === "up-to-date")
-    return (
-      <Badge variant="outline" className="border-green-500 text-green-600 dark:text-green-400">
-        Up to date
-      </Badge>
-    )
+  if (status === "outdated" || status === "up-to-date") return <StatusBadge status={status} />
   return <span className="text-sm text-muted-foreground">—</span>
 }
 

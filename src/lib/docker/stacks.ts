@@ -14,7 +14,7 @@ export type RedeployResult = {
   error?: string
 }
 
-export const findComposePath = async (stackName: string): Promise<string> => {
+export const findComposePath = async (stackName: string) => {
   const dir = join(env.STACKS_DIR, stackName)
   for (const f of COMPOSE_FILENAMES) {
     const path = join(dir, f)
@@ -23,7 +23,7 @@ export const findComposePath = async (stackName: string): Promise<string> => {
   throw new Error(`No compose file found in ${stackName}`)
 }
 
-export const listStacks = async (): Promise<string[]> => {
+export const listStacks = async () => {
   const entries = await readdir(env.STACKS_DIR)
   return (
     await Promise.all(
@@ -41,7 +41,7 @@ export const stackUp = async (stackName: string) => {
   await Bun.$`docker compose -f ${composePath} up -d --remove-orphans`
 }
 
-async function* spawnCompose(composePath: string, args: string[]): AsyncGenerator<string> {
+async function* spawnCompose(composePath: string, args: string[]) {
   const proc = Bun.spawn(["docker", "compose", "--progress", "plain", "-f", composePath, ...args], {
     stdout: "pipe",
     stderr: "pipe",
@@ -98,23 +98,23 @@ async function* spawnCompose(composePath: string, args: string[]): AsyncGenerato
   }
 }
 
-export async function* streamStackUp(stackName: string): AsyncGenerator<string> {
+export async function* streamStackUp(stackName: string) {
   yield* spawnCompose(await findComposePath(stackName), ["up", "-d", "--remove-orphans"])
 }
 
-export async function* streamStackStop(stackName: string): AsyncGenerator<string> {
+export async function* streamStackStop(stackName: string) {
   yield* spawnCompose(await findComposePath(stackName), ["stop"])
 }
 
-export async function* streamStackDown(stackName: string): AsyncGenerator<string> {
+export async function* streamStackDown(stackName: string) {
   yield* spawnCompose(await findComposePath(stackName), ["down"])
 }
 
-export async function* streamStackRestart(stackName: string): AsyncGenerator<string> {
+export async function* streamStackRestart(stackName: string) {
   yield* spawnCompose(await findComposePath(stackName), ["restart"])
 }
 
-export async function* streamStackPull(stackName: string): AsyncGenerator<string> {
+export async function* streamStackPull(stackName: string) {
   yield* spawnCompose(await findComposePath(stackName), ["pull"])
 }
 

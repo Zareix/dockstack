@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as VolumesRouteImport } from './routes/volumes'
 import { Route as ImagesRouteImport } from './routes/images'
 import { Route as ContainersRouteImport } from './routes/containers'
 import { Route as IndexRouteImport } from './routes/index'
@@ -22,6 +23,11 @@ import { Route as ApiWsExecRouteImport } from './routes/api/ws/exec'
 import { Route as ApiStacksRedeployRouteImport } from './routes/api/stacks/redeploy'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
+const VolumesRoute = VolumesRouteImport.update({
+  id: '/volumes',
+  path: '/volumes',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ImagesRoute = ImagesRouteImport.update({
   id: '/images',
   path: '/images',
@@ -87,6 +93,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/containers': typeof ContainersRoute
   '/images': typeof ImagesRoute
+  '/volumes': typeof VolumesRoute
   '/api/health': typeof ApiHealthRoute
   '/auth/$path': typeof AuthPathRoute
   '/settings/$path': typeof SettingsPathRoute
@@ -101,6 +108,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/containers': typeof ContainersRoute
   '/images': typeof ImagesRoute
+  '/volumes': typeof VolumesRoute
   '/api/health': typeof ApiHealthRoute
   '/auth/$path': typeof AuthPathRoute
   '/settings/$path': typeof SettingsPathRoute
@@ -116,6 +124,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/containers': typeof ContainersRoute
   '/images': typeof ImagesRoute
+  '/volumes': typeof VolumesRoute
   '/api/health': typeof ApiHealthRoute
   '/auth/$path': typeof AuthPathRoute
   '/settings/$path': typeof SettingsPathRoute
@@ -132,6 +141,7 @@ export interface FileRouteTypes {
     | '/'
     | '/containers'
     | '/images'
+    | '/volumes'
     | '/api/health'
     | '/auth/$path'
     | '/settings/$path'
@@ -146,6 +156,7 @@ export interface FileRouteTypes {
     | '/'
     | '/containers'
     | '/images'
+    | '/volumes'
     | '/api/health'
     | '/auth/$path'
     | '/settings/$path'
@@ -160,6 +171,7 @@ export interface FileRouteTypes {
     | '/'
     | '/containers'
     | '/images'
+    | '/volumes'
     | '/api/health'
     | '/auth/$path'
     | '/settings/$path'
@@ -175,6 +187,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ContainersRoute: typeof ContainersRoute
   ImagesRoute: typeof ImagesRoute
+  VolumesRoute: typeof VolumesRoute
   ApiHealthRoute: typeof ApiHealthRoute
   AuthPathRoute: typeof AuthPathRoute
   SettingsPathRoute: typeof SettingsPathRoute
@@ -188,6 +201,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/volumes': {
+      id: '/volumes'
+      path: '/volumes'
+      fullPath: '/volumes'
+      preLoaderRoute: typeof VolumesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/images': {
       id: '/images'
       path: '/images'
@@ -279,6 +299,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ContainersRoute: ContainersRoute,
   ImagesRoute: ImagesRoute,
+  VolumesRoute: VolumesRoute,
   ApiHealthRoute: ApiHealthRoute,
   AuthPathRoute: AuthPathRoute,
   SettingsPathRoute: SettingsPathRoute,
