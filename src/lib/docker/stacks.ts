@@ -25,7 +25,6 @@ export type RedeployResult = {
 
 export const getDockerEnv = () => {
   const dockerEnv = { ...process.env }
-  delete dockerEnv.STACKS_DIR
   delete dockerEnv.BETTER_AUTH_URL
   delete dockerEnv.ADMIN_EMAIL
   delete dockerEnv.APP_TITLE

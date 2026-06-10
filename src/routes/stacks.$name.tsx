@@ -29,6 +29,7 @@ import {
   AlertDialogTrigger,
 } from "#/components/ui/alert-dialog"
 import { Button } from "#/components/ui/button"
+import { Spinner } from "#/components/ui/spinner.tsx"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/components/ui/tabs"
 import {
   getStackStatus,
@@ -42,7 +43,7 @@ import {
 import { ensureSession } from "#/lib/functions/auth"
 
 const tabSchema = z.object({
-  tab: z.enum(["services", "files", "logs", "terminal"]).default("services"),
+  tab: z.enum(["services", "files", "logs", "terminal"]).default("files"),
 })
 
 export const Route = createFileRoute("/stacks/$name")({
@@ -58,6 +59,7 @@ export const Route = createFileRoute("/stacks/$name")({
     }
     return { session }
   },
+  pendingComponent: () => <Spinner />,
   component: StackPage,
 })
 
@@ -186,24 +188,24 @@ function StackPage() {
         className="mt-4"
       >
         <TabsList>
-          <TabsTrigger value="services">Services</TabsTrigger>
           <TabsTrigger value="files">Files</TabsTrigger>
+          <TabsTrigger value="services">Services</TabsTrigger>
           <TabsTrigger value="logs">Logs</TabsTrigger>
           <TabsTrigger value="terminal">Terminal</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="services">
-          <StackServices stackName={name} />
-        </TabsContent>
         <TabsContent value="files">
           <ClientOnly>
             <StackFiles stackName={name} />
           </ClientOnly>
         </TabsContent>
+        <TabsContent value="services">
+          <StackServices stackName={name} />
+        </TabsContent>
         <TabsContent value="logs">
           <ContainerLogs stackName={name} />
         </TabsContent>
-        <TabsContent value="terminal" className="flex h-[800px] flex-col">
+        <TabsContent value="terminal" className="flex h-200 flex-col">
           <ClientOnly>
             <StackTerminal stackName={name} />
           </ClientOnly>

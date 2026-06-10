@@ -11,7 +11,7 @@ import {
   type Table as TanstackTable,
   useReactTable,
 } from "@tanstack/react-table"
-import { ArrowDown, ArrowUp } from "lucide-react"
+import { ArrowDown, ArrowUp, FilterIcon } from "lucide-react"
 import { useState } from "react"
 
 import { Button } from "#/components/ui/button"
@@ -30,6 +30,7 @@ import {
   TableHeader,
   TableRow,
 } from "#/components/ui/table"
+import { cn } from "#/lib/utils.ts"
 
 export function SortableHeader<TData, TValue>({
   column,
@@ -71,7 +72,19 @@ export function FilterableHeader<TData>({
       disabled={disabled}
       items={items}
     >
-      <SelectTrigger size="sm" className="w-28 border-none shadow-none">
+      <SelectTrigger
+        size="sm"
+        className="w-28 border-none bg-transparent! shadow-none"
+        icon={
+          <FilterIcon
+            className={cn(
+              "pointer-events-none size-4 text-muted-foreground",
+              disabled && "opacity-50",
+              current !== "all" && "fill-primary text-primary",
+            )}
+          />
+        }
+      >
         <SelectValue />
       </SelectTrigger>
       <SelectContent>

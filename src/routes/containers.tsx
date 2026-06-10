@@ -1,13 +1,8 @@
 import { useQuery } from "@tanstack/react-query"
-import { Link, createFileRoute, redirect } from "@tanstack/react-router"
-import type { ColumnDef } from "@tanstack/react-table"
+import { createFileRoute, redirect } from "@tanstack/react-router"
 
-import { ContainerActions } from "#/components/containers/container-actions"
 import { PruneContainersButton } from "#/components/containers/prune-containers-button"
 import { ContainersTable } from "#/components/containers/table.tsx"
-import { StatusBadge } from "#/components/stacks/status-badge"
-import { DataTable, FilterableHeader, SortableHeader } from "#/components/ui/data-table"
-import type { ContainerInfo } from "#/lib/docker"
 import { listAllContainers } from "#/lib/functions"
 import { ensureSession } from "#/lib/functions/auth"
 

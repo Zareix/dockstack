@@ -11,6 +11,8 @@ type ExecSession = {
   exec: Docker.Exec
 }
 
+const AUTHORIZED_SHELLS = ["/bin/bash", "/bin/sh", "/bin/zsh", "/bin/fish"]
+
 const sessions = new Map<string, ExecSession>()
 
 function startExecHijack(execId: string): Promise<{ socket: net.Socket; remaining: Buffer }> {
@@ -90,6 +92,7 @@ const hooks = defineHooks({
         const cols = msg.cols ?? 80
         const rows = msg.rows ?? 24
         const shell = msg.shell ?? "/bin/sh"
+        if (!AUTHORIZED_SHELLS.includes(shell)) throw new Error("Shell not authorized")
 
         try {
           const container = dockerClient.getContainer(containerId)

@@ -1,5 +1,5 @@
 import { Select as SelectPrimitive } from "@base-ui/react/select"
-import { ChevronDownIcon, CheckIcon, ChevronUpIcon } from "lucide-react"
+import { ChevronDownIcon, CheckIcon, ChevronUpIcon, type LucideIcon } from "lucide-react"
 import * as React from "react"
 
 import { cn } from "#/lib/utils.ts"
@@ -30,10 +30,15 @@ function SelectTrigger({
   className,
   size = "default",
   children,
+  icon,
   ...props
 }: SelectPrimitive.Trigger.Props & {
   size?: "sm" | "default"
+  icon?: React.ReactElement
 }) {
+  const Icon = icon ?? (
+    <ChevronDownIcon className="pointer-events-none size-4 text-muted-foreground" />
+  )
   return (
     <SelectPrimitive.Trigger
       data-slot="select-trigger"
@@ -45,9 +50,7 @@ function SelectTrigger({
       {...props}
     >
       {children}
-      <SelectPrimitive.Icon
-        render={<ChevronDownIcon className="pointer-events-none size-4 text-muted-foreground" />}
-      />
+      <SelectPrimitive.Icon render={Icon} />
     </SelectPrimitive.Trigger>
   )
 }
