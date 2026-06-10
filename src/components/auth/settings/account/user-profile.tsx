@@ -1,23 +1,24 @@
-'use client'
+"use client"
 
-import { parseAdditionalFieldValue } from '@better-auth-ui/core'
-import type { AdditionalFieldValue } from '@better-auth-ui/core'
-import { useAuth, useSession, useUpdateUser } from '@better-auth-ui/react'
-import type { UsernameAuthClient } from '@better-auth-ui/react'
-import { useState } from 'react'
-import type { SyntheticEvent } from 'react'
-import { toast } from 'sonner'
+import { parseAdditionalFieldValue } from "@better-auth-ui/core"
+import type { AdditionalFieldValue } from "@better-auth-ui/core"
+import { useAuth, useSession, useUpdateUser } from "@better-auth-ui/react"
+import type { UsernameAuthClient } from "@better-auth-ui/react"
+import { useState } from "react"
+import type { SyntheticEvent } from "react"
+import { toast } from "sonner"
 
-import { Button } from '#/components/ui/button.tsx'
-import { Card, CardContent, CardFooter } from '#/components/ui/card.tsx'
-import { Field, FieldError } from '#/components/ui/field.tsx'
-import { Input } from '#/components/ui/input.tsx'
-import { Label } from '#/components/ui/label.tsx'
-import { Skeleton } from '#/components/ui/skeleton.tsx'
-import { Spinner } from '#/components/ui/spinner.tsx'
-import { cn } from '#/lib/utils.ts'
-import { AdditionalField } from '../../additional-field'
-import { ChangeAvatar } from './change-avatar'
+import { Button } from "#/components/ui/button.tsx"
+import { Card, CardContent, CardFooter } from "#/components/ui/card.tsx"
+import { Field, FieldError } from "#/components/ui/field.tsx"
+import { Input } from "#/components/ui/input.tsx"
+import { Label } from "#/components/ui/label.tsx"
+import { Skeleton } from "#/components/ui/skeleton.tsx"
+import { Spinner } from "#/components/ui/spinner.tsx"
+import { cn } from "#/lib/utils.ts"
+
+import { AdditionalField } from "../../additional-field"
+import { ChangeAvatar } from "./change-avatar"
 
 export type UserProfileProps = {
   className?: string
@@ -45,16 +46,13 @@ export function UserProfile({ className }: UserProfileProps) {
     e.preventDefault()
 
     const formData = new FormData(e.currentTarget)
-    const name = formData.get('name') as string
+    const name = formData.get("name") as string
 
     const additionalFieldValues: Record<string, unknown> = {}
 
     for (const field of additionalFields ?? []) {
       if (field.profile === false || field.readOnly) continue
-      const value = parseAdditionalFieldValue(
-        field,
-        formData.get(field.name) as string | null,
-      )
+      const value = parseAdditionalFieldValue(field, formData.get(field.name) as string | null)
 
       if (field.validate) {
         try {
@@ -79,9 +77,7 @@ export function UserProfile({ className }: UserProfileProps) {
 
   return (
     <div>
-      <h2 className="text-sm font-semibold mb-3">
-        {localization.settings.userProfile}
-      </h2>
+      <h2 className="mb-3 text-sm font-semibold">{localization.settings.userProfile}</h2>
 
       <form onSubmit={handleSubmit}>
         <Card className={cn(className)}>
@@ -130,7 +126,7 @@ export function UserProfile({ className }: UserProfileProps) {
               if (field.profile === false) return null
 
               if (!session) {
-                if (field.inputType === 'hidden') {
+                if (field.inputType === "hidden") {
                   return null
                 }
 
@@ -141,16 +137,12 @@ export function UserProfile({ className }: UserProfileProps) {
                 )
               }
 
-              const value = (session.user as Record<string, unknown>)[
-                field.name
-              ]
+              const value = (session.user as Record<string, unknown>)[field.name]
 
               // Re-mount when the session value loads so the field's
               // uncontrolled `defaultValue` reflects the latest data.
               const key = `${field.name}:${
-                value instanceof Date
-                  ? value.toISOString()
-                  : String(value ?? '')
+                value instanceof Date ? value.toISOString() : String(value ?? "")
               }`
 
               return (

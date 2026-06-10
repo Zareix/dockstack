@@ -1,29 +1,15 @@
-import {
-  useAuth,
-  useFetchOptions,
-  useRequestPasswordReset,
-} from '@better-auth-ui/react'
-import { useState } from 'react'
-import type { SyntheticEvent } from 'react'
-import { toast } from 'sonner'
+import { useAuth, useFetchOptions, useRequestPasswordReset } from "@better-auth-ui/react"
+import { useState } from "react"
+import type { SyntheticEvent } from "react"
+import { toast } from "sonner"
 
-import { Button } from '#/components/ui/button.tsx'
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '#/components/ui/card.tsx'
-import {
-  Field,
-  FieldDescription,
-  FieldError,
-  FieldGroup,
-} from '#/components/ui/field.tsx'
-import { Input } from '#/components/ui/input.tsx'
-import { Label } from '#/components/ui/label.tsx'
-import { Spinner } from '#/components/ui/spinner.tsx'
-import { cn } from '#/lib/utils.ts'
+import { Button } from "#/components/ui/button.tsx"
+import { Card, CardContent, CardHeader, CardTitle } from "#/components/ui/card.tsx"
+import { Field, FieldDescription, FieldError, FieldGroup } from "#/components/ui/field.tsx"
+import { Input } from "#/components/ui/input.tsx"
+import { Label } from "#/components/ui/label.tsx"
+import { Spinner } from "#/components/ui/spinner.tsx"
+import { cn } from "#/lib/utils.ts"
 
 export type ForgotPasswordProps = {
   className?: string
@@ -39,52 +25,37 @@ export type ForgotPasswordProps = {
  * @returns The forgot-password form UI as a JSX element
  */
 export function ForgotPassword({ className }: ForgotPasswordProps) {
-  const {
-    authClient,
-    baseURL,
-    basePaths,
-    localization,
-    plugins,
-    viewPaths,
-    Link,
-  } = useAuth()
+  const { authClient, baseURL, basePaths, localization, plugins, viewPaths, Link } = useAuth()
 
   const { fetchOptions, resetFetchOptions } = useFetchOptions()
 
-  const { mutate: requestPasswordReset, isPending } = useRequestPasswordReset(
-    authClient,
-    {
-      onError: () => {
-        resetFetchOptions()
-      },
-      onSuccess: () => toast.success(localization.auth.passwordResetEmailSent),
+  const { mutate: requestPasswordReset, isPending } = useRequestPasswordReset(authClient, {
+    onError: () => {
+      resetFetchOptions()
     },
-  )
+    onSuccess: () => toast.success(localization.auth.passwordResetEmailSent),
+  })
 
   function handleSubmit(e: SyntheticEvent<HTMLFormElement>) {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
     requestPasswordReset({
-      email: formData.get('email') as string,
+      email: formData.get("email") as string,
       redirectTo: `${baseURL}${basePaths.auth}/${viewPaths.auth.resetPassword}`,
       fetchOptions,
     })
   }
 
-  const Captcha = plugins.find(
-    (plugin) => plugin.captchaComponent,
-  )?.captchaComponent
+  const Captcha = plugins.find((plugin) => plugin.captchaComponent)?.captchaComponent
 
   const [fieldErrors, setFieldErrors] = useState<{
     email?: string
   }>({})
 
   return (
-    <Card className={cn('w-full max-w-sm', className)}>
+    <Card className={cn("w-full max-w-sm", className)}>
       <CardHeader>
-        <CardTitle className="text-xl font-semibold">
-          {localization.auth.forgotPassword}
-        </CardTitle>
+        <CardTitle className="text-xl font-semibold">{localization.auth.forgotPassword}</CardTitle>
       </CardHeader>
 
       <CardContent>
@@ -133,9 +104,9 @@ export function ForgotPassword({ className }: ForgotPasswordProps) {
           </FieldGroup>
         </form>
 
-        <div className="flex flex-col gap-3 items-center w-full mt-4">
+        <div className="mt-4 flex w-full flex-col items-center gap-3">
           <FieldDescription className="text-center">
-            {localization.auth.rememberYourPassword}{' '}
+            {localization.auth.rememberYourPassword}{" "}
             <Link
               href={`${basePaths.auth}/${viewPaths.auth.signIn}`}
               className="underline underline-offset-4"

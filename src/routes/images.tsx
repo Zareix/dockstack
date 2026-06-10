@@ -1,22 +1,23 @@
-import { useQuery } from '@tanstack/react-query'
-import { createFileRoute, redirect } from '@tanstack/react-router'
-import type { ImageInfo, StaleStatus } from '#/lib/docker'
-import type { ColumnDef } from '@tanstack/react-table'
-import { ImageActions } from '#/components/images/image-actions'
-import { PruneImagesButton } from '#/components/images/prune-images-button'
-import { Badge } from '#/components/ui/badge'
-import { Spinner } from '#/components/ui/spinner'
-import { DataTable, SortableHeader } from '#/components/ui/data-table'
-import { checkImagesStale, listImages } from '#/lib/functions'
-import { ensureSession } from '#/lib/functions/auth'
+import { useQuery } from "@tanstack/react-query"
+import { createFileRoute, redirect } from "@tanstack/react-router"
+import type { ColumnDef } from "@tanstack/react-table"
 
-export const Route = createFileRoute('/images')({
+import { ImageActions } from "#/components/images/image-actions"
+import { PruneImagesButton } from "#/components/images/prune-images-button"
+import { Badge } from "#/components/ui/badge"
+import { DataTable, SortableHeader } from "#/components/ui/data-table"
+import { Spinner } from "#/components/ui/spinner"
+import type { ImageInfo, StaleStatus } from "#/lib/docker"
+import { checkImagesStale, listImages } from "#/lib/functions"
+import { ensureSession } from "#/lib/functions/auth"
+
+export const Route = createFileRoute("/images")({
   async beforeLoad({ context: { queryClient }, location }) {
     const session = await ensureSession(queryClient)()
     if (!session) {
       throw redirect({
-        to: '/auth/$path',
-        params: { path: 'sign-in' },
+        to: "/auth/$path",
+        params: { path: "sign-in" },
         search: { redirectTo: location.href },
       })
     }
@@ -41,27 +42,24 @@ function StaleCell({
   if (isLoading) return <Spinner className="size-3" />
   if (!staleData) return null
   const status = staleData[imageId]
-  if (status === 'outdated') return <Badge variant="warning">Outdated</Badge>
-  if (status === 'up-to-date')
+  if (status === "outdated") return <Badge variant="warning">Outdated</Badge>
+  if (status === "up-to-date")
     return (
-      <Badge
-        variant="outline"
-        className="border-green-500 text-green-600 dark:text-green-400"
-      >
+      <Badge variant="outline" className="border-green-500 text-green-600 dark:text-green-400">
         Up to date
       </Badge>
     )
-  return <span className="text-muted-foreground text-sm">—</span>
+  return <span className="text-sm text-muted-foreground">—</span>
 }
 
 function ImagesPage() {
   const imagesQuery = useQuery({
-    queryKey: ['images'],
+    queryKey: ["images"],
     queryFn: listImages,
   })
 
   const staleQuery = useQuery({
-    queryKey: ['images-stale'],
+    queryKey: ["images-stale"],
     queryFn: checkImagesStale,
     enabled: !!imagesQuery.data,
     staleTime: 60_000,
@@ -69,55 +67,47 @@ function ImagesPage() {
 
   const columns: ColumnDef<ImageInfo>[] = [
     {
-      accessorKey: 'tags',
+      accessorKey: "tags",
       header: ({ column }) => <SortableHeader column={column} label="Tag" />,
       cell: ({ row }) => {
-        const tags: string[] = row.getValue('tags')
+        const tags: string[] = row.getValue("tags")
         return (
-          <span className="font-mono text-sm">
-            {tags.length > 0 ? tags.join(', ') : '<none>'}
-          </span>
+          <span className="font-mono text-sm">{tags.length > 0 ? tags.join(", ") : "<none>"}</span>
         )
       },
       sortingFn: (a, b) => {
-        const tagA = a.original.tags[0] ?? ''
-        const tagB = b.original.tags[0] ?? ''
+        const tagA = a.original.tags[0] ?? ""
+        const tagB = b.original.tags[0] ?? ""
         return tagA.localeCompare(tagB)
       },
     },
     {
-      accessorKey: 'id',
+      accessorKey: "id",
       header: ({ column }) => <SortableHeader column={column} label="ID" />,
       cell: ({ row }) => (
-        <span className="font-mono text-sm text-muted-foreground">
-          {row.getValue('id')}
-        </span>
+        <span className="font-mono text-sm text-muted-foreground">{row.getValue("id")}</span>
       ),
     },
     {
-      accessorKey: 'size',
+      accessorKey: "size",
       header: ({ column }) => <SortableHeader column={column} label="Size" />,
-      cell: ({ row }) => (
-        <span className="text-sm">{formatSize(row.getValue('size'))}</span>
-      ),
+      cell: ({ row }) => <span className="text-sm">{formatSize(row.getValue("size"))}</span>,
     },
     {
-      accessorKey: 'created',
-      header: ({ column }) => (
-        <SortableHeader column={column} label="Created" />
-      ),
+      accessorKey: "created",
+      header: ({ column }) => <SortableHeader column={column} label="Created" />,
       cell: ({ row }) => (
         <span className="text-sm text-muted-foreground">
           {new Date(
             // @ts-ignore It's typed as a number, but the ts can't infer the actual value
-            row.getValue('created') * 1000,
+            row.getValue("created") * 1000,
           ).toLocaleDateString()}
         </span>
       ),
     },
     {
-      id: 'status',
-      header: 'Status',
+      id: "status",
+      header: "Status",
       cell: ({ row }) => (
         <StaleCell
           imageId={row.original.id}
@@ -127,7 +117,7 @@ function ImagesPage() {
       ),
     },
     {
-      id: 'actions',
+      id: "actions",
       cell: ({ row }) => (
         <div className="text-right">
           <ImageActions image={row.original} />
@@ -138,7 +128,7 @@ function ImagesPage() {
 
   return (
     <>
-      <div className="flex items-center justify-between mb-8">
+      <div className="mb-8 flex items-center justify-between">
         <h1 className="text-3xl font-bold">Images</h1>
         <PruneImagesButton />
       </div>

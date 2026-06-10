@@ -16,3 +16,8 @@ db.sqlite*
 .github
 .claude
 .cta.json
+.ox*rc.json
+components.json
+README.md
+renovate.json
+.cta.json

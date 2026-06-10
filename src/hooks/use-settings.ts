@@ -1,6 +1,6 @@
-import { useRouteContext } from '@tanstack/react-router'
+import { useRouteContext } from "@tanstack/react-router"
 
 export const useSettings = () => {
-  const settingsQuery = useRouteContext({ from: '__root__' })
+  const settingsQuery = useRouteContext({ from: "__root__" })
   return settingsQuery.appSettings
 }

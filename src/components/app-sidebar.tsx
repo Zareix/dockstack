@@ -1,8 +1,10 @@
-import { Link, useLocation } from '@tanstack/react-router'
-import { ContainerIcon, ImagesIcon, LayersIcon } from 'lucide-react'
-import { useAuth, useSession } from '@better-auth-ui/react'
-import type { ValidateLinkOptions } from '@tanstack/react-router'
-import { UserButton } from '#/components/auth/user/user-button'
+import { useAuth, useSession } from "@better-auth-ui/react"
+import { Link, useLocation } from "@tanstack/react-router"
+import type { ValidateLinkOptions } from "@tanstack/react-router"
+import { ContainerIcon, ImagesIcon, LayersIcon } from "lucide-react"
+
+import { UserButton } from "#/components/auth/user/user-button"
+import { useSettings } from "#/hooks/use-settings"
 import {
   Sidebar,
   SidebarContent,
@@ -14,8 +16,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from '@/components/ui/sidebar'
-import { useSettings } from '#/hooks/use-settings'
+} from "@/components/ui/sidebar"
 
 const LINKS: Array<{
   label: string
@@ -23,18 +24,18 @@ const LINKS: Array<{
   icon: React.ReactNode
 }> = [
   {
-    label: 'Stacks',
-    linkOptions: { to: '/' },
+    label: "Stacks",
+    linkOptions: { to: "/" },
     icon: <LayersIcon className="size-5" />,
   },
   {
-    label: 'Containers',
-    linkOptions: { to: '/containers' },
+    label: "Containers",
+    linkOptions: { to: "/containers" },
     icon: <ContainerIcon className="size-5" />,
   },
   {
-    label: 'Images',
-    linkOptions: { to: '/images' },
+    label: "Images",
+    linkOptions: { to: "/images" },
     icon: <ImagesIcon className="size-5" />,
   },
 ] as const
@@ -58,7 +59,7 @@ export function AppSidebar() {
         <Link
           to="/"
           onClick={toggleSidebarOnMobile}
-          className="flex items-center gap-2 font-semibold text-xl"
+          className="flex items-center gap-2 text-xl font-semibold"
         >
           {appTitle}
         </Link>
@@ -70,12 +71,7 @@ export function AppSidebar() {
               {LINKS.map((l, index) => (
                 <SidebarMenuItem key={index}>
                   <SidebarMenuButton
-                    render={
-                      <Link
-                        {...l.linkOptions}
-                        onClick={toggleSidebarOnMobile}
-                      />
-                    }
+                    render={<Link {...l.linkOptions} onClick={toggleSidebarOnMobile} />}
                     isActive={l.linkOptions.to === pathname}
                   >
                     {l.icon}

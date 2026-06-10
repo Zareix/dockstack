@@ -1,18 +1,16 @@
-import { AuthProvider as AuthProviderPrimitive } from '@better-auth-ui/react'
-import type { AuthProviderProps } from '@better-auth-ui/react'
-import type { ComponentType, PropsWithChildren, ReactNode } from 'react'
+import { AuthProvider as AuthProviderPrimitive } from "@better-auth-ui/react"
+import type { AuthProviderProps } from "@better-auth-ui/react"
+import type { ComponentType, PropsWithChildren, ReactNode } from "react"
 
-import { ErrorToaster } from './error-toaster'
+import { ErrorToaster } from "./error-toaster"
 
-declare module '@better-auth-ui/core' {
+declare module "@better-auth-ui/core" {
   interface AuthConfig {
     /**
      * React component used to render internal navigation links.
      * Typically TanStack Router's `Link` or Next.js's `Link`.
      */
-    Link: ComponentType<
-      PropsWithChildren<{ className?: string; href: string; to?: string }>
-    >
+    Link: ComponentType<PropsWithChildren<{ className?: string; href: string; to?: string }>>
   }
 
   /** Widen `AdditionalField.label` to `ReactNode` in the shadcn package. */

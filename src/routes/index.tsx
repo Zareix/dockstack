@@ -1,5 +1,5 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router'
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router"
 import {
   DownloadIcon,
   MoreHorizontalIcon,
@@ -7,17 +7,18 @@ import {
   PlayIcon,
   RefreshCwIcon,
   SquareIcon,
-} from 'lucide-react'
-import { toast } from 'sonner'
-import { CreateStackButton } from '#/components/stacks/create-stack-dialog'
-import { StatusBadge } from '#/components/stacks/status-badge'
-import { Button } from '#/components/ui/button'
+} from "lucide-react"
+import { toast } from "sonner"
+
+import { CreateStackButton } from "#/components/stacks/create-stack-dialog"
+import { StatusBadge } from "#/components/stacks/status-badge"
+import { Button } from "#/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '#/components/ui/dropdown-menu'
+} from "#/components/ui/dropdown-menu"
 import {
   Table,
   TableBody,
@@ -25,24 +26,17 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '#/components/ui/table'
-import {
-  listStacks,
-  stackDown,
-  stackPull,
-  stackRestart,
-  stackStop,
-  stackUp,
-} from '#/lib/functions'
-import { ensureSession } from '#/lib/functions/auth'
+} from "#/components/ui/table"
+import { listStacks, stackDown, stackPull, stackRestart, stackStop, stackUp } from "#/lib/functions"
+import { ensureSession } from "#/lib/functions/auth"
 
-export const Route = createFileRoute('/')({
+export const Route = createFileRoute("/")({
   async beforeLoad({ context: { queryClient }, location }) {
     const session = await ensureSession(queryClient)()
     if (!session) {
       throw redirect({
-        to: '/auth/$path',
-        params: { path: 'sign-in' },
+        to: "/auth/$path",
+        params: { path: "sign-in" },
         search: { redirectTo: location.href },
       })
     }
@@ -53,8 +47,7 @@ export const Route = createFileRoute('/')({
 
 function StackActions({ name }: { name: string }) {
   const queryClient = useQueryClient()
-  const invalidate = () =>
-    queryClient.invalidateQueries({ queryKey: ['stacks'] })
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: ["stacks"] })
 
   const upMutation = useMutation({
     mutationFn: () => stackUp({ data: { stackName: name } }),
@@ -106,40 +99,23 @@ function StackActions({ name }: { name: string }) {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger
-        render={<Button variant="ghost" size="icon" className="size-8" />}
-      >
+      <DropdownMenuTrigger render={<Button variant="ghost" size="icon" className="size-8" />}>
         <MoreHorizontalIcon />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem
-          onClick={() => upMutation.mutate()}
-          disabled={anyPending}
-        >
+        <DropdownMenuItem onClick={() => upMutation.mutate()} disabled={anyPending}>
           <PlayIcon /> Up
         </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => stopMutation.mutate()}
-          disabled={anyPending}
-        >
+        <DropdownMenuItem onClick={() => stopMutation.mutate()} disabled={anyPending}>
           <PauseIcon /> Stop
         </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => downMutation.mutate()}
-          disabled={anyPending}
-        >
+        <DropdownMenuItem onClick={() => downMutation.mutate()} disabled={anyPending}>
           <SquareIcon /> Down
         </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => restartMutation.mutate()}
-          disabled={anyPending}
-        >
+        <DropdownMenuItem onClick={() => restartMutation.mutate()} disabled={anyPending}>
           <RefreshCwIcon /> Restart
         </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => pullMutation.mutate()}
-          disabled={anyPending}
-        >
+        <DropdownMenuItem onClick={() => pullMutation.mutate()} disabled={anyPending}>
           <DownloadIcon /> Pull
         </DropdownMenuItem>
       </DropdownMenuContent>
@@ -150,13 +126,13 @@ function StackActions({ name }: { name: string }) {
 function Home() {
   const navigate = useNavigate()
   const stacksQuery = useQuery({
-    queryKey: ['stacks'],
+    queryKey: ["stacks"],
     queryFn: listStacks,
   })
 
   return (
     <>
-      <div className="flex items-center mb-8">
+      <div className="mb-8 flex items-center">
         <h1 className="text-3xl font-bold">Stacks</h1>
         <div className="ml-auto flex items-center gap-2">
           <CreateStackButton />
@@ -174,10 +150,7 @@ function Home() {
         <TableBody>
           {stacksQuery.isLoading && (
             <TableRow>
-              <TableCell
-                colSpan={3}
-                className="text-center text-muted-foreground"
-              >
+              <TableCell colSpan={3} className="text-center text-muted-foreground">
                 Loading...
               </TableCell>
             </TableRow>
@@ -195,7 +168,7 @@ function Home() {
               className="cursor-pointer"
               onClick={() =>
                 navigate({
-                  to: '/stacks/$name',
+                  to: "/stacks/$name",
                   params: { name },
                 })
               }
@@ -211,10 +184,7 @@ function Home() {
           ))}
           {stacksQuery.data?.length === 0 && (
             <TableRow>
-              <TableCell
-                colSpan={3}
-                className="text-center text-muted-foreground"
-              >
+              <TableCell colSpan={3} className="text-center text-muted-foreground">
                 No stacks found
               </TableCell>
             </TableRow>

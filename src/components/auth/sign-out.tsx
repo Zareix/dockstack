@@ -1,9 +1,10 @@
-'use client'
+"use client"
 
-import { useAuth, useSignOut } from '@better-auth-ui/react'
-import { useEffect, useRef } from 'react'
-import { Spinner } from '#/components/ui/spinner.tsx'
-import { cn } from '#/lib/utils.ts'
+import { useAuth, useSignOut } from "@better-auth-ui/react"
+import { useEffect, useRef } from "react"
+
+import { Spinner } from "#/components/ui/spinner.tsx"
+import { cn } from "#/lib/utils.ts"
 
 export type SignOutProps = {
   className?: string
@@ -41,5 +42,5 @@ export function SignOut({ className }: SignOutProps) {
     signOut()
   }, [signOut])
 
-  return <Spinner className={cn('mx-auto my-auto', className)} />
+  return <Spinner className={cn("mx-auto my-auto", className)} />
 }

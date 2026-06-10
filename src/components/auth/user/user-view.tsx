@@ -1,12 +1,13 @@
-'use client'
+"use client"
 
-import { useAuth, useSession } from '@better-auth-ui/react'
-import type { UsernameAuthClient } from '@better-auth-ui/react'
-import type { User } from 'better-auth'
+import { useAuth, useSession } from "@better-auth-ui/react"
+import type { UsernameAuthClient } from "@better-auth-ui/react"
+import type { User } from "better-auth"
 
-import { Skeleton } from '#/components/ui/skeleton.tsx'
-import { cn } from '#/lib/utils.ts'
-import { UserAvatar } from './user-avatar'
+import { Skeleton } from "#/components/ui/skeleton.tsx"
+import { cn } from "#/lib/utils.ts"
+
+import { UserAvatar } from "./user-avatar"
 
 export type UserViewProps = {
   className?: string
@@ -32,12 +33,7 @@ export type UserViewProps = {
  * @param user - Optional user object to display; when omitted the current session user is used
  * @returns A React element showing the user's avatar with their identifying information
  */
-export function UserView({
-  className,
-  isPending,
-  hideSubtitle = false,
-  user,
-}: UserViewProps) {
+export function UserView({ className, isPending, hideSubtitle = false, user }: UserViewProps) {
   const { authClient } = useAuth()
   const { data: session, isPending: sessionPending } = useSession(
     authClient as UsernameAuthClient,
@@ -48,7 +44,7 @@ export function UserView({
 
   if ((isPending || sessionPending) && !user) {
     return (
-      <div className={cn('flex items-center gap-2 min-w-0', className)}>
+      <div className={cn("flex min-w-0 items-center gap-2", className)}>
         <UserAvatar isPending />
 
         <div className="grid flex-1 gap-1 text-left text-sm">
@@ -61,22 +57,17 @@ export function UserView({
   }
 
   return (
-    <div className={cn('flex items-center gap-2 min-w-0', className)}>
+    <div className={cn("flex min-w-0 items-center gap-2", className)}>
       <UserAvatar user={resolvedUser as User | undefined} />
 
       <div className="grid min-w-0 flex-1 text-left text-sm leading-tight">
         <span className="truncate font-medium text-foreground">
-          {resolvedUser?.displayUsername ||
-            resolvedUser?.name ||
-            resolvedUser?.email}
+          {resolvedUser?.displayUsername || resolvedUser?.name || resolvedUser?.email}
         </span>
 
-        {!hideSubtitle &&
-          (resolvedUser?.displayUsername || resolvedUser?.name) && (
-            <span className="text-muted-foreground truncate text-xs">
-              {resolvedUser?.email}
-            </span>
-          )}
+        {!hideSubtitle && (resolvedUser?.displayUsername || resolvedUser?.name) && (
+          <span className="truncate text-xs text-muted-foreground">{resolvedUser?.email}</span>
+        )}
       </div>
     </div>
   )

@@ -1,34 +1,85 @@
 {
   "language_servers": ["!biome", "!eslint", "..."],
+  "lsp": {
+    "oxlint": {
+      "initialization_options": {
+        "settings": {
+          // Temporary since I get error in zed extension with it enabled
+          "typeAware": false
+        }
+      }
+    }
+  },
   "languages": {
     "JavaScript": {
-      "formatter": "prettier",
+      "formatter": [
+        {
+          "language_server": {
+            "name": "oxfmt"
+          }
+        }
+      ],
       "code_actions_on_format": {
-        "source.removeUnusedImports": true,
         "source.fixAll.oxc": true,
-        "sourceAll.organizeImports": true,
-      },
+        "sourceAll.": true
+      }
     },
     "TypeScript": {
-      "language_servers": ["tsgo", "oxlint"],
-      "formatter": "prettier",
-      "code_actions_on_format": {
-        "source.removeUnusedImports": true,
-        "source.fixAll.oxc": true,
-        "sourceAll.organizeImports": true,
+      "language_servers": ["tsgo", "oxlint", "oxfmt"],
+      "format_on_save": "on",
+      "prettier": {
+        "allowed": false
       },
+      "formatter": [
+        {
+          "language_server": {
+            "name": "oxfmt"
+          }
+        }
+      ],
+      "code_actions_on_format": {
+        "source.fixAll.oxc": true
+      }
     },
     "TSX": {
-      "language_servers": ["tsgo", "oxlint"],
-      "formatter": "prettier",
+      "language_servers": ["tsgo", "oxlint", "oxfmt"],
+      "formatter": [
+        {
+          "language_server": {
+            "name": "oxfmt"
+          }
+        }
+      ],
       "code_actions_on_format": {
-        "source.removeUnusedImports": true,
-        "source.fixAll.oxc": true,
-        "sourceAll.organizeImports": true,
-      },
+        "source.fixAll.oxc": true
+      }
     },
-    "JSON": { "formatter": "prettier" },
-    "JSONC": { "formatter": "prettier" },
-    "CSS": { "formatter": "prettier" },
-  },
+    "JSON": {
+      "formatter": [
+        {
+          "language_server": {
+            "name": "oxfmt"
+          }
+        }
+      ]
+    },
+    "JSONC": {
+      "formatter": [
+        {
+          "language_server": {
+            "name": "oxfmt"
+          }
+        }
+      ]
+    },
+    "CSS": {
+      "formatter": [
+        {
+          "language_server": {
+            "name": "oxfmt"
+          }
+        }
+      ]
+    }
+  }
 }

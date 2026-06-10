@@ -1,13 +1,12 @@
-import { useForm } from '@tanstack/react-form'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useNavigate } from '@tanstack/react-router'
-import { PlusIcon } from 'lucide-react'
-import { useState } from 'react'
-import { toast } from 'sonner'
-import { z } from 'zod'
-import { createStack } from '#/lib/functions'
-import { Label } from '#/components/ui/label'
-import { Input } from '#/components/ui/input'
+import { useForm } from "@tanstack/react-form"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useNavigate } from "@tanstack/react-router"
+import { PlusIcon } from "lucide-react"
+import { useState } from "react"
+import { toast } from "sonner"
+import { z } from "zod"
+
+import { Button } from "#/components/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -15,15 +14,17 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '#/components/ui/dialog'
-import { Button } from '#/components/ui/button'
-import { FieldError } from '#/components/ui/field'
+} from "#/components/ui/dialog"
+import { FieldError } from "#/components/ui/field"
+import { Input } from "#/components/ui/input"
+import { Label } from "#/components/ui/label"
+import { createStack } from "#/lib/functions"
 
 const schema = z.object({
   name: z
     .string()
-    .min(1, 'Name is required')
-    .regex(/^[a-zA-Z0-9_-]+$/, 'Only letters, numbers, hyphens, underscores'),
+    .min(1, "Name is required")
+    .regex(/^[a-zA-Z0-9_-]+$/, "Only letters, numbers, hyphens, underscores"),
 })
 
 export function CreateStackButton() {
@@ -35,13 +36,13 @@ export function CreateStackButton() {
     mutationFn: (stackName: string) => createStack({ data: { stackName } }),
     onSuccess: (_, stackName) => {
       toast.success(`Stack "${stackName}" created`)
-      queryClient.invalidateQueries({ queryKey: ['stacks'] })
+      queryClient.invalidateQueries({ queryKey: ["stacks"] })
       setOpen(false)
       form.reset()
       navigate({
         to: `/stacks/${stackName}`,
         search: {
-          tab: 'files',
+          tab: "files",
         },
       })
     },
@@ -49,7 +50,7 @@ export function CreateStackButton() {
   })
 
   const form = useForm({
-    defaultValues: { name: '' },
+    defaultValues: { name: "" },
     validators: { onSubmit: schema },
     onSubmit: ({ value }) => mutation.mutate(value.name),
   })
@@ -77,13 +78,9 @@ export function CreateStackButton() {
           <div className="grid gap-2">
             <form.Field name="name">
               {(field) => {
-                const isInvalid =
-                  field.state.meta.isTouched && !field.state.meta.isValid
+                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
                 return (
-                  <div
-                    data-invalid={isInvalid || undefined}
-                    className="grid gap-2"
-                  >
+                  <div data-invalid={isInvalid || undefined} className="grid gap-2">
                     <Label htmlFor={field.name}>Name</Label>
                     <Input
                       id={field.name}
@@ -94,9 +91,7 @@ export function CreateStackButton() {
                       aria-invalid={isInvalid}
                       autoFocus
                     />
-                    {isInvalid && (
-                      <FieldError errors={field.state.meta.errors} />
-                    )}
+                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
                   </div>
                 )
               }}
@@ -104,7 +99,7 @@ export function CreateStackButton() {
           </div>
           <DialogFooter className="mt-4">
             <Button type="submit" disabled={mutation.isPending}>
-              {mutation.isPending ? 'Creating...' : 'Create'}
+              {mutation.isPending ? "Creating..." : "Create"}
             </Button>
           </DialogFooter>
         </form>

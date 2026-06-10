@@ -1,7 +1,8 @@
-import { createAuthPlugin } from '@better-auth-ui/core'
-import { apiKeyPlugin as coreApiKeyPlugin } from '@better-auth-ui/core/plugins'
-import { ApiKeys } from '#/components/auth/api-key/api-keys.tsx'
-import type { ApiKeyPluginOptions } from '@better-auth-ui/core/plugins'
+import { createAuthPlugin } from "@better-auth-ui/core"
+import { apiKeyPlugin as coreApiKeyPlugin } from "@better-auth-ui/core/plugins"
+import type { ApiKeyPluginOptions } from "@better-auth-ui/core/plugins"
+
+import { ApiKeys } from "#/components/auth/api-key/api-keys.tsx"
 
 export const apiKeyPlugin = createAuthPlugin(
   coreApiKeyPlugin.id,

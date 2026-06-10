@@ -1,11 +1,13 @@
-'use client'
+"use client"
 
-import { useAuth, useListAccounts } from '@better-auth-ui/react'
-import { Card, CardContent } from '#/components/ui/card.tsx'
-import { Separator } from '#/components/ui/separator.tsx'
-import { Skeleton } from '#/components/ui/skeleton.tsx'
-import { cn } from '#/lib/utils.ts'
-import { LinkedAccount } from './linked-account'
+import { useAuth, useListAccounts } from "@better-auth-ui/react"
+
+import { Card, CardContent } from "#/components/ui/card.tsx"
+import { Separator } from "#/components/ui/separator.tsx"
+import { Skeleton } from "#/components/ui/skeleton.tsx"
+import { cn } from "#/lib/utils.ts"
+
+import { LinkedAccount } from "./linked-account"
 
 export type LinkedAccountsProps = {
   className?: string
@@ -25,15 +27,11 @@ export function LinkedAccounts({ className }: LinkedAccountsProps) {
 
   const { data: accounts, isPending } = useListAccounts(authClient)
 
-  const linkedAccounts = accounts?.filter(
-    (account) => account.providerId !== 'credential',
-  )
+  const linkedAccounts = accounts?.filter((account) => account.providerId !== "credential")
 
   const linkedProviderIds = new Set(linkedAccounts?.map((a) => a.providerId))
 
-  const availableProviders = socialProviders?.filter(
-    (p) => !linkedProviderIds.has(p),
-  )
+  const availableProviders = socialProviders?.filter((p) => !linkedProviderIds.has(p))
 
   const allRows = [
     ...(linkedAccounts?.map((account) => ({
@@ -50,11 +48,9 @@ export function LinkedAccounts({ className }: LinkedAccountsProps) {
 
   return (
     <div>
-      <h2 className="text-sm font-semibold mb-3">
-        {localization.settings.linkedAccounts}
-      </h2>
+      <h2 className="mb-3 text-sm font-semibold">{localization.settings.linkedAccounts}</h2>
 
-      <Card className={cn('p-0', className)}>
+      <Card className={cn("p-0", className)}>
         <CardContent className="p-0">
           {isPending
             ? socialProviders?.map((provider, index) => (
@@ -67,10 +63,7 @@ export function LinkedAccounts({ className }: LinkedAccountsProps) {
                 <div key={row.key}>
                   {index > 0 && <Separator />}
 
-                  <LinkedAccount
-                    account={row.account}
-                    provider={row.provider}
-                  />
+                  <LinkedAccount account={row.account} provider={row.provider} />
                 </div>
               ))}
         </CardContent>
@@ -81,7 +74,7 @@ export function LinkedAccounts({ className }: LinkedAccountsProps) {
 
 function AccountRowSkeleton() {
   return (
-    <Card className="bg-transparent border-0 ring-0 shadow-none">
+    <Card className="border-0 bg-transparent shadow-none ring-0">
       <CardContent className="flex items-center gap-3">
         <Skeleton className="size-10 rounded-md" />
 

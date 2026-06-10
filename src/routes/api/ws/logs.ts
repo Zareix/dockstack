@@ -1,11 +1,12 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { defineHooks } from 'crossws'
-import { dockerClient } from '#/lib/docker/client'
+import { createFileRoute } from "@tanstack/react-router"
+import { defineHooks } from "crossws"
+
+import { dockerClient } from "#/lib/docker/client"
 
 export type LogEntry = {
   containerName: string
   message: string
-  stream: 'stdout' | 'stderr'
+  stream: "stdout" | "stderr"
   timestamp: string
 }
 
@@ -20,11 +21,11 @@ const decoder = new TextDecoder()
 function processStream(
   stream: ReadableStream<Uint8Array>,
   containerName: string,
-  streamType: 'stdout' | 'stderr',
+  streamType: "stdout" | "stderr",
   send: (data: string) => void,
 ): Promise<void> {
   const reader = stream.getReader()
-  let buf = ''
+  let buf = ""
   return (async () => {
     try {
       // oxlint-disable-next-line typescript/no-unnecessary-condition
@@ -32,12 +33,12 @@ function processStream(
         const { done, value } = await reader.read()
         if (done) break
         buf += decoder.decode(value, { stream: true })
-        const parts = buf.split('\n')
-        buf = parts.pop() ?? ''
+        const parts = buf.split("\n")
+        buf = parts.pop() ?? ""
         for (const line of parts) {
           if (!line) continue
-          const spaceIdx = line.indexOf(' ')
-          const timestamp = spaceIdx > -1 ? line.slice(0, spaceIdx) : ''
+          const spaceIdx = line.indexOf(" ")
+          const timestamp = spaceIdx > -1 ? line.slice(0, spaceIdx) : ""
           const message = spaceIdx > -1 ? line.slice(spaceIdx + 1) : line
           const entry: LogEntry = {
             containerName,
@@ -45,17 +46,17 @@ function processStream(
             stream: streamType,
             timestamp,
           }
-          send(JSON.stringify({ type: 'log', ...entry }))
+          send(JSON.stringify({ type: "log", ...entry }))
         }
       }
       if (buf) {
         send(
           JSON.stringify({
-            type: 'log',
+            type: "log",
             containerName,
             message: buf,
             stream: streamType,
-            timestamp: '',
+            timestamp: "",
           }),
         )
       }
@@ -68,11 +69,9 @@ function processStream(
 const hooks = defineHooks({
   async message(peer, message) {
     try {
-      const msg = message.json<
-        { type: 'init'; stackName: string } | { type: 'close' }
-      >()
+      const msg = message.json<{ type: "init"; stackName: string } | { type: "close" }>()
 
-      if (msg.type === 'init') {
+      if (msg.type === "init") {
         const existing = sessions.get(peer.id)
         if (existing) {
           for (const p of existing.processes) p.kill()
@@ -87,7 +86,7 @@ const hooks = defineHooks({
           })
 
           if (containers.length === 0) {
-            peer.send(JSON.stringify({ type: 'end' }))
+            peer.send(JSON.stringify({ type: "end" }))
             return
           }
 
@@ -100,44 +99,35 @@ const hooks = defineHooks({
           const checkDone = () => {
             finished++
             if (finished >= total) {
-              peer.send(JSON.stringify({ type: 'end' }))
+              peer.send(JSON.stringify({ type: "end" }))
               sessions.delete(peer.id)
             }
           }
 
           for (const info of containers) {
-            const containerName =
-              info.Names[0]?.replace(/^\//, '') ?? info.Id.slice(0, 12)
+            const containerName = info.Names[0]?.replace(/^\//, "") ?? info.Id.slice(0, 12)
             const proc = Bun.spawn(
-              [
-                'docker',
-                'logs',
-                '--follow',
-                '--timestamps',
-                '--tail',
-                '1000',
-                info.Id,
-              ],
-              { stdout: 'pipe', stderr: 'pipe' },
+              ["docker", "logs", "--follow", "--timestamps", "--tail", "1000", info.Id],
+              { stdout: "pipe", stderr: "pipe" },
             )
             processes.push(proc)
 
-            processStream(proc.stdout, containerName, 'stdout', (data) =>
-              peer.send(data),
-            ).finally(checkDone)
+            processStream(proc.stdout, containerName, "stdout", (data) => peer.send(data)).finally(
+              checkDone,
+            )
 
-            processStream(proc.stderr, containerName, 'stderr', (data) =>
-              peer.send(data),
-            ).finally(checkDone)
+            processStream(proc.stderr, containerName, "stderr", (data) => peer.send(data)).finally(
+              checkDone,
+            )
           }
         } catch (err) {
-          peer.send(JSON.stringify({ type: 'error', message: String(err) }))
+          peer.send(JSON.stringify({ type: "error", message: String(err) }))
         }
         return
       }
 
       // oxlint-disable-next-line typescript/no-unnecessary-condition
-      if (msg.type === 'close') {
+      if (msg.type === "close") {
         const session = sessions.get(peer.id)
         if (session) {
           for (const p of session.processes) p.kill()
@@ -159,14 +149,13 @@ const hooks = defineHooks({
   },
 })
 
-export const Route = createFileRoute('/api/ws/logs')({
+export const Route = createFileRoute("/api/ws/logs")({
   server: {
     handlers: {
       GET: async () => {
-        return Object.assign(
-          new Response('WebSocket upgrade is required.', { status: 426 }),
-          { crossws: hooks },
-        )
+        return Object.assign(new Response("WebSocket upgrade is required.", { status: 426 }), {
+          crossws: hooks,
+        })
       },
     },
   },

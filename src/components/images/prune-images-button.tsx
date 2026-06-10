@@ -1,9 +1,8 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { BrushCleaningIcon } from 'lucide-react'
-import { useState } from 'react'
-import { toast } from 'sonner'
-import { imagePrune } from '#/lib/functions'
-import { Button } from '#/components/ui/button'
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { BrushCleaningIcon } from "lucide-react"
+import { useState } from "react"
+import { toast } from "sonner"
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,7 +13,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from '#/components/ui/alert-dialog'
+} from "#/components/ui/alert-dialog"
+import { Button } from "#/components/ui/button"
+import { imagePrune } from "#/lib/functions"
 
 export function PruneImagesButton() {
   const [open, setOpen] = useState(false)
@@ -25,10 +26,8 @@ export function PruneImagesButton() {
     onSuccess: (result) => {
       const count = result.prunedImages.length
       const mb = (result.spaceReclaimed / 1e6).toFixed(1)
-      toast.success(
-        `Pruned ${count} image${count !== 1 ? 's' : ''}, freed ${mb} MB`,
-      )
-      queryClient.invalidateQueries({ queryKey: ['images'] })
+      toast.success(`Pruned ${count} image${count !== 1 ? "s" : ""}, freed ${mb} MB`)
+      queryClient.invalidateQueries({ queryKey: ["images"] })
     },
     onError: (e) => toast.error(e.message),
   })
@@ -47,8 +46,7 @@ export function PruneImagesButton() {
         <AlertDialogHeader>
           <AlertDialogTitle>Prune unused images?</AlertDialogTitle>
           <AlertDialogDescription>
-            All images not referenced by any container will be removed. This
-            cannot be undone.
+            All images not referenced by any container will be removed. This cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

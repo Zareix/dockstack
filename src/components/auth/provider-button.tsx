@@ -1,17 +1,17 @@
-import { authMutationKeys, getProviderName } from '@better-auth-ui/core'
-import { providerIcons, useAuth, useSignInSocial } from '@better-auth-ui/react'
-import { useIsMutating } from '@tanstack/react-query'
-import type { SocialProvider } from 'better-auth/social-providers'
-import type { ComponentProps } from 'react'
+import { authMutationKeys, getProviderName } from "@better-auth-ui/core"
+import { providerIcons, useAuth, useSignInSocial } from "@better-auth-ui/react"
+import { useIsMutating } from "@tanstack/react-query"
+import type { SocialProvider } from "better-auth/social-providers"
+import { IdCardIcon } from "lucide-react"
+import type { ComponentProps } from "react"
 
-import { Button } from '#/components/ui/button.tsx'
-import { Spinner } from '#/components/ui/spinner.tsx'
-import { IdCardIcon } from 'lucide-react'
+import { Button } from "#/components/ui/button.tsx"
+import { Spinner } from "#/components/ui/spinner.tsx"
 
 export type ProviderButtonProps = {
   provider: SocialProvider
-  display?: 'full' | 'name' | 'icon'
-} & Omit<ComponentProps<typeof Button>, 'onClick' | 'children' | 'disabled'>
+  display?: "full" | "name" | "icon"
+} & Omit<ComponentProps<typeof Button>, "onClick" | "children" | "disabled">
 
 /**
  * Social provider sign-in button.
@@ -21,16 +21,15 @@ export type ProviderButtonProps = {
  */
 export function ProviderButton({
   provider,
-  display = 'full',
-  variant = 'outline',
+  display = "full",
+  variant = "outline",
   ...props
 }: ProviderButtonProps) {
   const { authClient, baseURL, localization, redirectTo } = useAuth()
 
   const callbackURL = `${baseURL}${redirectTo}`
 
-  const { mutate: signInSocial, isPending: signInSocialPending } =
-    useSignInSocial(authClient)
+  const { mutate: signInSocial, isPending: signInSocialPending } = useSignInSocial(authClient)
 
   const ProviderIcon = providerIcons[provider] ?? IdCardIcon
 
@@ -53,12 +52,9 @@ export function ProviderButton({
     >
       {signInSocialPending ? <Spinner /> : <ProviderIcon />}
 
-      {display === 'full'
-        ? localization.auth.continueWith.replace(
-            '{{provider}}',
-            getProviderName(provider),
-          )
-        : display === 'name'
+      {display === "full"
+        ? localization.auth.continueWith.replace("{{provider}}", getProviderName(provider))
+        : display === "name"
           ? getProviderName(provider)
           : null}
     </Button>

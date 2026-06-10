@@ -1,11 +1,13 @@
-'use client'
+"use client"
 
-import { useAuth, useListSessions, useSession } from '@better-auth-ui/react'
-import { Card, CardContent } from '#/components/ui/card.tsx'
-import { Separator } from '#/components/ui/separator.tsx'
-import { Skeleton } from '#/components/ui/skeleton.tsx'
-import { cn } from '#/lib/utils.ts'
-import { ActiveSession } from './active-session'
+import { useAuth, useListSessions, useSession } from "@better-auth-ui/react"
+
+import { Card, CardContent } from "#/components/ui/card.tsx"
+import { Separator } from "#/components/ui/separator.tsx"
+import { Skeleton } from "#/components/ui/skeleton.tsx"
+import { cn } from "#/lib/utils.ts"
+
+import { ActiveSession } from "./active-session"
 
 export type ActiveSessionsProps = {
   className?: string
@@ -31,11 +33,9 @@ export function ActiveSessions({ className }: ActiveSessionsProps) {
 
   return (
     <div>
-      <h2 className="text-sm font-semibold mb-3">
-        {localization.settings.activeSessions}
-      </h2>
+      <h2 className="mb-3 text-sm font-semibold">{localization.settings.activeSessions}</h2>
 
-      <Card className={cn('p-0', className)}>
+      <Card className={cn("p-0", className)}>
         <CardContent className="p-0">
           {isPending ? (
             <SessionRowSkeleton />
@@ -56,7 +56,7 @@ export function ActiveSessions({ className }: ActiveSessionsProps) {
 
 function SessionRowSkeleton() {
   return (
-    <Card className="bg-transparent border-0 ring-0 shadow-none">
+    <Card className="border-0 bg-transparent shadow-none ring-0">
       <CardContent className="flex items-center gap-3">
         <Skeleton className="size-10 rounded-md" />
 

@@ -1,7 +1,5 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useCallback } from 'react'
-import { ClientOnly, createFileRoute, redirect } from '@tanstack/react-router'
-import { z } from 'zod'
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { ClientOnly, createFileRoute, redirect } from "@tanstack/react-router"
 import {
   DownloadIcon,
   PauseIcon,
@@ -9,14 +7,17 @@ import {
   RefreshCwIcon,
   SquareIcon,
   Trash2Icon,
-} from 'lucide-react'
-import { toast } from 'sonner'
-import { ContainerLogs } from '#/components/stacks/logs'
-import { StackActionDialog } from '#/components/stacks/action-dialog'
-import { StackFiles } from '#/components/stacks/files'
-import { StackServices } from '#/components/stacks/services'
-import { StatusBadge } from '#/components/stacks/status-badge'
-import { StackTerminal } from '#/components/stacks/terminal'
+} from "lucide-react"
+import { useCallback } from "react"
+import { toast } from "sonner"
+import { z } from "zod"
+
+import { StackActionDialog } from "#/components/stacks/action-dialog"
+import { StackFiles } from "#/components/stacks/files"
+import { ContainerLogs } from "#/components/stacks/logs"
+import { StackServices } from "#/components/stacks/services"
+import { StatusBadge } from "#/components/stacks/status-badge"
+import { StackTerminal } from "#/components/stacks/terminal"
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -26,9 +27,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from '#/components/ui/alert-dialog'
-import { Button } from '#/components/ui/button'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '#/components/ui/tabs'
+} from "#/components/ui/alert-dialog"
+import { Button } from "#/components/ui/button"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/components/ui/tabs"
 import {
   getStackStatus,
   stackDestroy,
@@ -37,21 +38,21 @@ import {
   streamStackRestart,
   streamStackStop,
   streamStackUp,
-} from '#/lib/functions'
-import { ensureSession } from '#/lib/functions/auth'
+} from "#/lib/functions"
+import { ensureSession } from "#/lib/functions/auth"
 
 const tabSchema = z.object({
-  tab: z.enum(['services', 'files', 'logs', 'terminal']).default('services'),
+  tab: z.enum(["services", "files", "logs", "terminal"]).default("services"),
 })
 
-export const Route = createFileRoute('/stacks/$name')({
+export const Route = createFileRoute("/stacks/$name")({
   validateSearch: tabSchema,
   async beforeLoad({ context: { queryClient }, location }) {
     const session = await ensureSession(queryClient)()
     if (!session) {
       throw redirect({
-        to: '/auth/$path',
-        params: { path: 'sign-in' },
+        to: "/auth/$path",
+        params: { path: "sign-in" },
         search: { redirectTo: location.href },
       })
     }
@@ -67,14 +68,14 @@ function StackPage() {
   const navigate = Route.useNavigate()
 
   const statusQuery = useQuery({
-    queryKey: ['stacks', name, 'status'],
+    queryKey: ["stacks", name, "status"],
     queryFn: () => getStackStatus({ data: { stackName: name } }),
     refetchInterval: 5000,
   })
 
   const invalidateStatus = useCallback(() => {
-    queryClient.invalidateQueries({ queryKey: ['stacks', name, 'status'] })
-    queryClient.invalidateQueries({ queryKey: ['stacks', name, 'services'] })
+    queryClient.invalidateQueries({ queryKey: ["stacks", name, "status"] })
+    queryClient.invalidateQueries({ queryKey: ["stacks", name, "services"] })
   }, [queryClient, name])
 
   const destroyMutation = useMutation({
@@ -82,29 +83,26 @@ function StackPage() {
     onError: (error) => toast.error(error.message),
     onSuccess: () => {
       toast.success(`Stack ${name} destroyed`)
-      queryClient.invalidateQueries({ queryKey: ['stacks'] })
-      navigate({ to: '/' })
+      queryClient.invalidateQueries({ queryKey: ["stacks"] })
+      navigate({ to: "/" })
     },
   })
 
   return (
     <>
-      <header className="md:flex items-center gap-3">
-        <h2 className="text-2xl font-bold flex items-center gap-2">
+      <header className="items-center gap-3 md:flex">
+        <h2 className="flex items-center gap-2 text-2xl font-bold">
           <span>{name}</span>
           {statusQuery.data && <StatusBadge status={statusQuery.data} />}
         </h2>
 
-        <div className="ml-auto mt-4 md:mt-0 flex flex-wrap items-center gap-2">
+        <div className="mt-4 ml-auto flex flex-wrap items-center gap-2 md:mt-0">
           <AlertDialog>
             <AlertDialogTrigger
               render={
-                <Button
-                  variant="destructive"
-                  disabled={destroyMutation.isPending}
-                >
+                <Button variant="destructive" disabled={destroyMutation.isPending}>
                   <Trash2Icon />
-                  {destroyMutation.isPending ? 'Destroying...' : 'Destroy'}
+                  {destroyMutation.isPending ? "Destroying..." : "Destroy"}
                 </Button>
               }
             />
@@ -112,16 +110,13 @@ function StackPage() {
               <AlertDialogHeader>
                 <AlertDialogTitle>Destroy "{name}"?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This will run <code>docker compose down</code> and permanently
-                  delete all stack files. This cannot be undone.
+                  This will run <code>docker compose down</code> and permanently delete all stack
+                  files. This cannot be undone.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogCancel
-                  variant="destructive"
-                  onClick={() => destroyMutation.mutate()}
-                >
+                <AlertDialogCancel variant="destructive" onClick={() => destroyMutation.mutate()}>
                   Destroy
                 </AlertDialogCancel>
               </AlertDialogFooter>
@@ -187,9 +182,7 @@ function StackPage() {
 
       <Tabs
         value={tab}
-        onValueChange={(value) =>
-          navigate({ search: { tab: value as typeof tab } })
-        }
+        onValueChange={(value) => navigate({ search: { tab: value as typeof tab } })}
         className="mt-4"
       >
         <TabsList>
@@ -210,7 +203,7 @@ function StackPage() {
         <TabsContent value="logs">
           <ContainerLogs stackName={name} />
         </TabsContent>
-        <TabsContent value="terminal" className="h-[800px] flex flex-col">
+        <TabsContent value="terminal" className="flex h-[800px] flex-col">
           <ClientOnly>
             <StackTerminal stackName={name} />
           </ClientOnly>

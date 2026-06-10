@@ -6,9 +6,11 @@ import {
   getSortedRowModel,
   type SortingState,
   useReactTable,
-} from '@tanstack/react-table'
+} from "@tanstack/react-table"
+import { ArrowDown, ArrowUp } from "lucide-react"
+import { useState } from "react"
 
-import { Button } from '#/components/ui/button'
+import { Button } from "#/components/ui/button"
 import {
   Table,
   TableBody,
@@ -16,25 +18,17 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '#/components/ui/table'
-import { ArrowDown, ArrowUp } from 'lucide-react'
-import { useState } from 'react'
+} from "#/components/ui/table"
 
-export function SortableHeader({
-  column,
-  label,
-}: {
-  column: Column<any, any>
-  label: string
-}) {
+export function SortableHeader({ column, label }: { column: Column<any, any>; label: string }) {
   const sorted = column.getIsSorted()
-  const Icon = sorted === 'asc' ? ArrowUp : sorted === 'desc' ? ArrowDown : null
+  const Icon = sorted === "asc" ? ArrowUp : sorted === "desc" ? ArrowDown : null
   return (
     <Button
       variant="ghost"
       size="sm"
       className="-ml-3 h-8"
-      onClick={() => column.toggleSorting(sorted === 'asc')}
+      onClick={() => column.toggleSorting(sorted === "asc")}
     >
       {label}
       {Icon && <Icon className="ml-2 h-4 w-4" />}
@@ -75,10 +69,7 @@ export function DataTable<TData, TValue>({
                   <TableHead key={header.id}>
                     {header.isPlaceholder
                       ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
+                      : flexRender(header.column.columnDef.header, header.getContext())}
                   </TableHead>
                 )
               })}
@@ -88,19 +79,13 @@ export function DataTable<TData, TValue>({
         <TableBody>
           {isLoading ? (
             <TableRow>
-              <TableCell
-                colSpan={columns.length}
-                className="text-center text-muted-foreground"
-              >
+              <TableCell colSpan={columns.length} className="text-center text-muted-foreground">
                 Loading...
               </TableCell>
             </TableRow>
           ) : table.getRowModel().rows?.length ? (
             table.getRowModel().rows.map((row) => (
-              <TableRow
-                key={row.id}
-                data-state={row.getIsSelected() && 'selected'}
-              >
+              <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
                 {row.getVisibleCells().map((cell) => (
                   <TableCell key={cell.id}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}

@@ -1,14 +1,10 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { PlayIcon, RefreshCwIcon, SquareIcon, Trash2Icon } from 'lucide-react'
-import { toast } from 'sonner'
-import type { ContainerInfo } from '#/lib/docker'
-import {
-  containerRemove,
-  containerRestart,
-  containerStart,
-  containerStop,
-} from '#/lib/functions'
-import { Button } from '#/components/ui/button'
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { PlayIcon, RefreshCwIcon, SquareIcon, Trash2Icon } from "lucide-react"
+import { toast } from "sonner"
+
+import { Button } from "#/components/ui/button"
+import type { ContainerInfo } from "#/lib/docker"
+import { containerRemove, containerRestart, containerStart, containerStop } from "#/lib/functions"
 
 export function ContainerActions({
   container,
@@ -20,12 +16,12 @@ export function ContainerActions({
   const queryClient = useQueryClient()
 
   const invalidate = () => {
-    queryClient.invalidateQueries({ queryKey: ['containers'] })
+    queryClient.invalidateQueries({ queryKey: ["containers"] })
     queryClient.invalidateQueries({
-      queryKey: stackName ? ['stacks', stackName, 'status'] : ['stacks'],
+      queryKey: stackName ? ["stacks", stackName, "status"] : ["stacks"],
     })
     queryClient.invalidateQueries({
-      queryKey: stackName ? ['stacks', stackName, 'services'] : ['stacks'],
+      queryKey: stackName ? ["stacks", stackName, "services"] : ["stacks"],
     })
   }
 
@@ -62,12 +58,8 @@ export function ContainerActions({
     onError: (e) => toast.error(e.message),
   })
 
-  const busy =
-    startM.isPending ||
-    stopM.isPending ||
-    restartM.isPending ||
-    removeM.isPending
-  const running = container.state === 'running'
+  const busy = startM.isPending || stopM.isPending || restartM.isPending || removeM.isPending
+  const running = container.state === "running"
 
   return (
     <div className="flex items-center gap-1">

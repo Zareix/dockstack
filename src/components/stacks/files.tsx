@@ -1,21 +1,22 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Suspense, useEffect, useState } from 'react'
-import { toast } from 'sonner'
-import { PlusIcon } from 'lucide-react'
-import { Button } from '#/components/ui/button'
-import { Spinner } from '#/components/ui/spinner'
-import { createDotEnv, getStackFiles, saveStackFiles } from '#/lib/functions'
-import Editor from '#/components/editor/monaco-file-editor'
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { PlusIcon } from "lucide-react"
+import { Suspense, useEffect, useState } from "react"
+import { toast } from "sonner"
+
+import Editor from "#/components/editor/monaco-file-editor"
+import { Button } from "#/components/ui/button"
+import { Spinner } from "#/components/ui/spinner"
+import { createDotEnv, getStackFiles, saveStackFiles } from "#/lib/functions"
 
 export function StackFiles({ stackName }: { stackName: string }) {
   const queryClient = useQueryClient()
 
   const filesQuery = useQuery({
-    queryKey: ['stack-files', stackName],
+    queryKey: ["stack-files", stackName],
     queryFn: () => getStackFiles({ data: { stackName } }),
   })
 
-  const [compose, setCompose] = useState('')
+  const [compose, setCompose] = useState("")
   const [envContent, setEnvContent] = useState<string | null>(null)
 
   useEffect(() => {
@@ -35,35 +36,29 @@ export function StackFiles({ stackName }: { stackName: string }) {
         },
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['stack-files', stackName] })
-      toast.success('Saved')
+      queryClient.invalidateQueries({ queryKey: ["stack-files", stackName] })
+      toast.success("Saved")
     },
-    onError: () => toast.error('Failed to save'),
+    onError: () => toast.error("Failed to save"),
   })
 
   const createDotEnvMutation = useMutation({
     mutationFn: () => createDotEnv({ data: { stackName } }),
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: ['stack-files', stackName] }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["stack-files", stackName] }),
   })
 
   const isDirty =
-    filesQuery.data &&
-    (compose !== filesQuery.data.compose || envContent !== filesQuery.data.env)
+    filesQuery.data && (compose !== filesQuery.data.compose || envContent !== filesQuery.data.env)
 
   return (
     <>
-      {filesQuery.isLoading && (
-        <p className="text-muted-foreground text-sm">Loading...</p>
-      )}
-      {filesQuery.error && (
-        <p className="text-destructive text-sm">{filesQuery.error.message}</p>
-      )}
+      {filesQuery.isLoading && <p className="text-sm text-muted-foreground">Loading...</p>}
+      {filesQuery.error && <p className="text-sm text-destructive">{filesQuery.error.message}</p>}
       {filesQuery.data && (
         <>
-          <div className="grid md:grid-cols-12 gap-4">
+          <div className="grid gap-4 md:grid-cols-12">
             <div className="md:col-span-7">
-              <p className="text-xs text-muted-foreground font-mono mb-2">
+              <p className="mb-2 font-mono text-xs text-muted-foreground">
                 {filesQuery.data.composeFile}
               </p>
               <Suspense fallback={<Spinner />}>
@@ -75,23 +70,14 @@ export function StackFiles({ stackName }: { stackName: string }) {
               </Suspense>
             </div>
             <div className="md:col-span-5">
-              <p className="text-xs text-muted-foreground font-mono mb-2">
-                .env
-              </p>
+              <p className="mb-2 font-mono text-xs text-muted-foreground">.env</p>
               {envContent !== null ? (
                 <Suspense fallback={<Spinner />}>
-                  <Editor
-                    value={envContent}
-                    filename=".env"
-                    onChange={setEnvContent}
-                  />
+                  <Editor value={envContent} filename=".env" onChange={setEnvContent} />
                 </Suspense>
               ) : (
-                <div className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground flex items-center">
-                  <Button
-                    onClick={() => createDotEnvMutation.mutate()}
-                    variant="ghost"
-                  >
+                <div className="flex items-center rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
+                  <Button onClick={() => createDotEnvMutation.mutate()} variant="ghost">
                     <PlusIcon />
                     Create .env
                   </Button>
@@ -100,12 +86,9 @@ export function StackFiles({ stackName }: { stackName: string }) {
             </div>
           </div>
           {isDirty && (
-            <div className="flex items-center justify-end gap-3 mt-2">
-              <Button
-                onClick={() => saveMutation.mutate()}
-                disabled={saveMutation.isPending}
-              >
-                {saveMutation.isPending ? 'Saving...' : 'Save'}
+            <div className="mt-2 flex items-center justify-end gap-3">
+              <Button onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending}>
+                {saveMutation.isPending ? "Saving..." : "Save"}
               </Button>
             </div>
           )}

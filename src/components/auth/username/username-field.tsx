@@ -1,22 +1,15 @@
-import {
-  useAuth,
-  useAuthPlugin,
-  useIsUsernameAvailable,
-} from '@better-auth-ui/react'
-import type { UsernameAuthClient } from '@better-auth-ui/react'
-import { useDebouncer } from '@tanstack/react-pacer'
-import { Check, X } from 'lucide-react'
-import { useState } from 'react'
-import type { AdditionalFieldProps } from '#/components/auth/additional-field.tsx'
-import { Field, FieldError } from '#/components/ui/field.tsx'
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-} from '#/components/ui/input-group.tsx'
-import { Label } from '#/components/ui/label.tsx'
-import { Spinner } from '#/components/ui/spinner.tsx'
-import { usernamePlugin } from '#/lib/auth/username-plugin.ts'
+import { useAuth, useAuthPlugin, useIsUsernameAvailable } from "@better-auth-ui/react"
+import type { UsernameAuthClient } from "@better-auth-ui/react"
+import { useDebouncer } from "@tanstack/react-pacer"
+import { Check, X } from "lucide-react"
+import { useState } from "react"
+
+import type { AdditionalFieldProps } from "#/components/auth/additional-field.tsx"
+import { Field, FieldError } from "#/components/ui/field.tsx"
+import { InputGroup, InputGroupAddon, InputGroupInput } from "#/components/ui/input-group.tsx"
+import { Label } from "#/components/ui/label.tsx"
+import { Spinner } from "#/components/ui/spinner.tsx"
+import { usernamePlugin } from "#/lib/auth/username-plugin.ts"
 
 /**
  * Renderer for the `username` additional field. Owns availability checking,
@@ -24,11 +17,7 @@ import { usernamePlugin } from '#/lib/auth/username-plugin.ts'
  * validation (minLength, required, etc.) — availability feedback is shown
  * via the icon and `aria-label` without affecting the field's invalid state.
  */
-export function UsernameField({
-  name,
-  field,
-  isPending,
-}: AdditionalFieldProps) {
+export function UsernameField({ name, field, isPending }: AdditionalFieldProps) {
   const { authClient } = useAuth()
   const {
     localization,
@@ -37,7 +26,7 @@ export function UsernameField({
     isUsernameAvailable: checkAvailability,
   } = useAuthPlugin(usernamePlugin)
 
-  const currentUsername = String(field.defaultValue ?? '')
+  const currentUsername = String(field.defaultValue ?? "")
   const [value, setValue] = useState(currentUsername)
   const [error, setError] = useState<string>()
 

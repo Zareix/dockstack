@@ -1,5 +1,5 @@
 {
-  "include": ["**/*.ts", "**/*.tsx", "prettier.config.js", "vite.config.js"],
+  "include": ["src/**/*.ts", "src/**/*.tsx", "vite.config.js"],
 
   "compilerOptions": {
     "target": "ES2023",

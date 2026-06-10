@@ -1,9 +1,9 @@
-'use client'
+"use client"
 
-import { useAuth, useAuthPlugin } from '@better-auth-ui/react'
-import { Check, Copy, Key } from 'lucide-react'
-import { useState } from 'react'
-import { toast } from 'sonner'
+import { useAuth, useAuthPlugin } from "@better-auth-ui/react"
+import { Check, Copy, Key } from "lucide-react"
+import { useState } from "react"
+import { toast } from "sonner"
 
 import {
   AlertDialog,
@@ -14,14 +14,10 @@ import {
   AlertDialogHeader,
   AlertDialogMedia,
   AlertDialogTitle,
-} from '#/components/ui/alert-dialog.tsx'
-import {
-  InputGroup,
-  InputGroupButton,
-  InputGroupInput,
-} from '#/components/ui/input-group.tsx'
-import { Label } from '#/components/ui/label.tsx'
-import { apiKeyPlugin } from '#/lib/auth/api-key-plugin.ts'
+} from "#/components/ui/alert-dialog.tsx"
+import { InputGroup, InputGroupButton, InputGroupInput } from "#/components/ui/input-group.tsx"
+import { Label } from "#/components/ui/label.tsx"
+import { apiKeyPlugin } from "#/lib/auth/api-key-plugin.ts"
 
 export type NewApiKeyDialogProps = {
   open: boolean
@@ -30,12 +26,7 @@ export type NewApiKeyDialogProps = {
   secretKey: string | null
 }
 
-export function NewApiKeyDialog({
-  open,
-  onOpenChange,
-  name,
-  secretKey,
-}: NewApiKeyDialogProps) {
+export function NewApiKeyDialog({ open, onOpenChange, name, secretKey }: NewApiKeyDialogProps) {
   const { localization } = useAuth()
   const { localization: apiKeyLocalization } = useAuthPlugin(apiKeyPlugin)
 
@@ -63,20 +54,16 @@ export function NewApiKeyDialog({
 
           <AlertDialogTitle>{apiKeyLocalization.newApiKey}</AlertDialogTitle>
 
-          <AlertDialogDescription>
-            {apiKeyLocalization.newApiKeyWarning}
-          </AlertDialogDescription>
+          <AlertDialogDescription>{apiKeyLocalization.newApiKeyWarning}</AlertDialogDescription>
         </AlertDialogHeader>
 
         <div className="flex flex-col gap-2">
-          <Label htmlFor="new-api-key-secret">
-            {name || apiKeyLocalization.apiKey}
-          </Label>
+          <Label htmlFor="new-api-key-secret">{name || apiKeyLocalization.apiKey}</Label>
 
           <InputGroup>
             <InputGroupInput
               id="new-api-key-secret"
-              value={secretKey ?? ''}
+              value={secretKey ?? ""}
               readOnly
               className="font-mono text-xs"
             />

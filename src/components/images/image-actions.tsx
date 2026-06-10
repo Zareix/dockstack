@@ -1,9 +1,10 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { Trash2Icon } from 'lucide-react'
-import { toast } from 'sonner'
-import type { ImageInfo } from '#/lib/docker'
-import { imageRemove } from '#/lib/functions'
-import { Button } from '#/components/ui/button'
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { Trash2Icon } from "lucide-react"
+import { toast } from "sonner"
+
+import { Button } from "#/components/ui/button"
+import type { ImageInfo } from "#/lib/docker"
+import { imageRemove } from "#/lib/functions"
 
 export function ImageActions({ image }: { image: ImageInfo }) {
   const queryClient = useQueryClient()
@@ -13,7 +14,7 @@ export function ImageActions({ image }: { image: ImageInfo }) {
     mutationFn: () => imageRemove({ data: { id: image.id } }),
     onSuccess: () => {
       toast.success(`${label} removed`)
-      queryClient.invalidateQueries({ queryKey: ['images'] })
+      queryClient.invalidateQueries({ queryKey: ["images"] })
     },
     onError: (e) => toast.error(e.message),
   })

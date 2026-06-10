@@ -1,15 +1,9 @@
-import { useAuth, useSession } from '@better-auth-ui/react'
-import {
-  ChevronsUpDown,
-  LogIn,
-  LogOut,
-  Settings,
-  UserPlus2,
-} from 'lucide-react'
-import { isValidElement } from 'react'
-import type { ComponentType, ReactElement, ReactNode } from 'react'
+import { useAuth, useSession } from "@better-auth-ui/react"
+import { ChevronsUpDown, LogIn, LogOut, Settings, UserPlus2 } from "lucide-react"
+import { isValidElement } from "react"
+import type { ComponentType, ReactElement, ReactNode } from "react"
 
-import { Button } from '#/components/ui/button.tsx'
+import { Button } from "#/components/ui/button.tsx"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,17 +12,15 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '#/components/ui/dropdown-menu.tsx'
-import { cn } from '#/lib/utils.ts'
-import { UserAvatar } from './user-avatar'
-import { UserView } from './user-view'
-import { useSidebar } from '#/components/ui/sidebar'
+} from "#/components/ui/dropdown-menu.tsx"
+import { useSidebar } from "#/components/ui/sidebar"
+import { cn } from "#/lib/utils.ts"
+
+import { UserAvatar } from "./user-avatar"
+import { UserView } from "./user-view"
 
 /** Auth states a `UserButton` link can be visible in. */
-export type UserButtonLinkVisibility =
-  | 'authenticated'
-  | 'unauthenticated'
-  | 'always'
+export type UserButtonLinkVisibility = "authenticated" | "unauthenticated" | "always"
 
 /** A simple link entry rendered as a `DropdownMenuItem` in the `UserButton` menu. */
 export type UserButtonLink = {
@@ -39,7 +31,7 @@ export type UserButtonLink = {
   /** Optional leading icon. Sized/coloured to match built-in items. */
   icon?: ReactNode
   /** Forwarded to the underlying `DropdownMenuItem`. */
-  variant?: 'default' | 'destructive'
+  variant?: "default" | "destructive"
   /**
    * When this link is visible based on auth state.
    * @default "always"
@@ -49,16 +41,10 @@ export type UserButtonLink = {
 
 export type UserButtonProps = {
   className?: string
-  align?: 'center' | 'end' | 'start' | undefined
+  align?: "center" | "end" | "start" | undefined
   sideOffset?: number
-  size?: 'default' | 'icon'
-  variant?:
-    | 'default'
-    | 'destructive'
-    | 'ghost'
-    | 'link'
-    | 'outline'
-    | 'secondary'
+  size?: "default" | "icon"
+  variant?: "default" | "destructive" | "ghost" | "link" | "outline" | "secondary"
   /** Additional menu entries rendered above the built-in items. */
   links?: (UserButtonLink | ReactElement)[]
   /** Hide the built-in "Settings" link. Useful when replacing it via `links`. */
@@ -74,11 +60,7 @@ function renderUserLink(
 
   const { label, href, icon, variant } = link
   return (
-    <DropdownMenuItem
-      key={fallbackKey}
-      variant={variant}
-      render={<Link href={href} />}
-    >
+    <DropdownMenuItem key={fallbackKey} variant={variant} render={<Link href={href} />}>
       {icon}
       {label}
     </DropdownMenuItem>
@@ -104,13 +86,12 @@ export function UserButton({
   className,
   align,
   sideOffset,
-  size = 'default',
-  variant = 'ghost',
+  size = "default",
+  variant = "ghost",
   links,
   hideSettings = false,
 }: UserButtonProps) {
-  const { authClient, basePaths, viewPaths, localization, plugins, Link } =
-    useAuth()
+  const { authClient, basePaths, viewPaths, localization, plugins, Link } = useAuth()
   const { isMobile, toggleSidebar } = useSidebar()
   const { data: session, isPending: sessionPending } = useSession(authClient)
 
@@ -118,9 +99,9 @@ export function UserButton({
 
   const userLinks = links?.flatMap((link, index) => {
     if (!isValidElement(link)) {
-      const visibility = link.visibility ?? 'always'
-      if (visibility === 'authenticated' && !session) return []
-      if (visibility === 'unauthenticated' && session) return []
+      const visibility = link.visibility ?? "always"
+      if (visibility === "authenticated" && !session) return []
+      if (visibility === "unauthenticated" && session) return []
     }
     return [renderUserLink(link, Link, `user-button-link-${index.toString()}`)]
   })
@@ -128,15 +109,12 @@ export function UserButton({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        className={cn(
-          size === 'icon' && 'rounded-full',
-          size === 'icon' && className,
-        )}
+        className={cn(size === "icon" && "rounded-full", size === "icon" && className)}
         render={
-          size !== 'icon' ? (
+          size !== "icon" ? (
             <Button
               variant={variant}
-              className={cn('py-2.5 h-auto font-normal', className)}
+              className={cn("h-auto py-2.5 font-normal", className)}
               size="lg"
             >
               {session || sessionPending ? (
@@ -156,11 +134,11 @@ export function UserButton({
           ) : undefined
         }
       >
-        {size === 'icon' && <UserAvatar />}
+        {size === "icon" && <UserAvatar />}
       </DropdownMenuTrigger>
 
       <DropdownMenuContent
-        className="w-[--radix-dropdown-menu-trigger-width] min-w-40 md:min-w-56 max-w-[48svw]"
+        className="w-[--radix-dropdown-menu-trigger-width] max-w-[48svw] min-w-40 md:min-w-56"
         sideOffset={sideOffset}
         align={align}
         autoFocus={false}
@@ -184,11 +162,7 @@ export function UserButton({
             {!hideSettings && (
               <DropdownMenuItem
                 onClick={toggleSidebarOnMobile}
-                render={
-                  <Link
-                    href={`${basePaths.settings}/${viewPaths.settings.account}`}
-                  />
-                }
+                render={<Link href={`${basePaths.settings}/${viewPaths.settings.account}`} />}
               >
                 <Settings className="text-muted-foreground" />
                 {localization.settings.settings}
@@ -204,9 +178,7 @@ export function UserButton({
             <DropdownMenuSeparator />
 
             <DropdownMenuItem
-              render={
-                <Link href={`${basePaths.auth}/${viewPaths.auth.signOut}`} />
-              }
+              render={<Link href={`${basePaths.auth}/${viewPaths.auth.signOut}`} />}
             >
               <LogOut className="text-muted-foreground" />
               {localization.auth.signOut}
@@ -216,20 +188,12 @@ export function UserButton({
           <>
             {userLinks}
 
-            <DropdownMenuItem
-              render={
-                <Link href={`${basePaths.auth}/${viewPaths.auth.signIn}`} />
-              }
-            >
+            <DropdownMenuItem render={<Link href={`${basePaths.auth}/${viewPaths.auth.signIn}`} />}>
               <LogIn className="text-muted-foreground" />
               {localization.auth.signIn}
             </DropdownMenuItem>
 
-            <DropdownMenuItem
-              render={
-                <Link href={`${basePaths.auth}/${viewPaths.auth.signUp}`} />
-              }
-            >
+            <DropdownMenuItem render={<Link href={`${basePaths.auth}/${viewPaths.auth.signUp}`} />}>
               <UserPlus2 className="text-muted-foreground" />
               {localization.auth.signUp}
             </DropdownMenuItem>

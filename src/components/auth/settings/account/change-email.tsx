@@ -1,16 +1,16 @@
-import { useAuth, useChangeEmail, useSession } from '@better-auth-ui/react'
-import { useState } from 'react'
-import type { SyntheticEvent } from 'react'
-import { toast } from 'sonner'
+import { useAuth, useChangeEmail, useSession } from "@better-auth-ui/react"
+import { useState } from "react"
+import type { SyntheticEvent } from "react"
+import { toast } from "sonner"
 
-import { Button } from '#/components/ui/button.tsx'
-import { Card, CardContent, CardFooter } from '#/components/ui/card.tsx'
-import { Field, FieldError } from '#/components/ui/field.tsx'
-import { Input } from '#/components/ui/input.tsx'
-import { Label } from '#/components/ui/label.tsx'
-import { Skeleton } from '#/components/ui/skeleton.tsx'
-import { Spinner } from '#/components/ui/spinner.tsx'
-import { cn } from '#/lib/utils.ts'
+import { Button } from "#/components/ui/button.tsx"
+import { Card, CardContent, CardFooter } from "#/components/ui/card.tsx"
+import { Field, FieldError } from "#/components/ui/field.tsx"
+import { Input } from "#/components/ui/input.tsx"
+import { Label } from "#/components/ui/label.tsx"
+import { Skeleton } from "#/components/ui/skeleton.tsx"
+import { Spinner } from "#/components/ui/spinner.tsx"
+import { cn } from "#/lib/utils.ts"
 
 export type ChangeEmailProps = {
   className?: string
@@ -42,16 +42,14 @@ export function ChangeEmail({ className }: ChangeEmailProps) {
 
     const formData = new FormData(e.currentTarget)
     changeEmail({
-      newEmail: formData.get('email') as string,
+      newEmail: formData.get("email") as string,
       callbackURL: `${baseURL}/${viewPaths.settings.account}`,
     })
   }
 
   return (
     <div>
-      <h2 className="text-sm font-semibold mb-3">
-        {localization.settings.changeEmail}
-      </h2>
+      <h2 className="mb-3 text-sm font-semibold">{localization.settings.changeEmail}</h2>
 
       <form onSubmit={handleSubmit}>
         <Card className={cn(className)}>

@@ -1,8 +1,8 @@
 {
   "name": "dockstack",
+  "version": "0.7.2",
   "private": true,
   "type": "module",
-  "version": "0.7.1",
   "imports": {
     "#/*": "./src/*"
   },
@@ -11,17 +11,17 @@
     "build": "bun run --bun vite build",
     "preview": "bun run --bun vite preview",
     "test": "bun test",
-    "lint": "oxlint --type-aware",
-    "lint:fix": "oxlint --fix --type-aware",
-    "format": "prettier --write .",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
+    "format": "oxfmt",
     "check": "bun run format && bun run lint:fix",
     "db:generate": "bunx drizzle-kit generate",
     "auth:generate": "bunx --bun @better-auth/cli generate --config src/lib/auth/index.ts --output src/db/schema/auth-schema.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.5.0",
-    "@better-auth-ui/core": "^1.6.15",
-    "@better-auth-ui/react": "^1.6.15",
+    "@better-auth-ui/core": "^1.6.18",
+    "@better-auth-ui/react": "^1.6.18",
     "@better-auth/api-key": "^1.6.11",
     "@fontsource-variable/geist": "^5.2.9",
     "@monaco-editor/react": "^4.7.0",
@@ -32,13 +32,13 @@
     "@tanstack/react-pacer": "^0.22.1",
     "@tanstack/react-query": "^5.100.14",
     "@tanstack/react-query-devtools": "latest",
-    "@tanstack/react-router": "1.170.9",
+    "@tanstack/react-router": "1.170.15",
     "@tanstack/react-router-devtools": "latest",
     "@tanstack/react-router-ssr-query": "1.167.1",
-    "@tanstack/react-start": "1.168.16",
+    "@tanstack/react-start": "1.168.25",
     "@tanstack/react-table": "^8.21.3",
     "@tanstack/react-virtual": "^3.13.26",
-    "@tanstack/router-plugin": "^1.168.12",
+    "@tanstack/router-plugin": "^1.168.18",
     "@types/dockerode-compose": "^1.4.2",
     "@xterm/addon-fit": "^0.11.0",
     "@xterm/addon-web-links": "^0.12.0",
@@ -56,7 +56,7 @@
     "monaco-editor": "^0.54.0",
     "monaco-yaml": "^5.5.0",
     "next-themes": "^0.4.6",
-    "nitro": "^3.0.260522-beta",
+    "nitro": "^3.0.260603-beta",
     "react": "^19.2.6",
     "react-day-picker": "^10.0.1",
     "react-dom": "^19.2.6",
@@ -76,24 +76,20 @@
     "@types/better-sqlite3": "^7.6.13",
     "@types/bun": "^1.3.14",
     "@types/dockerode": "^4.0.1",
-    "@types/node": "^25.9.1",
-    "@types/react": "^19.2.15",
+    "@types/node": "^25.9.2",
+    "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.2",
     "dotenv": "^17.4.2",
     "jsdom": "^29.1.1",
+    "oxfmt": "^0.53.0",
     "oxlint": "^1.68.0",
     "oxlint-tsgolint": "^0.23.0",
-    "prettier": "^3.8.3",
     "tsx": "^4.22.3",
     "typescript": "^6.0.3",
     "vite": "^8.0.14"
   },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "esbuild",
-      "lightningcss",
-      "better-sqlite3"
-    ]
+  "overrides": {
+    "kysely": "0.28.17"
   }
 }

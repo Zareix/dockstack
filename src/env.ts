@@ -1,18 +1,15 @@
-import { createEnv } from '@t3-oss/env-core'
-import { z } from 'zod'
+import { createEnv } from "@t3-oss/env-core"
+import { z } from "zod"
 
 export const env = createEnv({
   server: {
-    NODE_ENV: z._default(
-      z.enum(['development', 'test', 'production']),
-      'development',
-    ),
+    NODE_ENV: z._default(z.enum(["development", "test", "production"]), "development"),
     BETTER_AUTH_URL: z.url().optional(),
     ADMIN_EMAIL: z.email(),
-    APP_TITLE: z.string().min(1).optional().default('Dockstack'),
+    APP_TITLE: z.string().min(1).optional().default("Dockstack"),
     SERVER_HOST: z.string().min(1),
     STACKS_DIR: z.string().min(1),
-    DATABASE_PATH: z._default(z.string(), './db.sqlite'),
+    DATABASE_PATH: z._default(z.string(), "./db.sqlite"),
     OAUTH_PROVIDER_ID: z.string().optional(),
     OAUTH_CLIENT_ID: z.string().optional(),
     OAUTH_CLIENT_SECRET: z.string().optional(),
@@ -23,7 +20,7 @@ export const env = createEnv({
       .string()
       .transform((val) =>
         val
-          .split(',')
+          .split(",")
           .map((s) => s.trim())
           .filter(Boolean),
       )
@@ -36,7 +33,7 @@ export const env = createEnv({
    * The prefix that client-side variables must have. This is enforced both at
    * a type-level and at runtime.
    */
-  clientPrefix: 'VITE_',
+  clientPrefix: "VITE_",
 
   client: {},
 

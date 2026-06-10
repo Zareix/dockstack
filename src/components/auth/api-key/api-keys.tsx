@@ -3,18 +3,19 @@ import {
   useAuth,
   useAuthPlugin,
   useListApiKeys,
-} from '@better-auth-ui/react'
-import { useState } from 'react'
+} from "@better-auth-ui/react"
+import { useState } from "react"
 
-import { Button } from '#/components/ui/button.tsx'
-import { Card, CardContent } from '#/components/ui/card.tsx'
-import { Separator } from '#/components/ui/separator.tsx'
-import { apiKeyPlugin } from '#/lib/auth/api-key-plugin.ts'
-import { cn } from '#/lib/utils.ts'
-import { ApiKey } from './api-key'
-import { ApiKeySkeleton } from './api-key-skeleton'
-import { ApiKeysEmpty } from './api-keys-empty'
-import { CreateApiKeyDialog } from './create-api-key-dialog'
+import { Button } from "#/components/ui/button.tsx"
+import { Card, CardContent } from "#/components/ui/card.tsx"
+import { Separator } from "#/components/ui/separator.tsx"
+import { apiKeyPlugin } from "#/lib/auth/api-key-plugin.ts"
+import { cn } from "#/lib/utils.ts"
+
+import { ApiKey } from "./api-key"
+import { ApiKeySkeleton } from "./api-key-skeleton"
+import { ApiKeysEmpty } from "./api-keys-empty"
+import { CreateApiKeyDialog } from "./create-api-key-dialog"
 
 export type ApiKeysProps = {
   className?: string
@@ -42,9 +43,7 @@ export function ApiKeys({
     authClient as ApiKeyAuthClient,
     {
       enabled: !isPendingProp,
-      ...(organizationId
-        ? { query: { organizationId, configId: 'organization' } }
-        : {}),
+      ...(organizationId ? { query: { organizationId, configId: "organization" } } : {}),
     },
   )
 
@@ -53,11 +52,9 @@ export function ApiKeys({
   const [createOpen, setCreateOpen] = useState(false)
 
   return (
-    <div className={cn('flex flex-col gap-3', className)}>
+    <div className={cn("flex flex-col gap-3", className)}>
       <div className="flex items-end justify-between gap-3">
-        <h2 className="truncate text-sm font-semibold">
-          {apiKeyLocalization.apiKeys}
-        </h2>
+        <h2 className="truncate text-sm font-semibold">{apiKeyLocalization.apiKeys}</h2>
 
         {!hideCreate && (
           <Button
@@ -76,20 +73,13 @@ export function ApiKeys({
           {isPending ? (
             <ApiKeySkeleton />
           ) : !listData?.apiKeys.length ? (
-            <ApiKeysEmpty
-              onCreatePress={() => setCreateOpen(true)}
-              hideCreate={hideCreate}
-            />
+            <ApiKeysEmpty onCreatePress={() => setCreateOpen(true)} hideCreate={hideCreate} />
           ) : (
             listData.apiKeys.map((key, index) => (
               <div key={key.id}>
                 {index > 0 && <Separator />}
 
-                <ApiKey
-                  apiKey={key}
-                  hideDelete={hideDelete}
-                  organizationId={organizationId}
-                />
+                <ApiKey apiKey={key} hideDelete={hideDelete} organizationId={organizationId} />
               </div>
             ))
           )}

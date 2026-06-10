@@ -1,4 +1,4 @@
-import { dockerClient } from './client'
+import { dockerClient } from "./client"
 
 export type ImageInfo = {
   id: string
@@ -8,17 +8,16 @@ export type ImageInfo = {
   created: number
 }
 
-export type StaleStatus = 'outdated' | 'up-to-date' | 'unknown'
+export type StaleStatus = "outdated" | "up-to-date" | "unknown"
 
 export const formatImageTag = (tag: string) => {
-  if (tag.startsWith('sha256:')) {
-    return tag.replace('sha256:', '').slice(0, 12)
+  if (tag.startsWith("sha256:")) {
+    return tag.replace("sha256:", "").slice(0, 12)
   }
   return tag
 }
 
-export const imageRemove = (id: string) =>
-  dockerClient.getImage(id).remove({ force: true })
+export const imageRemove = (id: string) => dockerClient.getImage(id).remove({ force: true })
 
 export const imagePrune = async () => {
   const res = await dockerClient.pruneImages({
@@ -49,45 +48,38 @@ const getRemoteDigest = (tag: string): Promise<string> =>
     dockerClient.modem.dial(
       {
         path: `/distribution/${tag}/json`,
-        method: 'GET',
+        method: "GET",
         statusCodes: {
           200: true,
-          401: 'unauthorized',
-          404: 'not found',
-          500: 'server error',
+          401: "unauthorized",
+          404: "not found",
+          500: "server error",
         },
       },
       (err: Error | null, data: unknown) => {
         if (err) reject(err)
-        else
-          resolve(
-            (data as { Descriptor: { digest: string } }).Descriptor.digest,
-          )
+        else resolve((data as { Descriptor: { digest: string } }).Descriptor.digest)
       },
     )
   })
 
-export const checkImagesStale = async (): Promise<
-  Record<string, StaleStatus>
-> => {
+export const checkImagesStale = async (): Promise<Record<string, StaleStatus>> => {
   const images = await listImages()
   const results: Record<string, StaleStatus> = {}
 
   await Promise.all(
     images.map(async (image) => {
       if (image.tags.length === 0 || image.repoDigests.length === 0) {
-        results[image.id] = 'unknown'
+        results[image.id] = "unknown"
         return
       }
       try {
         const remoteDigest = await getRemoteDigest(image.tags[0])
-        results[image.id] = image.repoDigests.some((d) =>
-          d.includes(remoteDigest),
-        )
-          ? 'up-to-date'
-          : 'outdated'
+        results[image.id] = image.repoDigests.some((d) => d.includes(remoteDigest))
+          ? "up-to-date"
+          : "outdated"
       } catch {
-        results[image.id] = 'unknown'
+        results[image.id] = "unknown"
       }
     }),
   )

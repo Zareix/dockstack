@@ -1,30 +1,27 @@
-import { Link, useNavigate } from '@tanstack/react-router'
-import { ThemeProvider, useTheme } from 'next-themes'
-import { useQuery } from '@tanstack/react-query'
-import { AuthProvider } from './auth/auth-provider'
-import { Toaster } from './ui/sonner'
-import type { ReactNode } from 'react'
-import { SidebarProvider } from '#/components/ui/sidebar'
-import { usernamePlugin } from '#/lib/auth/username-plugin'
-import { themePlugin } from '#/lib/auth/theme-plugin'
-import { authClient } from '#/lib/auth-client'
-import { getSocialProviders } from '#/lib/functions/auth'
-import { apiKeyPlugin } from '#/lib/auth/api-key-plugin'
+import { useQuery } from "@tanstack/react-query"
+import { Link, useNavigate } from "@tanstack/react-router"
+import { ThemeProvider, useTheme } from "next-themes"
+import type { ReactNode } from "react"
+
+import { SidebarProvider } from "#/components/ui/sidebar"
+import { authClient } from "#/lib/auth-client"
+import { apiKeyPlugin } from "#/lib/auth/api-key-plugin"
+import { themePlugin } from "#/lib/auth/theme-plugin"
+import { usernamePlugin } from "#/lib/auth/username-plugin"
+import { getSocialProviders } from "#/lib/functions/auth"
+
+import { AuthProvider } from "./auth/auth-provider"
+import { Toaster } from "./ui/sonner"
 
 export function Providers({ children }: { children: ReactNode }) {
   const providersQuery = useQuery({
-    queryKey: ['social-providers'],
+    queryKey: ["social-providers"],
     queryFn: () => getSocialProviders(),
   })
   const navigate = useNavigate()
 
   return (
-    <ThemeProvider
-      attribute="class"
-      defaultTheme="system"
-      enableSystem
-      disableTransitionOnChange
-    >
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
       {providersQuery.isLoading ? (
         <></>
       ) : providersQuery.isError ? (
@@ -39,11 +36,7 @@ export function Providers({ children }: { children: ReactNode }) {
               enabled: true,
             }}
             navigate={navigate}
-            plugins={[
-              themePlugin({ useTheme }),
-              usernamePlugin(),
-              apiKeyPlugin(),
-            ]}
+            plugins={[themePlugin({ useTheme }), usernamePlugin(), apiKeyPlugin()]}
             Link={Link}
           >
             <SidebarProvider>{children}</SidebarProvider>

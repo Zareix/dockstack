@@ -1,5 +1,5 @@
 /* oxlint-disable typescript/no-unnecessary-condition */
-import { dockerClient } from './client'
+import { dockerClient } from "./client"
 
 export type SystemPruneResult = {
   containers: { deleted: string[]; spaceReclaimed: number }
@@ -9,12 +9,10 @@ export type SystemPruneResult = {
   totalSpaceReclaimed: number
 }
 
-export const systemPrune = async (
-  includeVolumes = false,
-): Promise<SystemPruneResult> => {
+export const systemPrune = async (includeVolumes = false): Promise<SystemPruneResult> => {
   const containers = await dockerClient.pruneContainers({})
   const images = await dockerClient.pruneImages({
-    filters: JSON.stringify({ dangling: ['false'] }),
+    filters: JSON.stringify({ dangling: ["false"] }),
   })
   const networks = await dockerClient.pruneNetworks({})
   const volumes = includeVolumes ? await dockerClient.pruneVolumes({}) : null

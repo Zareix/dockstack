@@ -1,25 +1,20 @@
-'use client'
+"use client"
 
 import {
   ThemePreviewDark,
   ThemePreviewLight,
   ThemePreviewSystem,
   useAuthPlugin,
-} from '@better-auth-ui/react'
-import { Monitor, Moon, Sun } from 'lucide-react'
-import { useEffect, useState } from 'react'
+} from "@better-auth-ui/react"
+import { Monitor, Moon, Sun } from "lucide-react"
+import { useEffect, useState } from "react"
 
-import { Card, CardContent } from '#/components/ui/card.tsx'
-import {
-  Field,
-  FieldContent,
-  FieldLabel,
-  FieldTitle,
-} from '#/components/ui/field.tsx'
-import { Label } from '#/components/ui/label.tsx'
-import { RadioGroup, RadioGroupItem } from '#/components/ui/radio-group.tsx'
-import { themePlugin } from '#/lib/auth/theme-plugin.ts'
-import { cn } from '#/lib/utils.ts'
+import { Card, CardContent } from "#/components/ui/card.tsx"
+import { Field, FieldContent, FieldLabel, FieldTitle } from "#/components/ui/field.tsx"
+import { Label } from "#/components/ui/label.tsx"
+import { RadioGroup, RadioGroupItem } from "#/components/ui/radio-group.tsx"
+import { themePlugin } from "#/lib/auth/theme-plugin.ts"
+import { cn } from "#/lib/utils.ts"
 
 export type AppearanceProps = {
   className?: string
@@ -43,7 +38,7 @@ export function Appearance({ className }: AppearanceProps) {
 
   return (
     <div>
-      <h2 className="text-sm font-semibold mb-3">{localization.appearance}</h2>
+      <h2 className="mb-3 text-sm font-semibold">{localization.appearance}</h2>
 
       <Card className={cn(className)}>
         <CardContent>
@@ -51,16 +46,16 @@ export function Appearance({ className }: AppearanceProps) {
             <Label>{localization.theme}</Label>
 
             <RadioGroup
-              value={isMounted ? theme : ''}
+              value={isMounted ? theme : ""}
               onValueChange={setTheme}
-              className="grid gap-3 grid-cols-2 sm:grid-cols-3"
+              className="grid grid-cols-2 gap-3 sm:grid-cols-3"
               disabled={!isMounted || !theme}
             >
-              {themes.includes('system') && (
+              {themes.includes("system") && (
                 <FieldLabel htmlFor="system">
                   <Field orientation="horizontal">
                     <FieldContent className="gap-2">
-                      <div className="flex items-center gap-2 justify-between">
+                      <div className="flex items-center justify-between gap-2">
                         <FieldTitle>
                           <Monitor className="size-4 text-muted-foreground" />
 
@@ -76,11 +71,11 @@ export function Appearance({ className }: AppearanceProps) {
                 </FieldLabel>
               )}
 
-              {themes.includes('light') && (
+              {themes.includes("light") && (
                 <FieldLabel htmlFor="light">
                   <Field orientation="horizontal">
                     <FieldContent className="gap-2">
-                      <div className="flex items-center gap-2 justify-between">
+                      <div className="flex items-center justify-between gap-2">
                         <FieldTitle>
                           <Sun className="size-4 text-muted-foreground" />
 
@@ -96,11 +91,11 @@ export function Appearance({ className }: AppearanceProps) {
                 </FieldLabel>
               )}
 
-              {themes.includes('dark') && (
+              {themes.includes("dark") && (
                 <FieldLabel htmlFor="dark">
                   <Field orientation="horizontal">
                     <FieldContent className="gap-2">
-                      <div className="flex items-center gap-2 justify-between">
+                      <div className="flex items-center justify-between gap-2">
                         <FieldTitle>
                           <Moon className="size-4 text-muted-foreground" />
 

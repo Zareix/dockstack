@@ -1,8 +1,10 @@
-import net from 'node:net'
-import { createFileRoute } from '@tanstack/react-router'
-import { defineHooks } from 'crossws'
-import type Docker from 'dockerode'
-import { dockerClient } from '#/lib/docker/client'
+import net from "node:net"
+
+import { createFileRoute } from "@tanstack/react-router"
+import { defineHooks } from "crossws"
+import type Docker from "dockerode"
+
+import { dockerClient } from "#/lib/docker/client"
 
 type ExecSession = {
   socket: net.Socket
@@ -11,22 +13,20 @@ type ExecSession = {
 
 const sessions = new Map<string, ExecSession>()
 
-function startExecHijack(
-  execId: string,
-): Promise<{ socket: net.Socket; remaining: Buffer }> {
+function startExecHijack(execId: string): Promise<{ socket: net.Socket; remaining: Buffer }> {
   return new Promise((resolve, reject) => {
-    const socket = net.createConnection('/var/run/docker.sock')
+    const socket = net.createConnection("/var/run/docker.sock")
     const body = JSON.stringify({ Detach: false, Tty: true })
     const request = [
       `POST /exec/${execId}/start HTTP/1.1`,
-      'Host: localhost',
+      "Host: localhost",
       `Content-Length: ${Buffer.byteLength(body)}`,
-      'Content-Type: application/json',
-      'Upgrade: tcp',
-      'Connection: Upgrade',
-      '',
+      "Content-Type: application/json",
+      "Upgrade: tcp",
+      "Connection: Upgrade",
+      "",
       body,
-    ].join('\r\n')
+    ].join("\r\n")
 
     let headerBuf = Buffer.alloc(0)
     let upgraded = false
@@ -34,12 +34,12 @@ function startExecHijack(
     const onData = (chunk: Buffer) => {
       if (upgraded) return
       headerBuf = Buffer.concat([headerBuf, chunk])
-      const idx = headerBuf.indexOf('\r\n\r\n')
+      const idx = headerBuf.indexOf("\r\n\r\n")
       if (idx !== -1) {
         upgraded = true
-        socket.removeListener('data', onData)
-        const statusLine = headerBuf.slice(0, idx).toString().split('\r\n')[0]
-        if (statusLine.includes('101') || statusLine.includes('200')) {
+        socket.removeListener("data", onData)
+        const statusLine = headerBuf.slice(0, idx).toString().split("\r\n")[0]
+        if (statusLine.includes("101") || statusLine.includes("200")) {
           resolve({ socket, remaining: headerBuf.slice(idx + 4) })
         } else {
           reject(new Error(`exec start failed: ${statusLine}`))
@@ -48,9 +48,9 @@ function startExecHijack(
       }
     }
 
-    socket.on('data', onData)
-    socket.on('error', reject)
-    socket.once('connect', () => socket.write(request))
+    socket.on("data", onData)
+    socket.on("error", reject)
+    socket.once("connect", () => socket.write(request))
   })
 }
 
@@ -59,43 +59,37 @@ const hooks = defineHooks({
     const raw = message.rawData
 
     // Binary messages → raw terminal input
-    if (
-      raw instanceof Uint8Array ||
-      raw instanceof ArrayBuffer ||
-      Buffer.isBuffer(raw)
-    ) {
+    if (raw instanceof Uint8Array || raw instanceof ArrayBuffer || Buffer.isBuffer(raw)) {
       const session = sessions.get(peer.id)
       if (session)
-        session.socket.write(
-          Buffer.isBuffer(raw) ? raw : Buffer.from(raw as ArrayBuffer),
-        )
+        session.socket.write(Buffer.isBuffer(raw) ? raw : Buffer.from(raw as ArrayBuffer))
       return
     }
 
     try {
       const msg = message.json<
         | {
-            type: 'init'
+            type: "init"
             containerId: string
             cols?: number
             rows?: number
             shell?: string
           }
         | {
-            type: 'resize'
+            type: "resize"
             cols: number
             rows: number
           }
         | {
-            type: 'close'
+            type: "close"
           }
       >()
 
-      if (msg.type === 'init') {
+      if (msg.type === "init") {
         const containerId = msg.containerId
         const cols = msg.cols ?? 80
         const rows = msg.rows ?? 24
-        const shell = msg.shell ?? '/bin/sh'
+        const shell = msg.shell ?? "/bin/sh"
 
         try {
           const container = dockerClient.getContainer(containerId)
@@ -120,25 +114,25 @@ const hooks = defineHooks({
 
           if (remaining.length > 0) peer.send(remaining)
 
-          socket.on('data', (chunk: Buffer) => peer.send(chunk))
+          socket.on("data", (chunk: Buffer) => peer.send(chunk))
 
-          socket.on('end', () => {
-            peer.send(JSON.stringify({ type: 'exit' }))
+          socket.on("end", () => {
+            peer.send(JSON.stringify({ type: "exit" }))
             sessions.delete(peer.id)
           })
 
-          socket.on('error', (err: Error) => {
-            peer.send(JSON.stringify({ type: 'error', message: err.message }))
+          socket.on("error", (err: Error) => {
+            peer.send(JSON.stringify({ type: "error", message: err.message }))
             sessions.delete(peer.id)
           })
         } catch (err) {
-          peer.send(JSON.stringify({ type: 'error', message: String(err) }))
+          peer.send(JSON.stringify({ type: "error", message: String(err) }))
         }
 
         return
       }
 
-      if (msg.type === 'resize') {
+      if (msg.type === "resize") {
         const session = sessions.get(peer.id)
         if (session) {
           await session.exec.resize({
@@ -165,12 +159,12 @@ const hooks = defineHooks({
   },
 })
 
-export const Route = createFileRoute('/api/ws/exec')({
+export const Route = createFileRoute("/api/ws/exec")({
   server: {
     handlers: {
       GET: async () => {
         return Object.assign(
-          new Response('WebSocket upgrade is required.', {
+          new Response("WebSocket upgrade is required.", {
             status: 426,
           }),
           {

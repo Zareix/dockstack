@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { Button } from '#/components/ui/button'
+import { useCallback, useEffect, useRef, useState } from "react"
+
+import { Button } from "#/components/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -7,7 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '#/components/ui/dialog'
+} from "#/components/ui/dialog"
 
 type Props = {
   title: string
@@ -38,11 +39,9 @@ export function StackActionDialog({ title, action, onDone, children }: Props) {
     const iter = (await actionRef.current())[Symbol.asyncIterator]()
 
     try {
+      // eslint-disable-next-line typescript/no-unnecessary-condition
       while (true) {
-        const result = await Promise.race([
-          iter.next(),
-          stopPromise.then(() => stopped),
-        ])
+        const result = await Promise.race([iter.next(), stopPromise.then(() => stopped)])
         if (result.done) break
         setLines((prev) => [...prev, result.value])
       }
@@ -60,8 +59,7 @@ export function StackActionDialog({ title, action, onDone, children }: Props) {
   }, [open, run])
 
   useEffect(() => {
-    if (scrollRef.current)
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight
+    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight
   }, [lines])
 
   return (
@@ -72,30 +70,24 @@ export function StackActionDialog({ title, action, onDone, children }: Props) {
           <DialogTitle>
             {title}
             {running && (
-              <span className="ml-2 inline-block size-2 rounded-full bg-green-400 animate-pulse" />
+              <span className="ml-2 inline-block size-2 animate-pulse rounded-full bg-green-400" />
             )}
           </DialogTitle>
         </DialogHeader>
         <div
           ref={scrollRef}
-          className="h-96 overflow-auto bg-zinc-950 rounded-md text-xs font-mono leading-5 p-3 text-zinc-200"
+          className="h-96 overflow-auto rounded-md bg-zinc-950 p-3 font-mono text-xs leading-5 text-zinc-200"
         >
           {lines.map((line, i) => (
             <div key={i} className="whitespace-pre-wrap">
               {line}
             </div>
           ))}
-          {running && lines.length === 0 && (
-            <span className="text-zinc-500">Starting...</span>
-          )}
+          {running && lines.length === 0 && <span className="text-zinc-500">Starting...</span>}
         </div>
         <DialogFooter>
-          <Button
-            variant="outline"
-            disabled={running}
-            onClick={() => setOpen(false)}
-          >
-            {running ? 'Running…' : 'Close'}
+          <Button variant="outline" disabled={running} onClick={() => setOpen(false)}>
+            {running ? "Running…" : "Close"}
           </Button>
         </DialogFooter>
       </DialogContent>

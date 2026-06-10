@@ -1,9 +1,8 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { BrushCleaningIcon } from 'lucide-react'
-import { useState } from 'react'
-import { toast } from 'sonner'
-import { containerPrune } from '#/lib/functions'
-import { Button } from '#/components/ui/button'
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { BrushCleaningIcon } from "lucide-react"
+import { useState } from "react"
+import { toast } from "sonner"
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,7 +13,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from '#/components/ui/alert-dialog'
+} from "#/components/ui/alert-dialog"
+import { Button } from "#/components/ui/button"
+import { containerPrune } from "#/lib/functions"
 
 export function PruneContainersButton() {
   const [open, setOpen] = useState(false)
@@ -25,10 +26,8 @@ export function PruneContainersButton() {
     onSuccess: (result) => {
       const count = result.ContainersDeleted.length
       const mb = (result.SpaceReclaimed / 1e6).toFixed(1)
-      toast.success(
-        `Pruned ${count} container${count !== 1 ? 's' : ''}, freed ${mb} MB`,
-      )
-      queryClient.invalidateQueries({ queryKey: ['containers'] })
+      toast.success(`Pruned ${count} container${count !== 1 ? "s" : ""}, freed ${mb} MB`)
+      queryClient.invalidateQueries({ queryKey: ["containers"] })
     },
     onError: (e) => toast.error(e.message),
   })

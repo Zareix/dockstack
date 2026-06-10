@@ -1,9 +1,9 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute } from "@tanstack/react-router"
 
-export const Route = createFileRoute('/api/health')({
+export const Route = createFileRoute("/api/health")({
   server: {
     handlers: {
-      GET: () => Response.json({ status: 'ok' }),
+      GET: () => Response.json({ status: "ok" }),
     },
   },
 })

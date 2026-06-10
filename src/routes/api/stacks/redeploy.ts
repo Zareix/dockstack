@@ -1,8 +1,9 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { apiKeyMiddleware, loggingMiddleware } from '#/lib/middleware'
-import { redeployAllRunningStacks } from '#/lib/docker'
+import { createFileRoute } from "@tanstack/react-router"
 
-export const Route = createFileRoute('/api/stacks/redeploy')({
+import { redeployAllRunningStacks } from "#/lib/docker"
+import { apiKeyMiddleware, loggingMiddleware } from "#/lib/middleware"
+
+export const Route = createFileRoute("/api/stacks/redeploy")({
   server: {
     middleware: [loggingMiddleware, apiKeyMiddleware],
     handlers: {

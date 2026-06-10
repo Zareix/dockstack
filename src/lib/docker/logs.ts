@@ -1,9 +1,9 @@
-import { dockerClient } from './client'
+import { dockerClient } from "./client"
 
 export type LogEntry = {
   containerName: string
   message: string
-  stream: 'stdout' | 'stderr'
+  stream: "stdout" | "stderr"
   timestamp: string
 }
 
@@ -29,22 +29,22 @@ export const streamStackLogs = async function* (stackName: string) {
   const processStream = async (
     stream: ReadableStream<Uint8Array>,
     containerName: string,
-    streamType: 'stdout' | 'stderr',
+    streamType: "stdout" | "stderr",
   ) => {
     const reader = stream.getReader()
-    let buf = ''
+    let buf = ""
     try {
       // oxlint-disable-next-line
       while (true) {
         const { done: streamDone, value } = await reader.read()
         if (streamDone) break
         buf += decoder.decode(value, { stream: true })
-        const parts = buf.split('\n')
-        buf = parts.pop() ?? ''
+        const parts = buf.split("\n")
+        buf = parts.pop() ?? ""
         for (const line of parts) {
           if (!line) continue
-          const spaceIdx = line.indexOf(' ')
-          const timestamp = spaceIdx > -1 ? line.slice(0, spaceIdx) : ''
+          const spaceIdx = line.indexOf(" ")
+          const timestamp = spaceIdx > -1 ? line.slice(0, spaceIdx) : ""
           const message = spaceIdx > -1 ? line.slice(spaceIdx + 1) : line
           queue.push({ containerName, message, stream: streamType, timestamp })
           const fn = notify
@@ -56,7 +56,7 @@ export const streamStackLogs = async function* (stackName: string) {
           containerName,
           message: buf,
           stream: streamType,
-          timestamp: '',
+          timestamp: "",
         })
         const fn = notify
         if (fn) fn()
@@ -67,25 +67,16 @@ export const streamStackLogs = async function* (stackName: string) {
   }
 
   for (const info of containers) {
-    const containerName =
-      info.Names[0]?.replace(/^\//, '') ?? info.Id.slice(0, 12)
+    const containerName = info.Names[0]?.replace(/^\//, "") ?? info.Id.slice(0, 12)
     ;(async () => {
       try {
         const proc = Bun.spawn(
-          [
-            'docker',
-            'logs',
-            '--follow',
-            '--timestamps',
-            '--tail',
-            '1000',
-            info.Id,
-          ],
-          { stdout: 'pipe', stderr: 'pipe' },
+          ["docker", "logs", "--follow", "--timestamps", "--tail", "1000", info.Id],
+          { stdout: "pipe", stderr: "pipe" },
         )
         await Promise.all([
-          processStream(proc.stdout, containerName, 'stdout'),
-          processStream(proc.stderr, containerName, 'stderr'),
+          processStream(proc.stdout, containerName, "stdout"),
+          processStream(proc.stderr, containerName, "stderr"),
         ])
       } catch {
         // container may have stopped or been removed

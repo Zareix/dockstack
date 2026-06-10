@@ -4,8 +4,8 @@ import {
   useAuth,
   useAuthPlugin,
   useDeleteApiKey,
-} from '@better-auth-ui/react'
-import { Key } from 'lucide-react'
+} from "@better-auth-ui/react"
+import { Key } from "lucide-react"
 
 import {
   AlertDialog,
@@ -16,13 +16,13 @@ import {
   AlertDialogHeader,
   AlertDialogMedia,
   AlertDialogTitle,
-} from '#/components/ui/alert-dialog.tsx'
-import { Button } from '#/components/ui/button.tsx'
-import { Field } from '#/components/ui/field.tsx'
-import { Input } from '#/components/ui/input.tsx'
-import { Label } from '#/components/ui/label.tsx'
-import { Spinner } from '#/components/ui/spinner.tsx'
-import { apiKeyPlugin } from '#/lib/auth/api-key-plugin.ts'
+} from "#/components/ui/alert-dialog.tsx"
+import { Button } from "#/components/ui/button.tsx"
+import { Field } from "#/components/ui/field.tsx"
+import { Input } from "#/components/ui/input.tsx"
+import { Label } from "#/components/ui/label.tsx"
+import { Spinner } from "#/components/ui/spinner.tsx"
+import { apiKeyPlugin } from "#/lib/auth/api-key-plugin.ts"
 
 export type DeleteApiKeyDialogProps = {
   open: boolean
@@ -40,7 +40,7 @@ export function DeleteApiKeyDialog({
 }: DeleteApiKeyDialogProps) {
   const { authClient, localization } = useAuth()
   const { localization: apiKeyLocalization } = useAuthPlugin(apiKeyPlugin)
-  const preview = `${apiKey.start}${'*'.repeat(16)}`
+  const preview = `${apiKey.start}${"*".repeat(16)}`
   const previewId = `delete-api-key-preview-${apiKey.id}`
   const { mutate: deleteApiKey, isPending: isDeleting } = useDeleteApiKey(
     authClient as ApiKeyAuthClient,
@@ -59,23 +59,13 @@ export function DeleteApiKeyDialog({
 
           <AlertDialogTitle>{apiKeyLocalization.deleteApiKey}</AlertDialogTitle>
 
-          <AlertDialogDescription>
-            {apiKeyLocalization.deleteApiKeyWarning}
-          </AlertDialogDescription>
+          <AlertDialogDescription>{apiKeyLocalization.deleteApiKeyWarning}</AlertDialogDescription>
         </AlertDialogHeader>
 
         <Field>
-          <Label htmlFor={previewId}>
-            {apiKey.name || apiKeyLocalization.apiKey}
-          </Label>
+          <Label htmlFor={previewId}>{apiKey.name || apiKeyLocalization.apiKey}</Label>
 
-          <Input
-            id={previewId}
-            value={preview}
-            readOnly
-            className="font-mono text-xs"
-            disabled
-          />
+          <Input id={previewId} value={preview} readOnly className="font-mono text-xs" disabled />
         </Field>
 
         <AlertDialogFooter>
@@ -90,7 +80,7 @@ export function DeleteApiKeyDialog({
             onClick={() =>
               deleteApiKey({
                 keyId: apiKey.id,
-                ...(organizationId ? { configId: 'organization' } : {}),
+                ...(organizationId ? { configId: "organization" } : {}),
               })
             }
           >

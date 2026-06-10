@@ -1,18 +1,19 @@
-import { Editor, loader } from '@monaco-editor/react'
-import * as monaco from 'monaco-editor'
-import { configureMonacoYaml } from 'monaco-yaml'
-import EditorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker'
-import { Spinner } from '#/components/ui/spinner'
+import { Editor, loader } from "@monaco-editor/react"
+import * as monaco from "monaco-editor"
+import EditorWorker from "monaco-editor/esm/vs/editor/editor.worker?worker"
+import { configureMonacoYaml } from "monaco-yaml"
+
+import { Spinner } from "#/components/ui/spinner"
 
 const COMPOSE_SCHEMA_URL =
-  'https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json'
+  "https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json"
 
 window.MonacoEnvironment = {
   getWorker(_, label) {
     switch (label) {
-      case 'yaml':
-        return new Worker(new URL('./yaml.worker.js', import.meta.url), {
-          type: 'module',
+      case "yaml":
+        return new Worker(new URL("./yaml.worker.js", import.meta.url), {
+          type: "module",
         })
       default:
         return new EditorWorker()
@@ -30,7 +31,7 @@ type MonacoFileEditorProps = {
 
 export default function MonacoFileEditor({
   value,
-  filename = 'file.yaml',
+  filename = "file.yaml",
   onChange,
   readOnly = false,
 }: MonacoFileEditorProps) {
@@ -38,9 +39,9 @@ export default function MonacoFileEditor({
     <Editor
       value={value}
       path={filename}
-      language={filename.endsWith('.env') ? 'ini' : 'yaml'}
+      language={filename.endsWith(".env") ? "ini" : "yaml"}
       theme="vs-dark"
-      className="rounded-lg overflow-hidden h-[60vh] md:h-[70vh]"
+      className="h-[60vh] overflow-hidden rounded-lg md:h-[70vh]"
       loading={<Spinner />}
       beforeMount={(m) =>
         configureMonacoYaml(m, {
@@ -53,10 +54,10 @@ export default function MonacoFileEditor({
             {
               uri: COMPOSE_SCHEMA_URL,
               fileMatch: [
-                '**/compose.yaml',
-                '**/compose.yml',
-                '**/docker-compose.yml',
-                '**/docker-compose.yaml',
+                "**/compose.yaml",
+                "**/compose.yml",
+                "**/docker-compose.yml",
+                "**/docker-compose.yaml",
               ],
             },
           ],
@@ -66,12 +67,12 @@ export default function MonacoFileEditor({
         readOnly,
         minimap: { enabled: false },
         fontSize: 13,
-        lineNumbers: 'on',
+        lineNumbers: "on",
         scrollBeyondLastLine: false,
-        wordWrap: 'on',
+        wordWrap: "on",
         tabSize: 2,
       }}
-      onChange={(v) => onChange?.(v ?? '')}
+      onChange={(v) => onChange?.(v ?? "")}
     />
   )
 }

@@ -1,19 +1,15 @@
-import {
-  HeadContent,
-  Scripts,
-  createRootRouteWithContext,
-} from '@tanstack/react-router'
-import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
-import { TanStackDevtools } from '@tanstack/react-devtools'
+import { TanStackDevtools } from "@tanstack/react-devtools"
+import type { QueryClient } from "@tanstack/react-query"
+import { ReactQueryDevtoolsPanel } from "@tanstack/react-query-devtools"
+import { HeadContent, Scripts, createRootRouteWithContext } from "@tanstack/react-router"
+import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools"
 
-import { ReactQueryDevtoolsPanel } from '@tanstack/react-query-devtools'
-import appCss from '../styles.css?url'
+import { AppSidebar } from "#/components/app-sidebar"
+import { Navbar } from "#/components/navbar"
+import { Providers } from "#/components/providers"
+import type { getSettings } from "#/lib/functions/settings"
 
-import type { QueryClient } from '@tanstack/react-query'
-import type { getSettings } from '#/lib/functions/settings'
-import { Providers } from '#/components/providers'
-import { AppSidebar } from '#/components/app-sidebar'
-import { Navbar } from '#/components/navbar'
+import appCss from "../styles.css?url"
 
 interface MyRouterContext {
   queryClient: QueryClient
@@ -27,11 +23,11 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
   head: ({ loaderData }) => ({
     meta: [
       {
-        charSet: 'utf-8',
+        charSet: "utf-8",
       },
       {
-        name: 'viewport',
-        content: 'width=device-width, initial-scale=1',
+        name: "viewport",
+        content: "width=device-width, initial-scale=1",
       },
       {
         title: loaderData?.appTitle,
@@ -39,14 +35,14 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
     ],
     links: [
       {
-        rel: 'stylesheet',
+        rel: "stylesheet",
         href: appCss,
       },
     ],
   }),
   shellComponent: RootDocument,
   notFoundComponent: () => (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+    <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4">
       <h1 className="text-4xl font-bold">404</h1>
       <p className="text-muted-foreground">Page not found</p>
     </div>
@@ -63,21 +59,19 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <Providers>
           <AppSidebar />
           <Navbar />
-          <main className="p-4 md:p-8 min-h-screen w-full isolate">
-            {children}
-          </main>
+          <main className="isolate min-h-screen w-full p-4 md:p-8">{children}</main>
         </Providers>
         <TanStackDevtools
           config={{
-            position: 'bottom-right',
+            position: "bottom-right",
           }}
           plugins={[
             {
-              name: 'Tanstack Router',
+              name: "Tanstack Router",
               render: <TanStackRouterDevtoolsPanel />,
             },
             {
-              name: 'Tanstack Query',
+              name: "Tanstack Query",
               render: <ReactQueryDevtoolsPanel />,
             },
           ]}

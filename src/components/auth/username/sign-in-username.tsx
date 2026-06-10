@@ -1,6 +1,6 @@
-'use client'
+"use client"
 
-import { authMutationKeys } from '@better-auth-ui/core'
+import { authMutationKeys } from "@better-auth-ui/core"
 import {
   useAuth,
   useAuthPlugin,
@@ -8,38 +8,29 @@ import {
   useSendVerificationEmail,
   useSignInEmail,
   useSignInUsername,
-} from '@better-auth-ui/react'
-import type { UsernameAuthClient } from '@better-auth-ui/react'
-import { useIsMutating } from '@tanstack/react-query'
-import { useState } from 'react'
-import type { SyntheticEvent } from 'react'
-import { toast } from 'sonner'
-import { ProviderButtons } from '#/components/auth/provider-buttons.tsx'
-import type { SocialLayout } from '#/components/auth/provider-buttons.tsx'
-import { Button } from '#/components/ui/button.tsx'
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '#/components/ui/card.tsx'
-import { Checkbox } from '#/components/ui/checkbox.tsx'
-import {
-  Field,
-  FieldError,
-  FieldGroup,
-  FieldSeparator,
-} from '#/components/ui/field.tsx'
-import { Input } from '#/components/ui/input.tsx'
-import { Label } from '#/components/ui/label.tsx'
-import { Spinner } from '#/components/ui/spinner.tsx'
-import { usernamePlugin } from '#/lib/auth/username-plugin.ts'
-import { cn } from '#/lib/utils.ts'
+} from "@better-auth-ui/react"
+import type { UsernameAuthClient } from "@better-auth-ui/react"
+import { useIsMutating } from "@tanstack/react-query"
+import { useState } from "react"
+import type { SyntheticEvent } from "react"
+import { toast } from "sonner"
+
+import { ProviderButtons } from "#/components/auth/provider-buttons.tsx"
+import type { SocialLayout } from "#/components/auth/provider-buttons.tsx"
+import { Button } from "#/components/ui/button.tsx"
+import { Card, CardContent, CardHeader, CardTitle } from "#/components/ui/card.tsx"
+import { Checkbox } from "#/components/ui/checkbox.tsx"
+import { Field, FieldError, FieldGroup, FieldSeparator } from "#/components/ui/field.tsx"
+import { Input } from "#/components/ui/input.tsx"
+import { Label } from "#/components/ui/label.tsx"
+import { Spinner } from "#/components/ui/spinner.tsx"
+import { usernamePlugin } from "#/lib/auth/username-plugin.ts"
+import { cn } from "#/lib/utils.ts"
 
 export type SignInUsernameProps = {
   className?: string
   socialLayout?: SocialLayout
-  socialPosition?: 'top' | 'bottom'
+  socialPosition?: "top" | "bottom"
 }
 
 function isEmail(value: string): boolean {
@@ -54,7 +45,7 @@ function isEmail(value: string): boolean {
 export function SignInUsername({
   className,
   socialLayout,
-  socialPosition = 'bottom',
+  socialPosition = "bottom",
 }: SignInUsernameProps) {
   const {
     authClient,
@@ -74,46 +65,44 @@ export function SignInUsername({
 
   const { localization: usernameLocalization } = useAuthPlugin(usernamePlugin)
 
-  const [password, setPassword] = useState('')
+  const [password, setPassword] = useState("")
 
-  const { mutate: sendVerificationEmail } = useSendVerificationEmail(
-    authClient,
+  const { mutate: sendVerificationEmail } = useSendVerificationEmail(authClient, {
+    onSuccess: () => toast.success(localization.auth.verificationEmailSent),
+  })
+
+  const { mutate: signInEmail, isPending: isSignInEmailPending } = useSignInEmail(authClient, {
+    onError: (error, { email }) => {
+      setPassword("")
+
+      if (error.error?.code === "EMAIL_NOT_VERIFIED") {
+        toast.error(error.error?.message || error.message, {
+          action: {
+            label: localization.auth.resend,
+            onClick: () =>
+              sendVerificationEmail({
+                email,
+                callbackURL: `${baseURL}${redirectTo}`,
+              }),
+          },
+        })
+      }
+
+      resetFetchOptions()
+    },
+    onSuccess: () => navigate({ to: redirectTo }),
+  })
+
+  const { mutate: signInUsername, isPending: isSignInUsernamePending } = useSignInUsername(
+    authClient as UsernameAuthClient,
     {
-      onSuccess: () => toast.success(localization.auth.verificationEmailSent),
+      onError: () => {
+        setPassword("")
+        resetFetchOptions()
+      },
+      onSuccess: () => navigate({ to: redirectTo }),
     },
   )
-
-  const { mutate: signInEmail, isPending: isSignInEmailPending } =
-    useSignInEmail(authClient, {
-      onError: (error, { email }) => {
-        setPassword('')
-
-        if (error.error?.code === 'EMAIL_NOT_VERIFIED') {
-          toast.error(error.error?.message || error.message, {
-            action: {
-              label: localization.auth.resend,
-              onClick: () =>
-                sendVerificationEmail({
-                  email,
-                  callbackURL: `${baseURL}${redirectTo}`,
-                }),
-            },
-          })
-        }
-
-        resetFetchOptions()
-      },
-      onSuccess: () => navigate({ to: redirectTo }),
-    })
-
-  const { mutate: signInUsername, isPending: isSignInUsernamePending } =
-    useSignInUsername(authClient as UsernameAuthClient, {
-      onError: () => {
-        setPassword('')
-        resetFetchOptions()
-      },
-      onSuccess: () => navigate({ to: redirectTo }),
-    })
 
   const signInMutating = useIsMutating({
     mutationKey: authMutationKeys.signIn.all,
@@ -124,9 +113,7 @@ export function SignInUsername({
   const isPending = signInMutating + signUpMutating > 0
   const isSignInPending = isSignInEmailPending || isSignInUsernamePending
 
-  const Captcha = plugins.find(
-    (plugin) => plugin.captchaComponent,
-  )?.captchaComponent
+  const Captcha = plugins.find((plugin) => plugin.captchaComponent)?.captchaComponent
 
   const [fieldErrors, setFieldErrors] = useState<{
     email?: string
@@ -137,8 +124,8 @@ export function SignInUsername({
     e.preventDefault()
 
     const formData = new FormData(e.currentTarget)
-    const email = formData.get('email') as string
-    const rememberMe = formData.get('rememberMe') === 'on'
+    const email = formData.get("email") as string
+    const rememberMe = formData.get("rememberMe") === "on"
 
     if (isEmail(email)) {
       signInEmail({
@@ -157,27 +144,24 @@ export function SignInUsername({
     }
   }
 
-  const showSeparator =
-    emailAndPassword?.enabled && socialProviders && socialProviders.length > 0
+  const showSeparator = emailAndPassword?.enabled && socialProviders && socialProviders.length > 0
 
   return (
-    <Card className={cn('w-full max-w-sm', className)}>
+    <Card className={cn("w-full max-w-sm", className)}>
       <CardHeader>
-        <CardTitle className="text-xl font-semibold">
-          {localization.auth.signIn}
-        </CardTitle>
+        <CardTitle className="text-xl font-semibold">{localization.auth.signIn}</CardTitle>
       </CardHeader>
 
       <CardContent>
         <div className="flex flex-col gap-6">
-          {socialPosition === 'top' && (
+          {socialPosition === "top" && (
             <>
               {socialProviders && socialProviders.length > 0 && (
                 <ProviderButtons socialLayout={socialLayout} />
               )}
 
               {showSeparator && (
-                <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card m-0 text-xs flex items-center">
+                <FieldSeparator className="m-0 flex items-center text-xs *:data-[slot=field-separator-content]:bg-card">
                   {localization.auth.or}
                 </FieldSeparator>
               )}
@@ -195,9 +179,7 @@ export function SignInUsername({
                     name="email"
                     type="text"
                     autoComplete="username"
-                    placeholder={
-                      usernameLocalization.usernameOrEmailPlaceholder
-                    }
+                    placeholder={usernameLocalization.usernameOrEmailPlaceholder}
                     required
                     disabled={isPending}
                     onChange={() => {
@@ -247,8 +229,7 @@ export function SignInUsername({
 
                       setFieldErrors((prev) => ({
                         ...prev,
-                        password: (e.target as HTMLInputElement)
-                          .validationMessage,
+                        password: (e.target as HTMLInputElement).validationMessage,
                       }))
                     }}
                     aria-invalid={!!fieldErrors.password}
@@ -260,25 +241,16 @@ export function SignInUsername({
                 {emailAndPassword.rememberMe && (
                   <Field className="my-1">
                     <div className="flex items-center gap-3">
-                      <Checkbox
-                        id="rememberMe"
-                        name="rememberMe"
-                        disabled={isPending}
-                      />
+                      <Checkbox id="rememberMe" name="rememberMe" disabled={isPending} />
 
-                      <Label
-                        htmlFor="rememberMe"
-                        className="cursor-pointer text-sm font-normal"
-                      >
+                      <Label htmlFor="rememberMe" className="cursor-pointer text-sm font-normal">
                         {localization.auth.rememberMe}
                       </Label>
                     </div>
                   </Field>
                 )}
 
-                {Captcha && (
-                  <div className="flex justify-center">{Captcha}</div>
-                )}
+                {Captcha && <div className="flex justify-center">{Captcha}</div>}
 
                 <div className="flex flex-col gap-3">
                   <Button type="submit" disabled={isPending}>
@@ -289,10 +261,7 @@ export function SignInUsername({
 
                   {plugins.flatMap((plugin) =>
                     (plugin.authButtons ?? []).map((AuthButton, index) => (
-                      <AuthButton
-                        key={`${plugin.id}-${index.toString()}`}
-                        view="signIn"
-                      />
+                      <AuthButton key={`${plugin.id}-${index.toString()}`} view="signIn" />
                     )),
                   )}
                 </div>
@@ -300,10 +269,10 @@ export function SignInUsername({
             </form>
           )}
 
-          {socialPosition === 'bottom' && (
+          {socialPosition === "bottom" && (
             <>
               {showSeparator && (
-                <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card text-xs flex items-center">
+                <FieldSeparator className="flex items-center text-xs *:data-[slot=field-separator-content]:bg-card">
                   {localization.auth.or}
                 </FieldSeparator>
               )}
@@ -315,7 +284,7 @@ export function SignInUsername({
           )}
         </div>
 
-        <div className="flex flex-col gap-3 items-center w-full mt-4">
+        <div className="mt-4 flex w-full flex-col items-center gap-3">
           {emailAndPassword?.forgotPassword && (
             <Link
               href={`${basePaths.auth}/${viewPaths.auth.forgotPassword}`}
