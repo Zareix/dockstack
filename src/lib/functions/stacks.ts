@@ -37,35 +37,57 @@ const stackNameSchema = z.object({ stackName: z.string().min(1) })
 export const stackUp = createServerFn()
   .middleware([authMiddleware])
   .validator(stackNameSchema)
-  .handler(({ data: { stackName } }) => docker.stackUp(stackName))
+  .handler(async ({ data: { stackName } }) => {
+    for await (const _line of docker.streamStackUp(stackName)) {
+    }
+    return { success: true }
+  })
 
 export const stackStop = createServerFn()
   .middleware([authMiddleware])
   .validator(stackNameSchema)
-  .handler(({ data: { stackName } }) => docker.stackStop(stackName))
+  .handler(async ({ data: { stackName } }) => {
+    for await (const _line of docker.streamStackStop(stackName)) {
+    }
+    return { success: true }
+  })
 
 export const stackDown = createServerFn()
   .middleware([authMiddleware])
   .validator(stackNameSchema)
-  .handler(({ data: { stackName } }) => docker.stackDown(stackName))
+  .handler(async ({ data: { stackName } }) => {
+    for await (const _line of docker.streamStackDown(stackName)) {
+    }
+    return { success: true }
+  })
 
 export const stackRestart = createServerFn()
   .middleware([authMiddleware])
   .validator(stackNameSchema)
-  .handler(({ data: { stackName } }) => docker.stackRestart(stackName))
+  .handler(async ({ data: { stackName } }) => {
+    for await (const _line of docker.streamStackRestart(stackName)) {
+    }
+    return { success: true }
+  })
 
 export const stackDestroy = createServerFn()
   .middleware([authMiddleware])
   .validator(stackNameSchema)
   .handler(async ({ data: { stackName } }) => {
-    await docker.stackDown(stackName).catch(() => {})
+    for await (const _line of docker.streamStackDown(stackName)) {
+    }
     await rm(join(env.STACKS_DIR, stackName), { recursive: true, force: true })
+    return { success: true }
   })
 
 export const stackPull = createServerFn()
   .middleware([authMiddleware])
   .validator(stackNameSchema)
-  .handler(({ data: { stackName } }) => docker.stackPull(stackName))
+  .handler(async ({ data: { stackName } }) => {
+    for await (const _line of docker.streamStackPull(stackName)) {
+    }
+    return { success: true }
+  })
 
 export const streamStackUp = createServerFn()
   .middleware([authMiddleware])

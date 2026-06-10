@@ -9,9 +9,37 @@ export type StackStatus = "running" | "partial" | "stopped" | "down" | "unknown"
 
 export type RedeployResult = {
   name: string
-  action: "redeployed" | "skipped" | "error"
-  services?: string[]
-  error?: string
+} & (
+  | {
+      action: "skipped"
+    }
+  | {
+      action: "redeployed"
+      services: string[]
+    }
+  | {
+      action: "error"
+      error: string
+    }
+)
+
+export const getDockerEnv = () => {
+  const dockerEnv = { ...process.env }
+  delete dockerEnv.STACKS_DIR
+  delete dockerEnv.BETTER_AUTH_URL
+  delete dockerEnv.ADMIN_EMAIL
+  delete dockerEnv.APP_TITLE
+  delete dockerEnv.SERVER_HOST
+  delete dockerEnv.STACKS_DIR
+  delete dockerEnv.DATABASE_PATH
+  delete dockerEnv.OAUTH_PROVIDER_ID
+  delete dockerEnv.OAUTH_CLIENT_ID
+  delete dockerEnv.OAUTH_CLIENT_SECRET
+  delete dockerEnv.OAUTH_DISCOVERY_URL
+  delete dockerEnv.DOCKER_SYSTEM_PRUNE_CRON
+  delete dockerEnv.DOCKER_SYSTEM_PRUNE_INCLUDE_VOLUMES
+  delete dockerEnv.REDEPLOY_SKIP
+  return dockerEnv
 }
 
 export const findComposePath = async (stackName: string) => {
@@ -21,6 +49,12 @@ export const findComposePath = async (stackName: string) => {
     if (await Bun.file(path).exists()) return path
   }
   throw new Error(`No compose file found in ${stackName}`)
+}
+
+export const findEnvPath = async (stackName: string) => {
+  const path = join(env.STACKS_DIR, stackName, ".env")
+  if (await Bun.file(path).exists()) return path
+  return null
 }
 
 export const listStacks = async () => {
@@ -36,15 +70,21 @@ export const listStacks = async () => {
     .sort()
 }
 
-export const stackUp = async (stackName: string) => {
+async function* spawnCompose(stackName: string, args: string[]) {
   const composePath = await findComposePath(stackName)
-  await Bun.$`docker compose -f ${composePath} up -d --remove-orphans`
-}
+  if (!(await Bun.file(composePath).exists())) return
 
-async function* spawnCompose(composePath: string, args: string[]) {
-  const proc = Bun.spawn(["docker", "compose", "--progress", "plain", "-f", composePath, ...args], {
+  const command = ["docker", "compose", "--progress", "plain", "-f", composePath]
+
+  const envPath = await findEnvPath(stackName)
+  if (envPath) command.push("--env-file", envPath)
+
+  command.push(...args)
+
+  const proc = Bun.spawn(command, {
     stdout: "pipe",
     stderr: "pipe",
+    env: getDockerEnv(),
   })
 
   const queue: string[] = []
@@ -99,48 +139,35 @@ async function* spawnCompose(composePath: string, args: string[]) {
 }
 
 export async function* streamStackUp(stackName: string) {
-  yield* spawnCompose(await findComposePath(stackName), ["up", "-d", "--remove-orphans"])
+  yield* spawnCompose(stackName, ["up", "-d", "--remove-orphans"])
 }
 
 export async function* streamStackStop(stackName: string) {
-  yield* spawnCompose(await findComposePath(stackName), ["stop"])
+  yield* spawnCompose(stackName, ["stop"])
 }
 
 export async function* streamStackDown(stackName: string) {
-  yield* spawnCompose(await findComposePath(stackName), ["down"])
+  yield* spawnCompose(stackName, ["down"])
 }
 
 export async function* streamStackRestart(stackName: string) {
-  yield* spawnCompose(await findComposePath(stackName), ["restart"])
+  yield* spawnCompose(stackName, ["restart"])
 }
 
 export async function* streamStackPull(stackName: string) {
-  yield* spawnCompose(await findComposePath(stackName), ["pull"])
-}
-
-export const stackStop = async (stackName: string) => {
-  const composePath = await findComposePath(stackName)
-  await Bun.$`docker compose -f ${composePath} stop`
-}
-
-export const stackDown = async (stackName: string) => {
-  const composePath = await findComposePath(stackName)
-  await Bun.$`docker compose -f ${composePath} down`
-}
-
-export const stackRestart = async (stackName: string) => {
-  const composePath = await findComposePath(stackName)
-  await Bun.$`docker compose -f ${composePath} restart`
-}
-
-export const stackPull = async (stackName: string) => {
-  const composePath = await findComposePath(stackName)
-  await Bun.$`docker compose -f ${composePath} pull`
+  yield* spawnCompose(stackName, ["pull"])
 }
 
 export const stackUpServices = async (stackName: string, services: string[]) => {
   const composePath = await findComposePath(stackName)
-  await Bun.$`docker compose -f ${composePath} up -d ${services}`
+  const envPath = await findEnvPath(stackName)
+  if (envPath) {
+    await Bun.$`docker compose -f ${composePath} --env-file ${envPath} up -d ${services}`.env(
+      getDockerEnv(),
+    )
+  } else {
+    await Bun.$`docker compose -f ${composePath} up -d ${services}`.env(getDockerEnv())
+  }
 }
 
 export const getRunningServices = async (stackName: string): Promise<string[]> => {
