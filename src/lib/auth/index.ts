@@ -34,7 +34,12 @@ export const auth = betterAuth({
       : null,
     admin(),
     username(),
-    apiKey(),
+    apiKey({
+      rateLimit: {
+        maxRequests: 100,
+        timeWindow: 1000 * 60, // 1m
+      },
+    }),
     tanstackStartCookies(),
   ].filter(Boolean),
 })
