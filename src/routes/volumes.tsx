@@ -65,7 +65,7 @@ function VolumesPage() {
         const size: number = row.getValue("size")
         const label =
           size < 0
-            ? "—"
+            ? "-"
             : size < 1e6
               ? `${(size / 1e3).toFixed(1)} KB`
               : `${(size / 1e6).toFixed(1)} MB`
@@ -79,7 +79,7 @@ function VolumesPage() {
         const val: string = row.getValue("created")
         return (
           <span className="text-sm text-muted-foreground">
-            {val ? new Date(val).toLocaleDateString() : "—"}
+            {val ? new Date(val).toLocaleDateString() : "-"}
           </span>
         )
       },

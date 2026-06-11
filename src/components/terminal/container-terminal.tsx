@@ -79,7 +79,7 @@ export function ContainerTerminal({ containerId, shell = "/bin/sh" }: Props) {
           }
           if (msg.type === "exit") {
             term.writeln(
-              "\r\n\x1b[90m[process exited — shell not found or container stopped]\x1b[0m",
+              "\r\n\x1b[90m[process exited - shell not found or container stopped]\x1b[0m",
             )
           } else if (msg.type === "error") {
             term.writeln(`\r\n\x1b[31m[error] ${msg.message}\x1b[0m`)

@@ -4,10 +4,12 @@ import { env } from "#/env"
 import { formatImageTag } from "#/lib/docker/images"
 
 import { dockerClient } from "./client"
+import { findComposePath } from "./stacks"
 import type { StackStatus } from "./stacks"
 
 export type ContainerInfo = {
   id: string
+  serviceName: string | null
   name: string
   image: string
   stack: string | null
@@ -41,6 +43,7 @@ const containerStateToStatus = (state: string): StackStatus => {
 
 const mapContainer = (c: Docker.ContainerInfo): ContainerInfo => ({
   id: c.Id.slice(0, 12),
+  serviceName: c.Labels["com.docker.compose.service"] ?? null,
   name: c.Names[0]?.replace(/^\//, "") ?? c.Id.slice(0, 12),
   image: formatImageTag(c.Image),
   stack: c.Labels["com.docker.compose.project"] ?? null,
@@ -66,7 +69,41 @@ export const getStackContainers = async (stackName: string): Promise<ContainerIn
       label: [`com.docker.compose.project=${stackName}`],
     }),
   })
-  return containers.map(mapContainer).sort((a, b) => a.name.localeCompare(b.name))
+
+  const mapped = containers.map(mapContainer)
+  const knownServices = new Set(
+    containers.map((c) => c.Labels["com.docker.compose.service"]).filter(Boolean),
+  )
+
+  try {
+    const composePath = await findComposePath(stackName)
+    const compose = (await Bun.YAML.parse(await Bun.file(composePath).text())) as {
+      services?: Record<
+        string,
+        {
+          image?: string
+          build?: unknown
+        }
+      >
+    }
+
+    for (const [serviceName, svc] of Object.entries(compose.services ?? {})) {
+      if (knownServices.has(serviceName)) continue
+
+      mapped.push({
+        id: serviceName,
+        serviceName,
+        name: "-",
+        image: svc.image ? formatImageTag(svc.image) : "-",
+        stack: stackName,
+        status: "missing",
+        uptime: "-",
+        ports: [],
+      })
+    }
+  } catch {}
+
+  return mapped.sort((a, b) => (a.serviceName ?? a.name).localeCompare(b.serviceName ?? b.name))
 }
 
 export const listAllContainers = async (): Promise<ContainerInfo[]> => {

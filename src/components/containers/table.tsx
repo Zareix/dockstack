@@ -15,6 +15,17 @@ type Props = {
 
 export const ContainersTable = ({ data, isLoading, showStack = true }: Props) => {
   const columns: ColumnDef<ContainerInfo>[] = [
+    ...(!showStack
+      ? ([
+          {
+            accessorKey: "serviceName",
+            header: ({ column }) => <SortableHeader column={column} label="Service" />,
+            cell: ({ row }) => (
+              <span className="font-mono text-sm">{row.getValue("serviceName")}</span>
+            ),
+          },
+        ] satisfies ColumnDef<ContainerInfo>[])
+      : []),
     {
       accessorKey: "name",
       header: ({ column }) => <SortableHeader column={column} label="Name" />,
@@ -36,7 +47,7 @@ export const ContainersTable = ({ data, isLoading, showStack = true }: Props) =>
                   {stack}
                 </Link>
               ) : (
-                <span className="text-sm text-muted-foreground">—</span>
+                <span className="text-sm text-muted-foreground">-</span>
               )
             },
             sortingFn: (a, b) => a.original.stack?.localeCompare(b.original.stack ?? "") ?? 0,
@@ -85,7 +96,7 @@ export const ContainersTable = ({ data, isLoading, showStack = true }: Props) =>
             ))}
           </div>
         ) : (
-          "—"
+          "-"
         )
       },
       enableSorting: false,

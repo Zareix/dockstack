@@ -3,7 +3,7 @@ import { createServerFn } from "@tanstack/react-start"
 import { env } from "#/env"
 
 export const getSettings = createServerFn().handler(async () => {
-  const instances = env.OTHER_INSTANCE_URLS
+  const instances = env.OTHER_INSTANCE_URLS.map((i) => ({ ...i, isCurrent: false }))
   instances.push({
     title: env.APP_TITLE,
     url: env.BETTER_AUTH_URL ?? "/",

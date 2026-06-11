@@ -66,6 +66,7 @@ stacks/
 | `DOCKER_SYSTEM_PRUNE_CRON`            | no       | —                     | Cron expression to schedule automatic `docker system prune` (e.g. `0 3 * * *` for 3 AM daily) |
 | `DOCKER_SYSTEM_PRUNE_INCLUDE_VOLUMES` | no       | `false`               | Set to `true` to also prune unused volumes during scheduled prune                             |
 | `REDEPLOY_SKIP`                       | no       | —                     | Comma-separated list of stack names to skip redeploying                                       |
+| `OTHER_INSTANCE_URLS`                 | no       | —                     | List of other instance to have a link to, format : `name1,url1;name2,url2`                    |
 
 ## Webhook redeploy
 

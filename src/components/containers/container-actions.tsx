@@ -61,6 +61,8 @@ export function ContainerActions({
   const busy = startM.isPending || stopM.isPending || restartM.isPending || removeM.isPending
   const running = container.status === "running"
 
+  if (container.status === "missing") return null
+
   return (
     <div className="flex items-center gap-1">
       {running ? (

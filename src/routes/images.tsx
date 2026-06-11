@@ -43,7 +43,7 @@ function StaleCell({
   if (!staleData) return null
   const status = staleData[imageId]
   if (status === "outdated" || status === "up-to-date") return <StatusBadge status={status} />
-  return <span className="text-sm text-muted-foreground">—</span>
+  return <span className="text-sm text-muted-foreground">-</span>
 }
 
 function ImagesPage() {

@@ -5,7 +5,7 @@ import { env } from "#/env"
 
 import { COMPOSE_FILENAMES, dockerClient } from "./client"
 
-export type StackStatus = "running" | "partial" | "stopped" | "down" | "unknown"
+export type StackStatus = "running" | "partial" | "stopped" | "down" | "unknown" | "missing"
 
 export type RedeployResult = {
   name: string

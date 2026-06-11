@@ -24,6 +24,11 @@ const statusMap: Record<Status, StatusVariant> = {
   stopped: { variant: "destructive", label: "Stopped" },
   down: { variant: "destructive", label: "Down" },
   unknown: { variant: "outline", className: "text-muted-foreground", label: "Unknown" },
+  missing: {
+    variant: "outline",
+    className: "text-muted-foreground border-dashed",
+    label: "Missing",
+  },
   outdated: { variant: "warning", label: "Outdated" },
   "up-to-date": {
     variant: "outline",

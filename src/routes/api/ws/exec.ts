@@ -146,7 +146,7 @@ const hooks = defineHooks({
         return
       }
     } catch {
-      // Not JSON — raw terminal input
+      // Not JSON - raw terminal input
       const session = sessions.get(peer.id)
       if (session) session.socket.write(message.text())
       return
