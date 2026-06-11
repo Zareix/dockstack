@@ -18,6 +18,15 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu"
+
 const LINKS: Array<{
   label: string
   linkOptions: ValidateLinkOptions
@@ -51,7 +60,7 @@ const LINKS: Array<{
 ] as const
 
 export function AppSidebar() {
-  const { appTitle } = useSettings()
+  const { appTitle, instances } = useSettings()
   const { pathname } = useLocation()
   const { authClient } = useAuth()
   const { data: session } = useSession(authClient)
@@ -66,13 +75,37 @@ export function AppSidebar() {
   return (
     <Sidebar mobileSide="right">
       <SidebarHeader className="flex-row items-center justify-between p-4">
-        <Link
-          to="/"
-          onClick={toggleSidebarOnMobile}
-          className="flex items-center gap-2 text-xl font-semibold"
-        >
-          {appTitle}
-        </Link>
+        {instances.length > 1 ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              render={
+                <div className="flex w-full cursor-default items-center gap-2 text-xl font-semibold" />
+              }
+            >
+              {appTitle}
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuGroup>
+                <DropdownMenuLabel>Other Instances</DropdownMenuLabel>
+                {instances
+                  .filter((instance) => !instance.isCurrent)
+                  .map((instance, index) => (
+                    <DropdownMenuItem key={index} render={<a href={instance.url} />}>
+                      {instance.title}
+                    </DropdownMenuItem>
+                  ))}
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : (
+          <Link
+            to="/"
+            onClick={toggleSidebarOnMobile}
+            className="flex items-center gap-2 text-xl font-semibold"
+          >
+            {appTitle}
+          </Link>
+        )}
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>

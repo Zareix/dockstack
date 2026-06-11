@@ -9,6 +9,17 @@ export const env = createEnv({
     APP_TITLE: z.string().min(1).optional().default("Dockstack"),
     SERVER_HOST: z.string().min(1),
     STACKS_DIR: z.string().min(1),
+    OTHER_INSTANCE_URLS: z
+      .string()
+      .transform((val) =>
+        val
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean),
+      )
+      .pipe(z.array(z.url()))
+      .optional()
+      .default([]),
     DATABASE_PATH: z._default(z.string(), "./db.sqlite"),
     OAUTH_PROVIDER_ID: z.string().optional(),
     OAUTH_CLIENT_ID: z.string().optional(),

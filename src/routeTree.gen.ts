@@ -17,6 +17,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as StacksNameRouteImport } from './routes/stacks.$name'
 import { Route as SettingsPathRouteImport } from './routes/settings/$path'
 import { Route as AuthPathRouteImport } from './routes/auth/$path'
+import { Route as ApiInfoRouteImport } from './routes/api/info'
 import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as ApiStacksIndexRouteImport } from './routes/api/stacks/index'
 import { Route as ApiWsLogsRouteImport } from './routes/api/ws/logs'
@@ -64,6 +65,11 @@ const AuthPathRoute = AuthPathRouteImport.update({
   path: '/auth/$path',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiInfoRoute = ApiInfoRouteImport.update({
+  id: '/api/info',
+  path: '/api/info',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiHealthRoute = ApiHealthRouteImport.update({
   id: '/api/health',
   path: '/api/health',
@@ -102,6 +108,7 @@ export interface FileRoutesByFullPath {
   '/networks': typeof NetworksRoute
   '/volumes': typeof VolumesRoute
   '/api/health': typeof ApiHealthRoute
+  '/api/info': typeof ApiInfoRoute
   '/auth/$path': typeof AuthPathRoute
   '/settings/$path': typeof SettingsPathRoute
   '/stacks/$name': typeof StacksNameRoute
@@ -118,6 +125,7 @@ export interface FileRoutesByTo {
   '/networks': typeof NetworksRoute
   '/volumes': typeof VolumesRoute
   '/api/health': typeof ApiHealthRoute
+  '/api/info': typeof ApiInfoRoute
   '/auth/$path': typeof AuthPathRoute
   '/settings/$path': typeof SettingsPathRoute
   '/stacks/$name': typeof StacksNameRoute
@@ -135,6 +143,7 @@ export interface FileRoutesById {
   '/networks': typeof NetworksRoute
   '/volumes': typeof VolumesRoute
   '/api/health': typeof ApiHealthRoute
+  '/api/info': typeof ApiInfoRoute
   '/auth/$path': typeof AuthPathRoute
   '/settings/$path': typeof SettingsPathRoute
   '/stacks/$name': typeof StacksNameRoute
@@ -153,6 +162,7 @@ export interface FileRouteTypes {
     | '/networks'
     | '/volumes'
     | '/api/health'
+    | '/api/info'
     | '/auth/$path'
     | '/settings/$path'
     | '/stacks/$name'
@@ -169,6 +179,7 @@ export interface FileRouteTypes {
     | '/networks'
     | '/volumes'
     | '/api/health'
+    | '/api/info'
     | '/auth/$path'
     | '/settings/$path'
     | '/stacks/$name'
@@ -185,6 +196,7 @@ export interface FileRouteTypes {
     | '/networks'
     | '/volumes'
     | '/api/health'
+    | '/api/info'
     | '/auth/$path'
     | '/settings/$path'
     | '/stacks/$name'
@@ -202,6 +214,7 @@ export interface RootRouteChildren {
   NetworksRoute: typeof NetworksRoute
   VolumesRoute: typeof VolumesRoute
   ApiHealthRoute: typeof ApiHealthRoute
+  ApiInfoRoute: typeof ApiInfoRoute
   AuthPathRoute: typeof AuthPathRoute
   SettingsPathRoute: typeof SettingsPathRoute
   StacksNameRoute: typeof StacksNameRoute
@@ -270,6 +283,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthPathRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/info': {
+      id: '/api/info'
+      path: '/api/info'
+      fullPath: '/api/info'
+      preLoaderRoute: typeof ApiInfoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/health': {
       id: '/api/health'
       path: '/api/health'
@@ -322,6 +342,7 @@ const rootRouteChildren: RootRouteChildren = {
   NetworksRoute: NetworksRoute,
   VolumesRoute: VolumesRoute,
   ApiHealthRoute: ApiHealthRoute,
+  ApiInfoRoute: ApiInfoRoute,
   AuthPathRoute: AuthPathRoute,
   SettingsPathRoute: SettingsPathRoute,
   StacksNameRoute: StacksNameRoute,
