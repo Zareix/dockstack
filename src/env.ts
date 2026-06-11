@@ -13,11 +13,24 @@ export const env = createEnv({
       .string()
       .transform((val) =>
         val
-          .split(",")
-          .map((s) => s.trim())
+          .split(";")
+          .map((s) => {
+            const [title, url] = s
+              .trim()
+              .split(",")
+              .map((t) => t.trim())
+            return { title, url }
+          })
           .filter(Boolean),
       )
-      .pipe(z.array(z.url()))
+      .pipe(
+        z.array(
+          z.object({
+            title: z.string().min(1),
+            url: z.url(),
+          }),
+        ),
+      )
       .optional()
       .default([]),
     DATABASE_PATH: z._default(z.string(), "./db.sqlite"),
