@@ -6,7 +6,7 @@ import { ContainersTable } from "#/components/containers/table.tsx"
 import { listAllContainers } from "#/lib/functions"
 import { ensureSession } from "#/lib/functions/auth"
 
-export const Route = createFileRoute("/containers")({
+export const Route = createFileRoute("/_private/containers")({
   async beforeLoad({ context: { queryClient }, location }) {
     const session = await ensureSession(queryClient)()
     if (!session) {

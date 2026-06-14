@@ -11,7 +11,7 @@ import type { ImageInfo, StaleStatus } from "#/lib/docker"
 import { checkImagesStale, listImages } from "#/lib/functions"
 import { ensureSession } from "#/lib/functions/auth"
 
-export const Route = createFileRoute("/images")({
+export const Route = createFileRoute("/_private/images")({
   async beforeLoad({ context: { queryClient }, location }) {
     const session = await ensureSession(queryClient)()
     if (!session) {

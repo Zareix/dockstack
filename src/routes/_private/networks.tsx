@@ -8,7 +8,7 @@ import type { NetworkInfo } from "#/lib/docker"
 import { listNetworks } from "#/lib/functions"
 import { ensureSession } from "#/lib/functions/auth"
 
-export const Route = createFileRoute("/networks")({
+export const Route = createFileRoute("/_private/networks")({
   async beforeLoad({ context: { queryClient }, location }) {
     const session = await ensureSession(queryClient)()
     if (!session) {

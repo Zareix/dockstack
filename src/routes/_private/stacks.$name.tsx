@@ -46,7 +46,7 @@ const tabSchema = z.object({
   tab: z.enum(["services", "files", "logs", "terminal"]).default("files"),
 })
 
-export const Route = createFileRoute("/stacks/$name")({
+export const Route = createFileRoute("/_private/stacks/$name")({
   validateSearch: tabSchema,
   async beforeLoad({ context: { queryClient }, location }) {
     const session = await ensureSession(queryClient)()

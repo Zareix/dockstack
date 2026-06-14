@@ -10,7 +10,7 @@ import type { VolumeInfo } from "#/lib/docker"
 import { listVolumes } from "#/lib/functions"
 import { ensureSession } from "#/lib/functions/auth"
 
-export const Route = createFileRoute("/volumes")({
+export const Route = createFileRoute("/_private/volumes")({
   async beforeLoad({ context: { queryClient }, location }) {
     const session = await ensureSession(queryClient)()
     if (!session) {

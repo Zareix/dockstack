@@ -9,55 +9,30 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as VolumesRouteImport } from './routes/volumes'
-import { Route as NetworksRouteImport } from './routes/networks'
-import { Route as ImagesRouteImport } from './routes/images'
-import { Route as ContainersRouteImport } from './routes/containers'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as StacksNameRouteImport } from './routes/stacks.$name'
-import { Route as SettingsPathRouteImport } from './routes/settings/$path'
+import { Route as PrivateRouteRouteImport } from './routes/_private/route'
+import { Route as PrivateIndexRouteImport } from './routes/_private/index'
 import { Route as AuthPathRouteImport } from './routes/auth/$path'
 import { Route as ApiHealthRouteImport } from './routes/api/health'
+import { Route as PrivateVolumesRouteImport } from './routes/_private/volumes'
+import { Route as PrivateNetworksRouteImport } from './routes/_private/networks'
+import { Route as PrivateImagesRouteImport } from './routes/_private/images'
+import { Route as PrivateContainersRouteImport } from './routes/_private/containers'
 import { Route as ApiStacksIndexRouteImport } from './routes/api/stacks/index'
 import { Route as ApiWsLogsRouteImport } from './routes/api/ws/logs'
 import { Route as ApiWsExecRouteImport } from './routes/api/ws/exec'
 import { Route as ApiStacksRedeployRouteImport } from './routes/api/stacks/redeploy'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as PrivateStacksNameRouteImport } from './routes/_private/stacks.$name'
+import { Route as PrivateSettingsPathRouteImport } from './routes/_private/settings/$path'
 
-const VolumesRoute = VolumesRouteImport.update({
-  id: '/volumes',
-  path: '/volumes',
+const PrivateRouteRoute = PrivateRouteRouteImport.update({
+  id: '/_private',
   getParentRoute: () => rootRouteImport,
 } as any)
-const NetworksRoute = NetworksRouteImport.update({
-  id: '/networks',
-  path: '/networks',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ImagesRoute = ImagesRouteImport.update({
-  id: '/images',
-  path: '/images',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ContainersRoute = ContainersRouteImport.update({
-  id: '/containers',
-  path: '/containers',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const IndexRoute = IndexRouteImport.update({
+const PrivateIndexRoute = PrivateIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const StacksNameRoute = StacksNameRouteImport.update({
-  id: '/stacks/$name',
-  path: '/stacks/$name',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SettingsPathRoute = SettingsPathRouteImport.update({
-  id: '/settings/$path',
-  path: '/settings/$path',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => PrivateRouteRoute,
 } as any)
 const AuthPathRoute = AuthPathRouteImport.update({
   id: '/auth/$path',
@@ -68,6 +43,26 @@ const ApiHealthRoute = ApiHealthRouteImport.update({
   id: '/api/health',
   path: '/api/health',
   getParentRoute: () => rootRouteImport,
+} as any)
+const PrivateVolumesRoute = PrivateVolumesRouteImport.update({
+  id: '/volumes',
+  path: '/volumes',
+  getParentRoute: () => PrivateRouteRoute,
+} as any)
+const PrivateNetworksRoute = PrivateNetworksRouteImport.update({
+  id: '/networks',
+  path: '/networks',
+  getParentRoute: () => PrivateRouteRoute,
+} as any)
+const PrivateImagesRoute = PrivateImagesRouteImport.update({
+  id: '/images',
+  path: '/images',
+  getParentRoute: () => PrivateRouteRoute,
+} as any)
+const PrivateContainersRoute = PrivateContainersRouteImport.update({
+  id: '/containers',
+  path: '/containers',
+  getParentRoute: () => PrivateRouteRoute,
 } as any)
 const ApiStacksIndexRoute = ApiStacksIndexRouteImport.update({
   id: '/api/stacks/',
@@ -94,17 +89,27 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PrivateStacksNameRoute = PrivateStacksNameRouteImport.update({
+  id: '/stacks/$name',
+  path: '/stacks/$name',
+  getParentRoute: () => PrivateRouteRoute,
+} as any)
+const PrivateSettingsPathRoute = PrivateSettingsPathRouteImport.update({
+  id: '/settings/$path',
+  path: '/settings/$path',
+  getParentRoute: () => PrivateRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/containers': typeof ContainersRoute
-  '/images': typeof ImagesRoute
-  '/networks': typeof NetworksRoute
-  '/volumes': typeof VolumesRoute
+  '/': typeof PrivateIndexRoute
+  '/containers': typeof PrivateContainersRoute
+  '/images': typeof PrivateImagesRoute
+  '/networks': typeof PrivateNetworksRoute
+  '/volumes': typeof PrivateVolumesRoute
   '/api/health': typeof ApiHealthRoute
   '/auth/$path': typeof AuthPathRoute
-  '/settings/$path': typeof SettingsPathRoute
-  '/stacks/$name': typeof StacksNameRoute
+  '/settings/$path': typeof PrivateSettingsPathRoute
+  '/stacks/$name': typeof PrivateStacksNameRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/stacks/redeploy': typeof ApiStacksRedeployRoute
   '/api/ws/exec': typeof ApiWsExecRoute
@@ -112,15 +117,15 @@ export interface FileRoutesByFullPath {
   '/api/stacks/': typeof ApiStacksIndexRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/containers': typeof ContainersRoute
-  '/images': typeof ImagesRoute
-  '/networks': typeof NetworksRoute
-  '/volumes': typeof VolumesRoute
+  '/containers': typeof PrivateContainersRoute
+  '/images': typeof PrivateImagesRoute
+  '/networks': typeof PrivateNetworksRoute
+  '/volumes': typeof PrivateVolumesRoute
   '/api/health': typeof ApiHealthRoute
   '/auth/$path': typeof AuthPathRoute
-  '/settings/$path': typeof SettingsPathRoute
-  '/stacks/$name': typeof StacksNameRoute
+  '/': typeof PrivateIndexRoute
+  '/settings/$path': typeof PrivateSettingsPathRoute
+  '/stacks/$name': typeof PrivateStacksNameRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/stacks/redeploy': typeof ApiStacksRedeployRoute
   '/api/ws/exec': typeof ApiWsExecRoute
@@ -129,15 +134,16 @@ export interface FileRoutesByTo {
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/containers': typeof ContainersRoute
-  '/images': typeof ImagesRoute
-  '/networks': typeof NetworksRoute
-  '/volumes': typeof VolumesRoute
+  '/_private': typeof PrivateRouteRouteWithChildren
+  '/_private/containers': typeof PrivateContainersRoute
+  '/_private/images': typeof PrivateImagesRoute
+  '/_private/networks': typeof PrivateNetworksRoute
+  '/_private/volumes': typeof PrivateVolumesRoute
   '/api/health': typeof ApiHealthRoute
   '/auth/$path': typeof AuthPathRoute
-  '/settings/$path': typeof SettingsPathRoute
-  '/stacks/$name': typeof StacksNameRoute
+  '/_private/': typeof PrivateIndexRoute
+  '/_private/settings/$path': typeof PrivateSettingsPathRoute
+  '/_private/stacks/$name': typeof PrivateStacksNameRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/stacks/redeploy': typeof ApiStacksRedeployRoute
   '/api/ws/exec': typeof ApiWsExecRoute
@@ -163,13 +169,13 @@ export interface FileRouteTypes {
     | '/api/stacks/'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/'
     | '/containers'
     | '/images'
     | '/networks'
     | '/volumes'
     | '/api/health'
     | '/auth/$path'
+    | '/'
     | '/settings/$path'
     | '/stacks/$name'
     | '/api/auth/$'
@@ -179,15 +185,16 @@ export interface FileRouteTypes {
     | '/api/stacks'
   id:
     | '__root__'
-    | '/'
-    | '/containers'
-    | '/images'
-    | '/networks'
-    | '/volumes'
+    | '/_private'
+    | '/_private/containers'
+    | '/_private/images'
+    | '/_private/networks'
+    | '/_private/volumes'
     | '/api/health'
     | '/auth/$path'
-    | '/settings/$path'
-    | '/stacks/$name'
+    | '/_private/'
+    | '/_private/settings/$path'
+    | '/_private/stacks/$name'
     | '/api/auth/$'
     | '/api/stacks/redeploy'
     | '/api/ws/exec'
@@ -196,15 +203,9 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  ContainersRoute: typeof ContainersRoute
-  ImagesRoute: typeof ImagesRoute
-  NetworksRoute: typeof NetworksRoute
-  VolumesRoute: typeof VolumesRoute
+  PrivateRouteRoute: typeof PrivateRouteRouteWithChildren
   ApiHealthRoute: typeof ApiHealthRoute
   AuthPathRoute: typeof AuthPathRoute
-  SettingsPathRoute: typeof SettingsPathRoute
-  StacksNameRoute: typeof StacksNameRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiStacksRedeployRoute: typeof ApiStacksRedeployRoute
   ApiWsExecRoute: typeof ApiWsExecRoute
@@ -214,54 +215,19 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/volumes': {
-      id: '/volumes'
-      path: '/volumes'
-      fullPath: '/volumes'
-      preLoaderRoute: typeof VolumesRouteImport
+    '/_private': {
+      id: '/_private'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof PrivateRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/networks': {
-      id: '/networks'
-      path: '/networks'
-      fullPath: '/networks'
-      preLoaderRoute: typeof NetworksRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/images': {
-      id: '/images'
-      path: '/images'
-      fullPath: '/images'
-      preLoaderRoute: typeof ImagesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/containers': {
-      id: '/containers'
-      path: '/containers'
-      fullPath: '/containers'
-      preLoaderRoute: typeof ContainersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/': {
-      id: '/'
+    '/_private/': {
+      id: '/_private/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/stacks/$name': {
-      id: '/stacks/$name'
-      path: '/stacks/$name'
-      fullPath: '/stacks/$name'
-      preLoaderRoute: typeof StacksNameRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/settings/$path': {
-      id: '/settings/$path'
-      path: '/settings/$path'
-      fullPath: '/settings/$path'
-      preLoaderRoute: typeof SettingsPathRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof PrivateIndexRouteImport
+      parentRoute: typeof PrivateRouteRoute
     }
     '/auth/$path': {
       id: '/auth/$path'
@@ -276,6 +242,34 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/health'
       preLoaderRoute: typeof ApiHealthRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_private/volumes': {
+      id: '/_private/volumes'
+      path: '/volumes'
+      fullPath: '/volumes'
+      preLoaderRoute: typeof PrivateVolumesRouteImport
+      parentRoute: typeof PrivateRouteRoute
+    }
+    '/_private/networks': {
+      id: '/_private/networks'
+      path: '/networks'
+      fullPath: '/networks'
+      preLoaderRoute: typeof PrivateNetworksRouteImport
+      parentRoute: typeof PrivateRouteRoute
+    }
+    '/_private/images': {
+      id: '/_private/images'
+      path: '/images'
+      fullPath: '/images'
+      preLoaderRoute: typeof PrivateImagesRouteImport
+      parentRoute: typeof PrivateRouteRoute
+    }
+    '/_private/containers': {
+      id: '/_private/containers'
+      path: '/containers'
+      fullPath: '/containers'
+      preLoaderRoute: typeof PrivateContainersRouteImport
+      parentRoute: typeof PrivateRouteRoute
     }
     '/api/stacks/': {
       id: '/api/stacks/'
@@ -312,19 +306,51 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_private/stacks/$name': {
+      id: '/_private/stacks/$name'
+      path: '/stacks/$name'
+      fullPath: '/stacks/$name'
+      preLoaderRoute: typeof PrivateStacksNameRouteImport
+      parentRoute: typeof PrivateRouteRoute
+    }
+    '/_private/settings/$path': {
+      id: '/_private/settings/$path'
+      path: '/settings/$path'
+      fullPath: '/settings/$path'
+      preLoaderRoute: typeof PrivateSettingsPathRouteImport
+      parentRoute: typeof PrivateRouteRoute
+    }
   }
 }
 
+interface PrivateRouteRouteChildren {
+  PrivateContainersRoute: typeof PrivateContainersRoute
+  PrivateImagesRoute: typeof PrivateImagesRoute
+  PrivateNetworksRoute: typeof PrivateNetworksRoute
+  PrivateVolumesRoute: typeof PrivateVolumesRoute
+  PrivateIndexRoute: typeof PrivateIndexRoute
+  PrivateSettingsPathRoute: typeof PrivateSettingsPathRoute
+  PrivateStacksNameRoute: typeof PrivateStacksNameRoute
+}
+
+const PrivateRouteRouteChildren: PrivateRouteRouteChildren = {
+  PrivateContainersRoute: PrivateContainersRoute,
+  PrivateImagesRoute: PrivateImagesRoute,
+  PrivateNetworksRoute: PrivateNetworksRoute,
+  PrivateVolumesRoute: PrivateVolumesRoute,
+  PrivateIndexRoute: PrivateIndexRoute,
+  PrivateSettingsPathRoute: PrivateSettingsPathRoute,
+  PrivateStacksNameRoute: PrivateStacksNameRoute,
+}
+
+const PrivateRouteRouteWithChildren = PrivateRouteRoute._addFileChildren(
+  PrivateRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  ContainersRoute: ContainersRoute,
-  ImagesRoute: ImagesRoute,
-  NetworksRoute: NetworksRoute,
-  VolumesRoute: VolumesRoute,
+  PrivateRouteRoute: PrivateRouteRouteWithChildren,
   ApiHealthRoute: ApiHealthRoute,
   AuthPathRoute: AuthPathRoute,
-  SettingsPathRoute: SettingsPathRoute,
-  StacksNameRoute: StacksNameRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiStacksRedeployRoute: ApiStacksRedeployRoute,
   ApiWsExecRoute: ApiWsExecRoute,

@@ -13,7 +13,7 @@ import { listStacks, stackDown, stackPull, stackRestart, stackStop, stackUp } fr
 import { ensureSession } from "#/lib/functions/auth"
 import type { Stack } from "#/lib/functions/stacks"
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/_private/")({
   async beforeLoad({ context: { queryClient }, location }) {
     const session = await ensureSession(queryClient)()
     if (!session) {

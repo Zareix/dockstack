@@ -6,7 +6,7 @@ import { ensureSession } from "#/lib/functions/auth"
 
 const validSettingsPaths = Object.values(viewPaths.settings)
 
-export const Route = createFileRoute("/settings/$path")({
+export const Route = createFileRoute("/_private/settings/$path")({
   async beforeLoad({ params: { path }, context: { queryClient }, location }) {
     if (!validSettingsPaths.includes(path)) {
       throw notFound()
