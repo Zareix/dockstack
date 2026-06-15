@@ -3,7 +3,7 @@ import { createMiddleware } from "@tanstack/react-start"
 import { auth } from "#/lib/auth"
 
 export const authMiddleware = createMiddleware().server(async ({ request, next }) => {
-  const session = await auth.api.getSession(request)
+  const session = await auth.api.getSession({ headers: request.headers })
   if (!session) {
     return Response.json({ error: "Unauthorized" }, { status: 401 })
   }
@@ -24,6 +24,7 @@ export const apiKeyMiddleware = createMiddleware().server(async ({ request, next
     body: {
       key,
     },
+    headers: request.headers,
   })
   if (!data.valid) {
     return Response.json({ error: data.error }, { status: 401 })
