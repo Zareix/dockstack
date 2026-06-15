@@ -6,6 +6,7 @@ export const env = createEnv({
     NODE_ENV: z._default(z.enum(["development", "test", "production"]), "development"),
     BETTER_AUTH_URL: z.url().optional(),
     ADMIN_EMAIL: z.email(),
+    DOCKER_CONFIG_DIR_PATH: z.string(),
     APP_TITLE: z.string().min(1).optional().default("Dockstack"),
     SERVER_HOST: z.string().min(1),
     STACKS_DIR: z.string().min(1),

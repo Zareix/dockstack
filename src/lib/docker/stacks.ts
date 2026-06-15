@@ -73,7 +73,16 @@ async function* spawnCompose(stackName: string, args: string[]) {
   const composePath = await findComposePath(stackName)
   if (!(await Bun.file(composePath).exists())) return
 
-  const command = ["docker", "compose", "--progress", "plain", "-f", composePath]
+  const command = [
+    "docker",
+    "--config",
+    env.DOCKER_CONFIG_DIR_PATH,
+    "compose",
+    "--progress",
+    "plain",
+    "-f",
+    composePath,
+  ]
 
   const envPath = await findEnvPath(stackName)
   if (envPath) command.push("--env-file", envPath)
@@ -160,12 +169,15 @@ export async function* streamStackPull(stackName: string) {
 export const stackUpServices = async (stackName: string, services: string[]) => {
   const composePath = await findComposePath(stackName)
   const envPath = await findEnvPath(stackName)
+  const configPath = env.DOCKER_CONFIG_DIR_PATH
   if (envPath) {
-    await Bun.$`docker compose -f ${composePath} --env-file ${envPath} up -d ${services}`.env(
+    await Bun.$`docker --config ${configPath} compose -f ${composePath} --env-file ${envPath} up -d ${services}`.env(
       getDockerEnv(),
     )
   } else {
-    await Bun.$`docker compose -f ${composePath} up -d ${services}`.env(getDockerEnv())
+    await Bun.$`docker --config ${configPath} compose -f ${composePath} up -d ${services}`.env(
+      getDockerEnv(),
+    )
   }
 }
 

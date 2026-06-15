@@ -1,3 +1,5 @@
+import { env } from "#/env"
+
 import { dockerClient } from "./client"
 
 export type LogEntry = {
@@ -71,7 +73,17 @@ export const streamStackLogs = async function* (stackName: string) {
     ;(async () => {
       try {
         const proc = Bun.spawn(
-          ["docker", "logs", "--follow", "--timestamps", "--tail", "1000", info.Id],
+          [
+            "docker",
+            "--config",
+            env.DOCKER_CONFIG_DIR_PATH,
+            "logs",
+            "--follow",
+            "--timestamps",
+            "--tail",
+            "1000",
+            info.Id,
+          ],
           { stdout: "pipe", stderr: "pipe" },
         )
         await Promise.all([

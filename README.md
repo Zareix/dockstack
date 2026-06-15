@@ -63,6 +63,7 @@ stacks/
 | `STACKS_DIR`                          | no       | `/app/stacks`         | Path to stacks directory inside container                                                     |
 | `DATABASE_PATH`                       | no       | `/app/data/db.sqlite` | Path to SQLite auth database                                                                  |
 | `PORT`                                | no       | `3000`                | HTTP port the server listens on                                                               |
+| `DOCKER_CONFIG_DIR_PATH`              | yes      | `/app/docker`         | Path to Docker config directory (passed as `docker --config`)                                 |
 | `DOCKER_SYSTEM_PRUNE_CRON`            | no       | —                     | Cron expression to schedule automatic `docker system prune` (e.g. `0 3 * * *` for 3 AM daily) |
 | `DOCKER_SYSTEM_PRUNE_INCLUDE_VOLUMES` | no       | `false`               | Set to `true` to also prune unused volumes during scheduled prune                             |
 | `REDEPLOY_SKIP`                       | no       | —                     | Comma-separated list of stack names to skip redeploying                                       |
