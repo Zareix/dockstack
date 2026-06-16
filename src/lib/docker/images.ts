@@ -1,4 +1,4 @@
-import { dockerClient } from "./client"
+import { dockerClient, getAuthConfig } from "./client"
 
 export type ImageInfo = {
   id: string
@@ -43,12 +43,14 @@ export const listImages = async (): Promise<ImageInfo[]> => {
     .sort((a, b) => b.created - a.created)
 }
 
-const getRemoteDigest = (tag: string): Promise<string> =>
-  new Promise((resolve, reject) => {
+const getRemoteDigest = async (tag: string): Promise<string> => {
+  const authConfig = await getAuthConfig(tag)
+  return new Promise((resolve, reject) => {
     dockerClient.modem.dial(
       {
         path: `/distribution/${tag}/json`,
         method: "GET",
+        authconfig: authConfig,
         statusCodes: {
           200: true,
           401: "unauthorized",
@@ -57,11 +59,14 @@ const getRemoteDigest = (tag: string): Promise<string> =>
         },
       },
       (err: Error | null, data: unknown) => {
-        if (err) reject(err)
-        else resolve((data as { Descriptor: { digest: string } }).Descriptor.digest)
+        if (err) {
+          console.error(err)
+          reject(err)
+        } else resolve((data as { Descriptor: { digest: string } }).Descriptor.digest)
       },
     )
   })
+}
 
 export const checkImagesStale = async (): Promise<Record<string, StaleStatus>> => {
   const images = await listImages()
@@ -74,7 +79,8 @@ export const checkImagesStale = async (): Promise<Record<string, StaleStatus>> =
         return
       }
       try {
-        const remoteDigest = await getRemoteDigest(image.tags[0])
+        const tag = image.tags[0]
+        const remoteDigest = await getRemoteDigest(tag)
         results[image.id] = image.repoDigests.some((d) => d.includes(remoteDigest))
           ? "up-to-date"
           : "outdated"

@@ -12,6 +12,7 @@ dist-ssr
 __unconfig*
 todos.json
 data/stacks
+data/config
 db.sqlite*
 .github
 .claude
