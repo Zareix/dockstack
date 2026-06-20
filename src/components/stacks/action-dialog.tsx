@@ -65,7 +65,7 @@ export function StackActionDialog({ title, action, onDone, children }: Props) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger render={children} />
-      <DialogContent className="max-w-3xl">
+      <DialogContent className="md:max-w-3xl">
         <DialogHeader>
           <DialogTitle>
             {title}
@@ -74,16 +74,15 @@ export function StackActionDialog({ title, action, onDone, children }: Props) {
             )}
           </DialogTitle>
         </DialogHeader>
-        <div
-          ref={scrollRef}
-          className="h-96 overflow-auto rounded-md bg-zinc-950 p-3 font-mono text-xs leading-5 text-zinc-200"
-        >
-          {lines.map((line, i) => (
-            <div key={i} className="whitespace-pre-wrap">
-              {line}
-            </div>
-          ))}
-          {running && lines.length === 0 && <span className="text-zinc-500">Starting...</span>}
+        <div className="overflow-hidden rounded-md bg-zinc-950 p-3 font-mono text-xs leading-5 text-zinc-200">
+          <div ref={scrollRef} className="h-96 overflow-auto">
+            {lines.map((line, i) => (
+              <div key={i} className="whitespace-pre">
+                {line}
+              </div>
+            ))}
+            {running && lines.length === 0 && <span className="text-zinc-500">Starting...</span>}
+          </div>
         </div>
         <DialogFooter>
           <Button variant="outline" disabled={running} onClick={() => setOpen(false)}>

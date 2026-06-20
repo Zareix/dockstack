@@ -73,76 +73,23 @@ async function* spawnCompose(stackName: string, args: string[]) {
   const composePath = await findComposePath(stackName)
   if (!(await Bun.file(composePath).exists())) return
 
+  const envPath = await findEnvPath(stackName)
   const command = [
-    "docker",
     "--config",
     env.DOCKER_CONFIG_DIR_PATH,
     "compose",
     "--progress",
     "plain",
-    "-f",
+    "--file",
     composePath,
+    ...(envPath ? ["--env-file", envPath] : []),
+    ...args,
   ]
 
-  const envPath = await findEnvPath(stackName)
-  if (envPath) command.push("--env-file", envPath)
+  yield `$ docker ${command.join(" ")}`
 
-  command.push(...args)
-
-  const proc = Bun.spawn(command, {
-    stdout: "pipe",
-    stderr: "pipe",
-    env: getDockerEnv(),
-  })
-
-  const queue: string[] = []
-  let done = 0
-  let notify: (() => void) | null = null
-
-  const finish = () => {
-    done++
-    const fn = notify
-    if (fn) fn()
-  }
-
-  const processStream = async (stream: ReadableStream<Uint8Array>) => {
-    const reader = stream.getReader()
-    const decoder = new TextDecoder()
-    let buf = ""
-    try {
-      // oxlint-disable-next-line
-      while (true) {
-        const { done: streamDone, value } = await reader.read()
-        if (streamDone) break
-        buf += decoder.decode(value, { stream: true })
-        const parts = buf.split("\n")
-        buf = parts.pop() ?? ""
-        for (const line of parts) {
-          if (!line) continue
-          queue.push(line)
-          const fn = notify
-          if (fn) fn()
-        }
-      }
-      if (buf) {
-        queue.push(buf)
-        const fn = notify
-        if (fn) fn()
-      }
-    } finally {
-      reader.releaseLock()
-    }
-  }
-
-  processStream(proc.stdout).finally(finish)
-  processStream(proc.stderr).finally(finish)
-
-  while (done < 2 || queue.length > 0) {
-    if (queue.length === 0) {
-      await new Promise<void>((r) => (notify = r))
-      notify = null
-    }
-    while (queue.length > 0) yield queue.shift()!
+  for await (const line of Bun.$`docker ${command} 2>&1`.env(getDockerEnv()).nothrow().lines()) {
+    if (line) yield line
   }
 }
 

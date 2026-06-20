@@ -146,7 +146,7 @@ export function ContainerLogs({ stackName }: { stackName: string }) {
         <Button onClick={streaming ? stopStreaming : startStreaming} size="sm">
           {streaming ? (
             <>
-              <StopCircleIcon /> Streaming...
+              <StopCircleIcon /> Stop
             </>
           ) : (
             <>
