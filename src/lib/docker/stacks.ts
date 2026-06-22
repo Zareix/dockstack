@@ -5,7 +5,16 @@ import { env } from "#/env"
 
 import { COMPOSE_FILENAMES, dockerClient } from "./client"
 
-export type StackStatus = "running" | "partial" | "stopped" | "down" | "unknown" | "missing"
+export type StackStatus =
+  | "running"
+  | "healthy"
+  | "unhealthy"
+  | "starting"
+  | "partial"
+  | "stopped"
+  | "down"
+  | "unknown"
+  | "missing"
 
 export type RedeployResult = {
   name: string
@@ -146,10 +155,13 @@ export const getStackStatus = async (stackName: string): Promise<StackStatus> =>
     }),
   })
   if (containers.length === 0) return "down"
-  const running = containers.filter((c) => c.State === "running").length
-  if (running === containers.length) return "running"
-  if (running === 0) return "stopped"
-  return "partial"
+  const running = containers.filter((c) => c.State === "running")
+  if (running.length === 0) return "stopped"
+  if (running.length < containers.length) return "partial"
+  if (running.some((c) => c.Status.includes("(unhealthy)"))) return "unhealthy"
+  if (running.some((c) => c.Status.includes("(health: starting)"))) return "starting"
+  if (running.every((c) => c.Status.includes("(healthy)"))) return "healthy"
+  return "running"
 }
 
 export const redeployAllRunningStacks = async (): Promise<RedeployResult[]> => {

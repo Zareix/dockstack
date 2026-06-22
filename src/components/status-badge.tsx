@@ -16,6 +16,17 @@ const statusMap: Record<Status, StatusVariant> = {
     className: "bg-green-600 text-white dark:bg-green-700",
     label: "Running",
   },
+  healthy: {
+    variant: "default",
+    className: "bg-green-600 text-white dark:bg-green-700",
+    label: "Healthy",
+  },
+  unhealthy: { variant: "destructive", label: "Unhealthy" },
+  starting: {
+    variant: "secondary",
+    className: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-400",
+    label: "Starting",
+  },
   partial: {
     variant: "secondary",
     className: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-400",

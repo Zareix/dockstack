@@ -23,9 +23,12 @@ export type ContainerInfo = {
   }[]
 }
 
-const containerStateToStatus = (state: string): StackStatus => {
+const containerStateToStatus = (state: string, statusStr: string): StackStatus => {
   switch (state) {
     case "running":
+      if (statusStr.includes("(healthy)")) return "healthy"
+      if (statusStr.includes("(unhealthy)")) return "unhealthy"
+      if (statusStr.includes("(health: starting)")) return "starting"
       return "running"
     case "restarting":
       return "partial"
@@ -47,8 +50,8 @@ const mapContainer = (c: Docker.ContainerInfo): ContainerInfo => ({
   name: c.Names[0]?.replace(/^\//, "") ?? c.Id.slice(0, 12),
   image: formatImageTag(c.Image),
   stack: c.Labels["com.docker.compose.project"] ?? null,
-  status: containerStateToStatus(c.State),
-  uptime: c.Status,
+  status: containerStateToStatus(c.State, c.Status),
+  uptime: c.Status.replace(/\s*\(.*?\)/, "").trim(),
   ports: c.Ports.filter((p) => p.PublicPort)
     .map((p) => ({
       hostPort: p.PublicPort,
