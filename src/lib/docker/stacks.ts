@@ -3,6 +3,7 @@ import { join } from "node:path"
 
 import { env } from "#/env"
 
+import { mergeStreams } from "../streams"
 import { COMPOSE_FILENAMES, dockerClient } from "./client"
 
 export type StackStatus =
@@ -80,7 +81,6 @@ export const listStacks = async () => {
 
 async function* spawnCompose(stackName: string, args: string[]) {
   const composePath = await findComposePath(stackName)
-  if (!(await Bun.file(composePath).exists())) return
 
   const envPath = await findEnvPath(stackName)
   const command = [
@@ -97,9 +97,12 @@ async function* spawnCompose(stackName: string, args: string[]) {
 
   yield `$ docker ${command.join(" ")}`
 
-  for await (const line of Bun.$`docker ${command} 2>&1`.env(getDockerEnv()).nothrow().lines()) {
-    if (line) yield line
-  }
+  const proc = Bun.spawn(["docker", ...command], {
+    stdout: "pipe",
+    stderr: "pipe",
+    env: getDockerEnv(),
+  })
+  yield* mergeStreams(proc.stdout, proc.stderr)
 }
 
 export async function* streamStackUp(stackName: string) {
