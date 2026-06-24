@@ -9,7 +9,7 @@ export function StackServices({ stackName }: { stackName: string }) {
   const query = useQuery({
     queryKey: ["stacks", stackName, "services"],
     queryFn: () => getStackContainers({ data: { stackName } }),
-    refetchInterval: 5000,
+    refetchInterval: 1000,
   })
 
   if (query.isLoading) return <Spinner />

@@ -72,7 +72,7 @@ function StackPage() {
   const statusQuery = useQuery({
     queryKey: ["stacks", name, "status"],
     queryFn: () => getStackStatus({ data: { stackName: name } }),
-    refetchInterval: 5000,
+    refetchInterval: 1000,
   })
 
   const invalidateStatus = useCallback(() => {
