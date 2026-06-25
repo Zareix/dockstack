@@ -31,6 +31,7 @@ ENV PORT=3000
 ENV STACKS_DIR=/app/stacks
 ENV DATABASE_PATH=/app/data/db.sqlite
 ENV DOCKER_CONFIG_DIR_PATH=/app/docker
+ENV BUILDX_CONFIG=/tmp/buildx
 
 EXPOSE 3000
 

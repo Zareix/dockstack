@@ -9,6 +9,7 @@ services:
       - ./data/stacks:/app/stacks
       - db:/app/data
       - /var/run/docker.sock:/var/run/docker.sock
+      - ./data/config/config.json:/app/docker/config.json:ro
     environment:
       - BETTER_AUTH_URL=${BETTER_AUTH_URL}
       - BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET}
