@@ -106,7 +106,7 @@ async function* spawnCompose(stackName: string, args: string[]) {
 }
 
 export async function* streamStackUp(stackName: string) {
-  yield* spawnCompose(stackName, ["up", "-d", "--remove-orphans"])
+  yield* spawnCompose(stackName, ["up", "-d", "--remove-orphans", "--build"])
 }
 
 export async function* streamStackStop(stackName: string) {
