@@ -6,10 +6,10 @@ export const env = createEnv({
     NODE_ENV: z._default(z.enum(["development", "test", "production"]), "development"),
     BETTER_AUTH_URL: z.url().optional(),
     ADMIN_EMAIL: z.email(),
-    DOCKER_CONFIG_DIR_PATH: z.string(),
+    DOCKER_CONFIG_DIR_PATH: z.string().optional().default("./.docker"),
     APP_TITLE: z.string().min(1).optional().default("Dockstack"),
-    SERVER_HOST: z.string().min(1),
-    STACKS_DIR: z.string().min(1),
+    SERVER_HOST: z.string().min(1).optional().default("localhost"),
+    STACKS_DIR: z.string().min(1).optional().default("./stacks"),
     OTHER_INSTANCE_URLS: z
       .string()
       .transform((val) =>
@@ -34,7 +34,7 @@ export const env = createEnv({
       )
       .optional()
       .default([]),
-    DATABASE_PATH: z._default(z.string(), "./db.sqlite"),
+    DATABASE_PATH: z.string().min(1).optional().default("./db.sqlite"),
     OAUTH_PROVIDER_ID: z.string().optional(),
     OAUTH_CLIENT_ID: z.string().optional(),
     OAUTH_CLIENT_SECRET: z.string().optional(),
