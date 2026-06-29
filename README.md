@@ -49,25 +49,25 @@ stacks/
 
 ## Environment variables
 
-| Variable                              | Required | Default               | Description                                                                                   |
-| ------------------------------------- | -------- | --------------------- | --------------------------------------------------------------------------------------------- |
-| `BETTER_AUTH_SECRET`                  | **yes**  | —                     | Secret key for session signing (min 32 chars)                                                 |
-| `BETTER_AUTH_URL`                     | **yes**  | —                     | Public URL of the dockstack instance                                                          |
-| `ADMIN_EMAIL`                         | **yes**  | —                     | Email of the initial admin user                                                               |
-| `OAUTH_PROVIDER_ID`                   | no       | —                     | Display name for the OAuth provider                                                           |
-| `OAUTH_CLIENT_ID`                     | no       | —                     | OAuth client ID                                                                               |
-| `OAUTH_CLIENT_SECRET`                 | no       | —                     | OAuth client secret                                                                           |
-| `OAUTH_DISCOVERY_URL`                 | no       | —                     | OIDC discovery endpoint URL                                                                   |
-| `APP_TITLE`                           | no       | `Dockstack`           | Title of the application                                                                      |
-| `SERVER_HOST`                         | no       | `localhost`           | Host shown in port links in the UI                                                            |
-| `STACKS_DIR`                          | no       | `./stacks`            | Path to stacks directory inside container                                                     |
-| `DATABASE_PATH`                       | no       | `./db.sqlite`         | Path to SQLite auth database                                                                  |
-| `PORT`                                | no       | `3000`                | HTTP port the server listens on                                                               |
-| `DOCKER_CONFIG_DIR_PATH`              | no       | `./.docker`           | Path to Docker config directory (passed as `docker --config`)                                 |
-| `DOCKER_SYSTEM_PRUNE_CRON`            | no       | —                     | Cron expression to schedule automatic `docker system prune` (e.g. `0 3 * * *` for 3 AM daily) |
-| `DOCKER_SYSTEM_PRUNE_INCLUDE_VOLUMES` | no       | `false`               | Set to `true` to also prune unused volumes during scheduled prune                             |
-| `REDEPLOY_SKIP`                       | no       | —                     | Comma-separated list of stack names to skip redeploying                                       |
-| `OTHER_INSTANCE_URLS`                 | no       | —                     | List of other instance to have a link to, format : `name1,url1;name2,url2`                    |
+| Variable                              | Required | Default       | Description                                                                                   |
+| ------------------------------------- | -------- | ------------- | --------------------------------------------------------------------------------------------- |
+| `BETTER_AUTH_SECRET`                  | **yes**  | —             | Secret key for session signing (min 32 chars)                                                 |
+| `BETTER_AUTH_URL`                     | **yes**  | —             | Public URL of the dockstack instance                                                          |
+| `ADMIN_EMAIL`                         | **yes**  | —             | Email of the initial admin user                                                               |
+| `OAUTH_PROVIDER_ID`                   | no       | —             | Display name for the OAuth provider                                                           |
+| `OAUTH_CLIENT_ID`                     | no       | —             | OAuth client ID                                                                               |
+| `OAUTH_CLIENT_SECRET`                 | no       | —             | OAuth client secret                                                                           |
+| `OAUTH_DISCOVERY_URL`                 | no       | —             | OIDC discovery endpoint URL                                                                   |
+| `APP_TITLE`                           | no       | `Dockstack`   | Title of the application                                                                      |
+| `SERVER_HOST`                         | no       | `localhost`   | Host shown in port links in the UI                                                            |
+| `STACKS_DIR`                          | no       | `./stacks`    | Path to stacks directory inside container                                                     |
+| `DATABASE_PATH`                       | no       | `./db.sqlite` | Path to SQLite auth database                                                                  |
+| `PORT`                                | no       | `3000`        | HTTP port the server listens on                                                               |
+| `DOCKER_CONFIG_DIR_PATH`              | no       | `./.docker`   | Path to Docker config directory (passed as `docker --config`)                                 |
+| `DOCKER_SYSTEM_PRUNE_CRON`            | no       | —             | Cron expression to schedule automatic `docker system prune` (e.g. `0 3 * * *` for 3 AM daily) |
+| `DOCKER_SYSTEM_PRUNE_INCLUDE_VOLUMES` | no       | `false`       | Set to `true` to also prune unused volumes during scheduled prune                             |
+| `REDEPLOY_SKIP`                       | no       | —             | Comma-separated list of stack names to skip redeploying                                       |
+| `OTHER_INSTANCE_URLS`                 | no       | —             | List of other instance to have a link to, format : `name1,url1;name2,url2`                    |
 
 ## Webhook redeploy
 
