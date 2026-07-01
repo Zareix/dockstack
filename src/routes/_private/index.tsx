@@ -132,6 +132,7 @@ function Home() {
           items={[
             { label: "Status", value: "all" },
             { label: "Running", value: "running" },
+            { label: "Down", value: "down" },
             { label: "Stopped", value: "stopped" },
           ]}
           column={column}

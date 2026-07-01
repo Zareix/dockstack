@@ -31,7 +31,7 @@ const containerStateToStatus = (state: string, statusStr: string): StackStatus =
       if (statusStr.includes("(health: starting)")) return "starting"
       return "running"
     case "restarting":
-      return "partial"
+      return "restarting"
     case "exited":
     case "paused":
       return "stopped"

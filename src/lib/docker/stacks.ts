@@ -11,6 +11,7 @@ export type StackStatus =
   | "healthy"
   | "unhealthy"
   | "starting"
+  | "restarting"
   | "partial"
   | "stopped"
   | "down"
@@ -158,9 +159,12 @@ export const getStackStatus = async (stackName: string): Promise<StackStatus> =>
     }),
   })
   if (containers.length === 0) return "down"
+  const restarting = containers.filter((c) => c.State === "restarting")
   const running = containers.filter((c) => c.State === "running")
-  if (running.length === 0) return "stopped"
-  if (running.length < containers.length) return "partial"
+  if (running.length === 0 && restarting.length === 0) return "stopped"
+  if (running.length === 0) return "restarting"
+  if (running.length + restarting.length < containers.length || restarting.length > 0)
+    return "partial"
   if (running.some((c) => c.Status.includes("(unhealthy)"))) return "unhealthy"
   if (running.some((c) => c.Status.includes("(health: starting)"))) return "starting"
   if (running.every((c) => c.Status.includes("(healthy)"))) return "healthy"

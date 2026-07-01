@@ -32,6 +32,11 @@ const statusMap: Record<Status, StatusVariant> = {
     className: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-400",
     label: "Partial",
   },
+  restarting: {
+    variant: "secondary",
+    className: "bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-400",
+    label: "Restarting",
+  },
   stopped: { variant: "destructive", label: "Stopped" },
   down: { variant: "destructive", label: "Down" },
   unknown: { variant: "outline", className: "text-muted-foreground", label: "Unknown" },
