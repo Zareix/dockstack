@@ -1,9 +1,16 @@
 import { useVirtualizer } from "@tanstack/react-virtual"
 import { ChevronRight, ListEnd, PlayCircleIcon, StopCircleIcon } from "lucide-react"
-import { useCallback, useLayoutEffect, useRef, useState } from "react"
+import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react"
 
 import { Button } from "#/components/ui/button"
 import { Label } from "#/components/ui/label"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "#/components/ui/select"
 import { Switch } from "#/components/ui/switch"
 import { cn } from "#/lib/utils"
 import type { LogEntry } from "#/routes/api/ws/logs"
@@ -65,14 +72,29 @@ export function ContainerLogs({ stackName }: { stackName: string }) {
   const [showTimestamp, setShowTimestamp] = useState(false)
   const [didInitialScroll, setDidInitialScroll] = useState(false)
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
+  const [selectedContainers, setSelectedContainers] = useState<string[]>([])
 
   const parentRef = useRef<HTMLDivElement>(null)
   const wsRef = useRef<WebSocket | null>(null)
 
+  const availableContainers = useMemo(
+    () => [...new Set(lines.map((l) => l.containerName))].sort(),
+    [lines],
+  )
+
+  const filteredLines = useMemo(
+    () =>
+      selectedContainers.length === 0
+        ? lines
+        : lines.filter((l) => selectedContainers.includes(l.containerName)),
+    [lines, selectedContainers],
+  )
+
   const virtualizer = useVirtualizer({
-    count: lines.length,
+    count: filteredLines.length,
     getScrollElement: () => parentRef.current,
-    getItemKey: (index) => lines[index].timestamp + lines[index].containerName + index,
+    getItemKey: (index) =>
+      filteredLines[index].timestamp + filteredLines[index].containerName + index,
     estimateSize: () => 20,
     overscan: 50,
     anchorTo: "end",
@@ -84,6 +106,7 @@ export function ContainerLogs({ stackName }: { stackName: string }) {
     setStreaming(true)
     setLines([])
     setExpanded(new Set())
+    setSelectedContainers([])
 
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:"
     const ws = new WebSocket(`${protocol}//${window.location.host}/api/ws/logs`)
@@ -154,13 +177,40 @@ export function ContainerLogs({ stackName }: { stackName: string }) {
             </>
           )}
         </Button>
+        <Select
+          value={selectedContainers}
+          onValueChange={setSelectedContainers}
+          multiple
+          disabled={availableContainers.length === 0}
+        >
+          <SelectTrigger size="sm" className="min-w-36">
+            <SelectValue placeholder="All containers">
+              {(value: string[]) =>
+                value.length === 0 || value.length === availableContainers.length
+                  ? "All containers"
+                  : `${value.length} selected`
+              }
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            {availableContainers.map((name) => (
+              <SelectItem key={name} value={name}>
+                {name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         <div className="flex items-center space-x-2">
           <Switch id="timestamp" checked={showTimestamp} onCheckedChange={setShowTimestamp} />
           <Label htmlFor="timestamp">Timestamps</Label>
         </div>
-        <Button onClick={() => virtualizer.scrollToEnd()} variant="outline" className="ml-auto">
+        <Button
+          onClick={() => virtualizer.scrollToEnd()}
+          variant="outline"
+          size="icon"
+          className="ml-auto"
+        >
           <ListEnd />
-          Go to bottom
         </Button>
       </div>
       <div
@@ -169,7 +219,7 @@ export function ContainerLogs({ stackName }: { stackName: string }) {
       >
         <div className="relative w-full" style={{ height: `${virtualizer.getTotalSize()}px` }}>
           {virtualizer.getVirtualItems().map((item) => {
-            const entry = lines[item.index]
+            const entry = filteredLines[item.index]
             const date = new Date(entry.timestamp)
             const itemKey = String(item.key)
             const isExpanded = expanded.has(itemKey)
@@ -238,7 +288,7 @@ export function ContainerLogs({ stackName }: { stackName: string }) {
           })}
         </div>
       </div>
-      <div className="mt-2 text-xs text-muted-foreground">{lines.length} lines</div>
+      <div className="mt-2 text-xs text-muted-foreground">{filteredLines.length} lines</div>
     </>
   )
 }
