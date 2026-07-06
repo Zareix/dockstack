@@ -27,7 +27,7 @@ export function StackTerminal({ stackName }: { stackName: string }) {
   if (query.isLoading) return <Spinner />
   if (query.error) return <p className="text-sm text-destructive">{query.error.message}</p>
 
-  const running = query.data?.filter((c) => c.status === "running") ?? []
+  const running = query.data?.filter((c) => c.status === "running" || c.status === "healthy") ?? []
 
   if (!running.length)
     return <p className="text-sm text-muted-foreground">No running containers.</p>

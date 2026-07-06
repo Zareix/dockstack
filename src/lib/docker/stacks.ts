@@ -160,7 +160,7 @@ export const getStackStatus = async (stackName: string): Promise<StackStatus> =>
   })
   if (containers.length === 0) return "down"
   const restarting = containers.filter((c) => c.State === "restarting")
-  const running = containers.filter((c) => c.State === "running")
+  const running = containers.filter((c) => c.State === "running" || c.State === "healthy")
   if (running.length === 0 && restarting.length === 0) return "stopped"
   if (running.length === 0) return "restarting"
   if (running.length + restarting.length < containers.length || restarting.length > 0)

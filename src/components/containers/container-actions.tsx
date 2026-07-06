@@ -59,7 +59,7 @@ export function ContainerActions({
   })
 
   const busy = startM.isPending || stopM.isPending || restartM.isPending || removeM.isPending
-  const running = container.status === "running"
+  const running = container.status === "running" || container.status === "healthy"
 
   if (container.status === "missing") return null
 
