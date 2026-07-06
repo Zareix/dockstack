@@ -117,6 +117,7 @@ function Home() {
   const stacksQuery = useQuery({
     queryKey: ["stacks"],
     queryFn: listStacks,
+    refetchInterval: 5000,
   })
 
   const columns: ColumnDef<Stack>[] = [
@@ -131,6 +132,7 @@ function Home() {
         <FilterableHeader
           items={[
             { label: "Status", value: "all" },
+            { label: "Healthy", value: "healthy" },
             { label: "Running", value: "running" },
             { label: "Down", value: "down" },
             { label: "Stopped", value: "stopped" },
