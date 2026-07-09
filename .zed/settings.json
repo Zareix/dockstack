@@ -43,6 +43,7 @@
     },
     "TSX": {
       "language_servers": ["tsgo", "oxlint", "oxfmt", "tailwindcss-language-server"],
+      "format_on_save": "on",
       "formatter": [
         {
           "language_server": {

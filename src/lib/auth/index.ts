@@ -1,4 +1,5 @@
 import { apiKey } from "@better-auth/api-key"
+import { passkey } from "@better-auth/passkey"
 import { betterAuth } from "better-auth"
 import { drizzleAdapter } from "better-auth/adapters/drizzle"
 import { admin, genericOAuth, username } from "better-auth/plugins"
@@ -34,6 +35,7 @@ export const auth = betterAuth({
       : null,
     admin(),
     username(),
+    passkey(),
     apiKey({
       rateLimit: {
         maxRequests: 100,

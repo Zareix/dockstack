@@ -6,6 +6,7 @@ import type { ReactNode } from "react"
 import { SidebarProvider } from "#/components/ui/sidebar"
 import { authClient } from "#/lib/auth-client"
 import { apiKeyPlugin } from "#/lib/auth/api-key-plugin"
+import { passkeyPlugin } from "#/lib/auth/passkey-plugin.ts"
 import { themePlugin } from "#/lib/auth/theme-plugin"
 import { usernamePlugin } from "#/lib/auth/username-plugin"
 import { getSocialProviders } from "#/lib/functions/auth"
@@ -36,7 +37,7 @@ export function Providers({ children }: { children: ReactNode }) {
               enabled: true,
             }}
             navigate={navigate}
-            plugins={[themePlugin({ useTheme }), usernamePlugin(), apiKeyPlugin()]}
+            plugins={[themePlugin({ useTheme }), usernamePlugin(), apiKeyPlugin(), passkeyPlugin()]}
             Link={Link}
           >
             <SidebarProvider>{children}</SidebarProvider>

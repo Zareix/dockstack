@@ -1,6 +1,6 @@
 {
   "name": "dockstack",
-  "version": "0.12.1",
+  "version": "0.13.0",
   "private": true,
   "type": "module",
   "imports": {
@@ -23,6 +23,7 @@
     "@better-auth-ui/core": "^1.6.27",
     "@better-auth-ui/react": "^1.6.27",
     "@better-auth/api-key": "^1.6.23",
+    "@better-auth/passkey": "^1.6.23",
     "@fontsource-variable/geist": "^5.2.9",
     "@monaco-editor/react": "^4.7.0",
     "@t3-oss/env-core": "^0.13.11",
