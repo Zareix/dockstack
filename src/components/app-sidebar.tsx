@@ -78,6 +78,7 @@ export function AppSidebar() {
         {instances.length > 1 ? (
           <DropdownMenu>
             <DropdownMenuTrigger
+              nativeButton={false}
               render={
                 <div className="flex w-full cursor-default items-center gap-2 text-xl font-semibold" />
               }
