@@ -8,6 +8,12 @@ import { Spinner } from "#/components/ui/spinner"
 const COMPOSE_SCHEMA_URL =
   "https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json"
 
+declare global {
+  interface Window {
+    IS_MONACO_YAML_CONFIGURED?: boolean
+  }
+}
+
 window.MonacoEnvironment = {
   getWorker(_, label) {
     switch (label) {
@@ -44,7 +50,7 @@ export default function MonacoFileEditor({
       className="h-[60vh] md:h-[70vh]"
       loading={<Spinner />}
       beforeMount={(m) => {
-        if (filename.endsWith(".env")) return
+        if (window.IS_MONACO_YAML_CONFIGURED) return
         configureMonacoYaml(m, {
           enableSchemaRequest: true,
           hover: true,
@@ -63,6 +69,7 @@ export default function MonacoFileEditor({
             },
           ],
         })
+        window.IS_MONACO_YAML_CONFIGURED = true
       }}
       options={{
         readOnly,

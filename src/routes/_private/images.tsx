@@ -138,13 +138,11 @@ function ImagesPage() {
         <h1 className="text-3xl font-bold">Images</h1>
         <PruneImagesButton />
       </div>
-      <div className="mx-auto md:max-w-4xl">
-        <DataTable
-          columns={columns}
-          data={imagesQuery.data ?? []}
-          isLoading={imagesQuery.isLoading}
-        />
-      </div>
+      <DataTable
+        columns={columns}
+        data={imagesQuery.data ?? []}
+        isLoading={imagesQuery.isLoading}
+      />
     </>
   )
 }

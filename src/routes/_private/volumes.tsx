@@ -100,9 +100,7 @@ function VolumesPage() {
         <h1 className="text-3xl font-bold">Volumes</h1>
         <PruneVolumesButton />
       </div>
-      <div className="mx-auto md:max-w-4xl">
-        <DataTable columns={columns} data={query.data ?? []} isLoading={query.isLoading} />
-      </div>
+      <DataTable columns={columns} data={query.data ?? []} isLoading={query.isLoading} />
     </>
   )
 }

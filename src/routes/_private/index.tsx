@@ -161,14 +161,12 @@ function Home() {
           <CreateStackButton />
         </div>
       </div>
-      <div className="mx-auto md:max-w-4xl">
-        <DataTable
-          columns={columns}
-          data={stacksQuery.data ?? []}
-          isLoading={stacksQuery.isLoading}
-          onRowClick={({ name }) => navigate({ to: "/stacks/$name", params: { name } })}
-        />
-      </div>
+      <DataTable
+        columns={columns}
+        data={stacksQuery.data ?? []}
+        isLoading={stacksQuery.isLoading}
+        onRowClick={({ name }) => navigate({ to: "/stacks/$name", params: { name } })}
+      />
     </>
   )
 }

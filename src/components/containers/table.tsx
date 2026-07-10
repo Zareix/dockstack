@@ -143,9 +143,5 @@ export const ContainersTable = ({ data, isLoading, showStack = true }: Props) =>
     },
   ]
 
-  return (
-    <div className="mx-auto md:max-w-4xl">
-      <DataTable columns={columns} data={data} isLoading={isLoading} />
-    </div>
-  )
+  return <DataTable columns={columns} data={data} isLoading={isLoading} />
 }

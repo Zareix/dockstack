@@ -70,9 +70,7 @@ function NetworksPage() {
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-3xl font-bold">Networks</h1>
       </div>
-      <div className="mx-auto md:max-w-4xl">
-        <DataTable columns={columns} data={query.data ?? []} isLoading={query.isLoading} />
-      </div>
+      <DataTable columns={columns} data={query.data ?? []} isLoading={query.isLoading} />
     </>
   )
 }
