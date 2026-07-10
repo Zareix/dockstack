@@ -21,6 +21,7 @@ export type ContainerInfo = {
     protocol: string
     hostName: string
   }[]
+  urls: string[]
 }
 
 const containerStateToStatus = (state: string, statusStr: string): StackStatus => {
@@ -44,6 +45,25 @@ const containerStateToStatus = (state: string, statusStr: string): StackStatus =
   }
 }
 
+const getContainerUrlsFromLabels = (c: Docker.ContainerInfo): string[] => {
+  // Godoxy
+  if (c.Labels["proxy.aliases"] && env.AUTODETECT_URL_BASE_DOMAIN) {
+    return c.Labels["proxy.aliases"].split(",").map((a) => {
+      if (a.includes(".")) return `https://${a.trim()}`
+      return `https://${a.trim()}.${env.AUTODETECT_URL_BASE_DOMAIN}`
+    })
+  }
+
+  // Traefik
+  const label = Object.keys(c.Labels).find((l) => l.match(/^traefik\.http\.routers\.(.*)\.rule$/))
+  if (label && c.Labels[label].includes("Host(")) {
+    const routerName = c.Labels[label]
+    return routerName.split(",").map((r) => `https://${r.trim().replace(/^Host\(`(.*)`\)$/, "$1")}`)
+  }
+
+  return []
+}
+
 const mapContainer = (c: Docker.ContainerInfo): ContainerInfo => ({
   id: c.Id.slice(0, 12),
   serviceName: c.Labels["com.docker.compose.service"] ?? null,
@@ -63,6 +83,7 @@ const mapContainer = (c: Docker.ContainerInfo): ContainerInfo => ({
       (p, i, a) =>
         a.findIndex((p2) => p.hostPort === p2.hostPort && p.protocol === p2.protocol) === i,
     ),
+  urls: getContainerUrlsFromLabels(c),
 })
 
 export const getStackContainers = async (stackName: string): Promise<ContainerInfo[]> => {
@@ -74,13 +95,11 @@ export const getStackContainers = async (stackName: string): Promise<ContainerIn
   })
 
   const mapped = containers.map(mapContainer)
-  const knownServices = new Set(
-    containers.map((c) => c.Labels["com.docker.compose.service"]).filter(Boolean),
-  )
 
   try {
-    const composePath = await findComposePath(stackName)
-    const compose = (await Bun.YAML.parse(await Bun.file(composePath).text())) as {
+    const compose = (await Bun.YAML.parse(
+      await Bun.file(await findComposePath(stackName)).text(),
+    )) as {
       services?: Record<
         string,
         {
@@ -90,6 +109,9 @@ export const getStackContainers = async (stackName: string): Promise<ContainerIn
       >
     }
 
+    const knownServices = new Set(
+      containers.map((c) => c.Labels["com.docker.compose.service"]).filter(Boolean),
+    )
     for (const [serviceName, svc] of Object.entries(compose.services ?? {})) {
       if (knownServices.has(serviceName)) continue
 
@@ -102,6 +124,7 @@ export const getStackContainers = async (stackName: string): Promise<ContainerIn
         status: "missing",
         uptime: "-",
         ports: [],
+        urls: [],
       })
     }
   } catch {}

@@ -118,7 +118,6 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -137,6 +136,7 @@ body,
   min-height: 100%;
 }
 
-.monaco-editor, .monaco-editor > .overflow-guard {
-  @apply rounded-lg
+.monaco-editor,
+.monaco-editor > .overflow-guard {
+  @apply rounded-lg;
 }

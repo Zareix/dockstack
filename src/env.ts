@@ -52,6 +52,7 @@ export const env = createEnv({
       .pipe(z.array(z.string().min(1)))
       .optional()
       .default([]),
+    AUTODETECT_URL_BASE_DOMAIN: z.string().min(1).optional(),
   },
 
   /**

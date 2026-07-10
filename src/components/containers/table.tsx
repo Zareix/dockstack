@@ -55,6 +55,13 @@ export const ContainersTable = ({ data, isLoading, showStack = true }: Props) =>
         ] satisfies ColumnDef<ContainerInfo>[])
       : []),
     {
+      accessorKey: "image",
+      header: ({ column }) => <SortableHeader column={column} label="Image" />,
+      cell: ({ row }) => (
+        <span className="font-mono text-sm text-muted-foreground">{row.getValue("image")}</span>
+      ),
+    },
+    {
       accessorKey: "status",
       header: ({ column }) => (
         <FilterableHeader
@@ -102,11 +109,29 @@ export const ContainersTable = ({ data, isLoading, showStack = true }: Props) =>
       enableSorting: false,
     },
     {
-      accessorKey: "image",
-      header: ({ column }) => <SortableHeader column={column} label="Image" />,
-      cell: ({ row }) => (
-        <span className="font-mono text-sm text-muted-foreground">{row.getValue("image")}</span>
-      ),
+      accessorKey: "urls",
+      header: "URLs",
+      cell: ({ row }) => {
+        const urls: ContainerInfo["urls"] = row.getValue("urls")
+        return urls.length ? (
+          <div className="font-mono text-sm">
+            {urls.map((u) => (
+              <a
+                key={u}
+                href={u}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block hover:underline"
+              >
+                {u.replace("https://", "")}
+              </a>
+            ))}
+          </div>
+        ) : (
+          "-"
+        )
+      },
+      enableSorting: false,
     },
     {
       id: "actions",
