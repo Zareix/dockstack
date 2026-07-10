@@ -41,9 +41,10 @@ export default function MonacoFileEditor({
       path={filename}
       language={filename.endsWith(".env") ? "ini" : "yaml"}
       theme="vs-dark"
-      className="h-[60vh] overflow-hidden rounded-lg md:h-[70vh]"
+      className="h-[60vh] md:h-[70vh]"
       loading={<Spinner />}
-      beforeMount={(m) =>
+      beforeMount={(m) => {
+        if (filename.endsWith(".env")) return
         configureMonacoYaml(m, {
           enableSchemaRequest: true,
           hover: true,
@@ -62,14 +63,13 @@ export default function MonacoFileEditor({
             },
           ],
         })
-      }
+      }}
       options={{
         readOnly,
         minimap: { enabled: false },
         fontSize: 13,
-        lineNumbers: "on",
         scrollBeyondLastLine: false,
-        wordWrap: "on",
+        wordWrap: "off",
         tabSize: 2,
       }}
       onChange={(v) => onChange?.(v ?? "")}

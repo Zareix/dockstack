@@ -118,11 +118,6 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-html,
-body,
-#app {
-  min-height: 100%;
-}
 
 @layer base {
   * {
@@ -134,4 +129,14 @@ body,
   html {
     @apply font-sans;
   }
+}
+
+html,
+body,
+#app {
+  min-height: 100%;
+}
+
+.monaco-editor, .monaco-editor > .overflow-guard {
+  @apply rounded-lg
 }
