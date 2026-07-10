@@ -56,9 +56,12 @@ const getContainerUrlsFromLabels = (c: Docker.ContainerInfo): string[] => {
 
   // Traefik
   const label = Object.keys(c.Labels).find((l) => l.match(/^traefik\.http\.routers\.(.*)\.rule$/))
-  if (label && c.Labels[label].includes("Host(")) {
+  if (label) {
     const routerName = c.Labels[label]
-    return routerName.split(",").map((r) => `https://${r.trim().replace(/^Host\(`(.*)`\)$/, "$1")}`)
+    return routerName
+      .split(",")
+      .filter((r) => r.trim().startsWith("Host("))
+      .map((r) => `https://${r.trim().replace(/^Host\(`(.*)`\)$/, "$1")}`)
   }
 
   return []
