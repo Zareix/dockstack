@@ -2,7 +2,7 @@ import { rm } from "node:fs/promises"
 import { join } from "node:path"
 
 import { createServerFn } from "@tanstack/react-start"
-import { z } from "zod"
+import * as v from "valibot"
 
 import { env } from "#/env"
 import * as docker from "#/lib/docker"
@@ -24,15 +24,15 @@ export const listStacks = createServerFn()
 
 export const getStackStatus = createServerFn()
   .middleware([authMiddleware])
-  .validator(z.object({ stackName: z.string().min(1) }))
+  .validator(v.object({ stackName: v.pipe(v.string(), v.minLength(1)) }))
   .handler(({ data: { stackName } }) => docker.getStackStatus(stackName))
 
 export const getStackContainers = createServerFn()
   .middleware([authMiddleware])
-  .validator(z.object({ stackName: z.string().min(1) }))
+  .validator(v.object({ stackName: v.pipe(v.string(), v.minLength(1)) }))
   .handler(({ data: { stackName } }) => docker.getStackContainers(stackName))
 
-const stackNameSchema = z.object({ stackName: z.string().min(1) })
+const stackNameSchema = v.object({ stackName: v.pipe(v.string(), v.minLength(1)) })
 
 export const stackUp = createServerFn()
   .middleware([authMiddleware])

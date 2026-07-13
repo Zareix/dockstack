@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start"
-import { z } from "zod"
+import * as v from "valibot"
 
 import * as docker from "#/lib/docker"
 import { authMiddleware } from "#/lib/middleware"
@@ -8,7 +8,7 @@ export const listAllContainers = createServerFn()
   .middleware([authMiddleware])
   .handler(() => docker.listAllContainers())
 
-const containerIdSchema = z.object({ id: z.string().min(1) })
+const containerIdSchema = v.object({ id: v.pipe(v.string(), v.minLength(1)) })
 
 export const containerStart = createServerFn()
   .middleware([authMiddleware])

@@ -1,86 +1,58 @@
 import { createEnv } from "@t3-oss/env-core"
-import { z } from "zod"
+import * as v from "valibot"
 
 export const env = createEnv({
   server: {
-    NODE_ENV: z._default(z.enum(["development", "test", "production"]), "development"),
-    BETTER_AUTH_URL: z.url().optional(),
-    ADMIN_EMAIL: z.email(),
-    DOCKER_CONFIG_DIR_PATH: z.string().optional().default("./.docker"),
-    APP_TITLE: z.string().min(1).optional().default("Dockstack"),
-    SERVER_HOST: z.string().min(1).optional().default("localhost"),
-    STACKS_DIR: z.string().min(1).optional().default("./stacks"),
-    OTHER_INSTANCE_URLS: z
-      .string()
-      .transform((val) =>
-        val
-          .split(";")
-          .map((s) => {
-            const [title, url] = s
-              .trim()
+    NODE_ENV: v.optional(v.picklist(["development", "test", "production"]), "development"),
+    BETTER_AUTH_URL: v.optional(v.pipe(v.string(), v.url())),
+    ADMIN_EMAIL: v.pipe(v.string(), v.email()),
+    DOCKER_CONFIG_DIR_PATH: v.optional(v.string(), "./.docker"),
+    APP_TITLE: v.optional(v.pipe(v.string(), v.minLength(1)), "Dockstack"),
+    SERVER_HOST: v.optional(v.pipe(v.string(), v.minLength(1)), "localhost"),
+    STACKS_DIR: v.optional(v.pipe(v.string(), v.minLength(1)), "./stacks"),
+    OTHER_INSTANCE_URLS: v.pipe(
+      v.optional(v.string(), ""),
+      v.transform((val) =>
+        val === ""
+          ? []
+          : val
+              .split(";")
+              .map((s) => {
+                const [title, url] = s
+                  .trim()
+                  .split(",")
+                  .map((t) => t.trim())
+                return { title, url }
+              })
+              .filter(Boolean),
+      ),
+      v.check(
+        (entries) => entries.every((e) => e.title.length > 0 && URL.canParse(e.url)),
+        "Each entry must have a title and a valid url",
+      ),
+    ),
+    DATABASE_PATH: v.optional(v.pipe(v.string(), v.minLength(1)), "./db.sqlite"),
+    OAUTH_PROVIDER_ID: v.optional(v.string()),
+    OAUTH_CLIENT_ID: v.optional(v.string()),
+    OAUTH_CLIENT_SECRET: v.optional(v.string()),
+    OAUTH_DISCOVERY_URL: v.optional(v.pipe(v.string(), v.url())),
+    DOCKER_SYSTEM_PRUNE_CRON: v.optional(v.string()),
+    DOCKER_SYSTEM_PRUNE_INCLUDE_VOLUMES: v.optional(v.boolean(), false),
+    REDEPLOY_SKIP: v.pipe(
+      v.optional(v.string(), ""),
+      v.transform((val) =>
+        val === ""
+          ? []
+          : val
               .split(",")
-              .map((t) => t.trim())
-            return { title, url }
-          })
-          .filter(Boolean),
-      )
-      .pipe(
-        z.array(
-          z.object({
-            title: z.string().min(1),
-            url: z.url(),
-          }),
-        ),
-      )
-      .optional()
-      .default([]),
-    DATABASE_PATH: z.string().min(1).optional().default("./db.sqlite"),
-    OAUTH_PROVIDER_ID: z.string().optional(),
-    OAUTH_CLIENT_ID: z.string().optional(),
-    OAUTH_CLIENT_SECRET: z.string().optional(),
-    OAUTH_DISCOVERY_URL: z.url().optional(),
-    DOCKER_SYSTEM_PRUNE_CRON: z.string().optional(),
-    DOCKER_SYSTEM_PRUNE_INCLUDE_VOLUMES: z.boolean().optional().default(false),
-    REDEPLOY_SKIP: z
-      .string()
-      .transform((val) =>
-        val
-          .split(",")
-          .map((s) => s.trim())
-          .filter(Boolean),
-      )
-      .pipe(z.array(z.string().min(1)))
-      .optional()
-      .default([]),
-    AUTODETECT_URL_BASE_DOMAIN: z.string().min(1).optional(),
+              .map((s) => s.trim())
+              .filter(Boolean),
+      ),
+    ),
+    AUTODETECT_URL_BASE_DOMAIN: v.optional(v.pipe(v.string(), v.minLength(1))),
   },
-
-  /**
-   * The prefix that client-side variables must have. This is enforced both at
-   * a type-level and at runtime.
-   */
   clientPrefix: "VITE_",
-
   client: {},
-
-  /**
-   * What object holds the environment variables at runtime. This is usually
-   * `process.env` or `import.meta.env`.
-   */
   runtimeEnv: process.env,
-
-  /**
-   * By default, this library will feed the environment variables directly to
-   * the Zod validator.
-   *
-   * This means that if you have an empty string for a value that is supposed
-   * to be a number (e.g. `PORT=` in a ".env" file), Zod will incorrectly flag
-   * it as a type mismatch violation. Additionally, if you have an empty string
-   * for a value that is supposed to be a string with a default value (e.g.
-   * `DOMAIN=` in an ".env" file), the default value will never be applied.
-   *
-   * In order to solve these issues, we recommend that all new projects
-   * explicitly specify this option as true.
-   */
   emptyStringAsUndefined: true,
 })

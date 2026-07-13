@@ -4,7 +4,7 @@ import { useNavigate } from "@tanstack/react-router"
 import { PlusIcon } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
-import { z } from "zod"
+import * as v from "valibot"
 
 import { Button } from "#/components/ui/button"
 import {
@@ -20,11 +20,12 @@ import { Input } from "#/components/ui/input"
 import { Label } from "#/components/ui/label"
 import { createStack } from "#/lib/functions"
 
-const schema = z.object({
-  name: z
-    .string()
-    .min(1, "Name is required")
-    .regex(/^[a-zA-Z0-9_-]+$/, "Only letters, numbers, hyphens, underscores"),
+const schema = v.object({
+  name: v.pipe(
+    v.string(),
+    v.minLength(1, "Name is required"),
+    v.regex(/^[a-zA-Z0-9_-]+$/, "Only letters, numbers, hyphens, underscores"),
+  ),
 })
 
 export function CreateStackButton() {

@@ -1,8 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { TerminalIcon } from "lucide-react"
-import { useState } from "react"
+import { lazy, Suspense, useState } from "react"
 
-import { ContainerTerminal } from "#/components/terminal/container-terminal"
 import {
   Select,
   SelectContent,
@@ -12,6 +11,12 @@ import {
 } from "#/components/ui/select"
 import { Spinner } from "#/components/ui/spinner"
 import { getStackContainers } from "#/lib/functions"
+
+const ContainerTerminal = lazy(() =>
+  import("#/components/terminal/container-terminal").then((m) => ({
+    default: m.ContainerTerminal,
+  })),
+)
 
 const SHELLS = ["/bin/sh", "/bin/bash", "/bin/zsh", "/bin/ash"]
 
@@ -78,7 +83,9 @@ export function StackTerminal({ stackName }: { stackName: string }) {
 
       {activeId && (
         <div className="min-h-0 flex-1">
-          <ContainerTerminal key={`${activeId}-${shell}`} containerId={activeId} shell={shell} />
+          <Suspense fallback={<Spinner />}>
+            <ContainerTerminal key={`${activeId}-${shell}`} containerId={activeId} shell={shell} />
+          </Suspense>
         </div>
       )}
     </div>

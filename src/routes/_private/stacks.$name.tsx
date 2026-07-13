@@ -10,7 +10,7 @@ import {
 } from "lucide-react"
 import { useCallback } from "react"
 import { toast } from "sonner"
-import { z } from "zod"
+import * as v from "valibot"
 
 import { StackActionDialog } from "#/components/stacks/action-dialog"
 import { StackFiles } from "#/components/stacks/files"
@@ -42,8 +42,8 @@ import {
 } from "#/lib/functions"
 import { ensureSession } from "#/lib/functions/auth"
 
-const tabSchema = z.object({
-  tab: z.enum(["services", "files", "logs", "terminal"]).default("files"),
+const tabSchema = v.object({
+  tab: v.optional(v.picklist(["services", "files", "logs", "terminal"]), "files"),
 })
 
 export const Route = createFileRoute("/_private/stacks/$name")({
@@ -195,20 +195,24 @@ function StackPage() {
         </TabsList>
 
         <TabsContent value="files">
-          <ClientOnly>
-            <StackFiles stackName={name} />
-          </ClientOnly>
+          {tab === "files" && (
+            <ClientOnly>
+              <StackFiles stackName={name} />
+            </ClientOnly>
+          )}
         </TabsContent>
         <TabsContent value="services">
-          <StackServices stackName={name} />
+          {tab === "services" && <StackServices stackName={name} />}
         </TabsContent>
         <TabsContent value="logs">
-          <ContainerLogs stackName={name} />
+          {tab === "logs" && <ContainerLogs stackName={name} />}
         </TabsContent>
         <TabsContent value="terminal" className="flex h-200 flex-col">
-          <ClientOnly>
-            <StackTerminal stackName={name} />
-          </ClientOnly>
+          {tab === "terminal" && (
+            <ClientOnly>
+              <StackTerminal stackName={name} />
+            </ClientOnly>
+          )}
         </TabsContent>
       </Tabs>
     </>

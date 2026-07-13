@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start"
-import { z } from "zod"
+import * as v from "valibot"
 
 import * as docker from "#/lib/docker"
 import { authMiddleware } from "#/lib/middleware"
@@ -10,7 +10,7 @@ export const listImages = createServerFn()
 
 export const imageRemove = createServerFn()
   .middleware([authMiddleware])
-  .validator(z.object({ id: z.string().min(1) }))
+  .validator(v.object({ id: v.pipe(v.string(), v.minLength(1)) }))
   .handler(({ data: { id } }) => docker.imageRemove(id))
 
 export const imagePrune = createServerFn()

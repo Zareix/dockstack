@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start"
-import { z } from "zod"
+import * as v from "valibot"
 
 import * as docker from "#/lib/docker"
 import { authMiddleware } from "#/lib/middleware"
@@ -10,7 +10,7 @@ export const listVolumes = createServerFn()
 
 export const volumeRemove = createServerFn()
   .middleware([authMiddleware])
-  .validator(z.object({ name: z.string().min(1) }))
+  .validator(v.object({ name: v.pipe(v.string(), v.minLength(1)) }))
   .handler(({ data: { name } }) => docker.volumeRemove(name))
 
 export const volumePrune = createServerFn()
