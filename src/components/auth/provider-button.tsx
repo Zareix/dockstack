@@ -5,8 +5,11 @@ import type { SocialProvider } from "better-auth/social-providers"
 import { IdCardIcon } from "lucide-react"
 import type { ComponentProps } from "react"
 
+import { Badge } from "#/components/ui/badge.tsx"
 import { Button } from "#/components/ui/button.tsx"
 import { Spinner } from "#/components/ui/spinner.tsx"
+import { authClient as projectAuthClient } from "#/lib/auth-client.ts"
+import { cn } from "#/lib/utils.ts"
 
 export type ProviderButtonProps = {
   provider: SocialProvider
@@ -41,6 +44,8 @@ export function ProviderButton({
   })
   const isPending = signInMutating + signUpMutating > 0
 
+  const isLastUsed = projectAuthClient.isLastUsedLoginMethod(provider)
+
   return (
     <Button
       type="button"
@@ -48,6 +53,7 @@ export function ProviderButton({
       disabled={isPending}
       onClick={() => signInSocial({ provider, callbackURL })}
       {...props}
+      className={cn("relative", props.className)}
       aria-label={getProviderName(provider)}
     >
       {signInSocialPending ? <Spinner /> : <ProviderIcon />}
@@ -57,6 +63,15 @@ export function ProviderButton({
         : display === "name"
           ? getProviderName(provider)
           : null}
+
+      {isLastUsed && display !== "icon" && (
+        <Badge
+          variant="secondary"
+          className="absolute -top-2 -right-3 ml-auto border-border text-xs font-normal"
+        >
+          Last used
+        </Badge>
+      )}
     </Button>
   )
 }

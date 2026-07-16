@@ -3,6 +3,7 @@ import { passkey } from "@better-auth/passkey"
 import { betterAuth } from "better-auth"
 import { drizzleAdapter } from "better-auth/adapters/drizzle"
 import { admin, genericOAuth, username } from "better-auth/plugins"
+import { lastLoginMethod } from "better-auth/plugins"
 import { tanstackStartCookies } from "better-auth/tanstack-start"
 
 import { db } from "#/db"
@@ -41,6 +42,9 @@ export const auth = betterAuth({
         maxRequests: 100,
         timeWindow: 1000 * 60, // 1m
       },
+    }),
+    lastLoginMethod({
+      customResolveMethod: (ctx) => (ctx.path === "/sign-in/username" ? "username" : null),
     }),
     tanstackStartCookies(),
   ].filter(Boolean),

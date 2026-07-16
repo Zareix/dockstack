@@ -8,8 +8,10 @@ import {
 import { useIsMutating } from "@tanstack/react-query"
 import { Fingerprint } from "lucide-react"
 
+import { Badge } from "#/components/ui/badge.tsx"
 import { Button } from "#/components/ui/button.tsx"
 import { Spinner } from "#/components/ui/spinner.tsx"
+import { authClient as projectAuthClient } from "#/lib/auth-client.ts"
 import { passkeyPlugin } from "#/lib/auth/passkey-plugin.ts"
 import { cn } from "#/lib/utils.ts"
 
@@ -43,6 +45,7 @@ export function PasskeyButton({ view }: PasskeyButtonProps) {
     mutationKey: authMutationKeys.signUp.all,
   })
   const isPending = signInMutating + signUpMutating > 0
+  const isLastUsed = projectAuthClient.isLastUsedLoginMethod("passkey")
 
   // Passkey sign-in isn't relevant on the sign-up flow.
   if (view === "signUp") return null
@@ -52,11 +55,19 @@ export function PasskeyButton({ view }: PasskeyButtonProps) {
       type="button"
       variant="outline"
       disabled={isPending}
-      className={cn("w-full", isPending && "pointer-events-none opacity-50")}
+      className={cn("relative w-full", isPending && "pointer-events-none opacity-50")}
       onClick={() => signInPasskey()}
     >
       {passkeyPending ? <Spinner /> : <Fingerprint />}
       {localization.auth.continueWith.replace("{{provider}}", passkeyLocalization.passkey)}
+      {isLastUsed && (
+        <Badge
+          variant="secondary"
+          className="absolute -top-2 -right-3 ml-auto border-border text-xs font-normal"
+        >
+          Last used
+        </Badge>
+      )}
     </Button>
   )
 }

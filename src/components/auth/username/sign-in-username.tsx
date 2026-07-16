@@ -17,6 +17,7 @@ import { toast } from "sonner"
 
 import { ProviderButtons } from "#/components/auth/provider-buttons.tsx"
 import type { SocialLayout } from "#/components/auth/provider-buttons.tsx"
+import { Badge } from "#/components/ui/badge.tsx"
 import { Button } from "#/components/ui/button.tsx"
 import { Card, CardContent, CardHeader, CardTitle } from "#/components/ui/card.tsx"
 import { Checkbox } from "#/components/ui/checkbox.tsx"
@@ -24,6 +25,7 @@ import { Field, FieldError, FieldGroup, FieldSeparator } from "#/components/ui/f
 import { Input } from "#/components/ui/input.tsx"
 import { Label } from "#/components/ui/label.tsx"
 import { Spinner } from "#/components/ui/spinner.tsx"
+import { authClient as projectAuthClient } from "#/lib/auth-client.ts"
 import { usernamePlugin } from "#/lib/auth/username-plugin.ts"
 import { cn } from "#/lib/utils.ts"
 
@@ -66,6 +68,9 @@ export function SignInUsername({
   const { localization: usernameLocalization } = useAuthPlugin(usernamePlugin)
 
   const [password, setPassword] = useState("")
+
+  const lastUsedMethod = projectAuthClient.getLastUsedLoginMethod()
+  const isLastUsedField = lastUsedMethod === "email" || lastUsedMethod === "username"
 
   const { mutate: sendVerificationEmail } = useSendVerificationEmail(authClient, {
     onSuccess: () => toast.success(localization.auth.verificationEmailSent),
@@ -172,7 +177,14 @@ export function SignInUsername({
             <form onSubmit={handleSubmit}>
               <FieldGroup>
                 <Field data-invalid={!!fieldErrors.email}>
-                  <Label htmlFor="email">{usernameLocalization.username}</Label>
+                  <Label htmlFor="email" className="flex items-center gap-2">
+                    {usernameLocalization.username}
+                    {isLastUsedField && (
+                      <Badge variant="secondary" className="border-border text-xs font-normal">
+                        Last used
+                      </Badge>
+                    )}
+                  </Label>
 
                   <Input
                     id="email"
