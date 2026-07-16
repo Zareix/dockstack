@@ -47,7 +47,6 @@ export default function MonacoFileEditor({
       path={filename}
       language={filename.endsWith(".env") ? "ini" : "yaml"}
       theme="vs-dark"
-      className="h-[60vh] md:h-[70vh]"
       loading={<Spinner />}
       beforeMount={(m) => {
         if (window.IS_MONACO_YAML_CONFIGURED) return

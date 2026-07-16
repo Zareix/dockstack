@@ -62,20 +62,24 @@ export function StackFiles({ stackName }: { stackName: string }) {
               <p className="mb-2 font-mono text-xs text-muted-foreground">
                 {filesQuery.data.composeFile}
               </p>
-              <Suspense fallback={<Spinner />}>
-                <Editor
-                  value={compose}
-                  filename={filesQuery.data.composeFile}
-                  onChange={setCompose}
-                />
-              </Suspense>
+              <div className="h-[60vh] md:h-[70vh]">
+                <Suspense fallback={<Spinner />}>
+                  <Editor
+                    value={compose}
+                    filename={filesQuery.data.composeFile}
+                    onChange={setCompose}
+                  />
+                </Suspense>
+              </div>
             </div>
-            <div className="md:col-span-5">
+            <div className="md:col-span-5 ">
               <p className="mb-2 font-mono text-xs text-muted-foreground">.env</p>
               {envContent !== null ? (
-                <Suspense fallback={<Spinner />}>
-                  <Editor value={envContent} filename=".env" onChange={setEnvContent} />
-                </Suspense>
+                <div className="h-[60vh] md:h-[70vh]">
+                  <Suspense fallback={<Spinner />}>
+                    <Editor value={envContent} filename=".env" onChange={setEnvContent} />
+                  </Suspense>
+                </div>
               ) : (
                 <div className="flex items-center rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
                   <Button onClick={() => createDotEnvMutation.mutate()} variant="ghost">
