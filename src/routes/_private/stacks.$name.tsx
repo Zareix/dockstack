@@ -15,6 +15,7 @@ import * as v from "valibot"
 import { StackActionDialog } from "#/components/stacks/action-dialog"
 import { StackFiles } from "#/components/stacks/files"
 import { ContainerLogs } from "#/components/stacks/logs"
+import { StackServiceLinks } from "#/components/stacks/service-links"
 import { StackServices } from "#/components/stacks/services"
 import { StatusBadge } from "#/components/stacks/status-badge"
 import { StackTerminal } from "#/components/stacks/terminal"
@@ -92,10 +93,11 @@ function StackPage() {
 
   return (
     <>
-      <header className="items-center gap-3 md:flex">
+      <header className="items-center gap-2 md:flex">
         <h2 className="flex items-center gap-2 text-2xl font-bold">
           <span>{name}</span>
           {statusQuery.data && <StatusBadge status={statusQuery.data} />}
+          <StackServiceLinks stackName={name} />
         </h2>
 
         <div className="mt-4 ml-auto flex flex-wrap items-center gap-2 md:mt-0">

@@ -16,7 +16,7 @@
       }
     },
     "TypeScript": {
-      "language_servers": ["tsgo", "oxlint", "oxfmt", "tailwindcss-language-server"],
+      "language_servers": ["typescript-ls", "oxlint", "oxfmt", "tailwindcss-language-server"],
       "format_on_save": "on",
       "prettier": {
         "allowed": false
@@ -33,7 +33,7 @@
       }
     },
     "TSX": {
-      "language_servers": ["tsgo", "oxlint", "oxfmt", "tailwindcss-language-server"],
+      "language_servers": ["typescript-ls", "oxlint", "oxfmt", "tailwindcss-language-server"],
       "format_on_save": "on",
       "formatter": [
         {
