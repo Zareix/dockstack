@@ -183,7 +183,7 @@ export function ContainerLogs({ stackName }: { stackName: string }) {
           multiple
           disabled={availableContainers.length === 0}
         >
-          <SelectTrigger size="sm" className="min-w-36">
+          <SelectTrigger size="sm" className="w-36 md:w-52">
             <SelectValue placeholder="All containers">
               {(value: string[]) =>
                 value.length === 0 || value.length === availableContainers.length
