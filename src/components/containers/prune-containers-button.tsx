@@ -24,8 +24,8 @@ export function PruneContainersButton() {
   const pruneM = useMutation({
     mutationFn: () => containerPrune(),
     onSuccess: (result) => {
-      const count = result.ContainersDeleted.length
-      const mb = (result.SpaceReclaimed / 1e6).toFixed(1)
+      const count = result.containersDeleted.length
+      const mb = (result.spaceReclaimed / 1e6).toFixed(1)
       toast.success(`Pruned ${count} container${count !== 1 ? "s" : ""}, freed ${mb} MB`)
       queryClient.invalidateQueries({ queryKey: ["containers"] })
     },

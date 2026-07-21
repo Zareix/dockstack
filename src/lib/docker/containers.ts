@@ -146,4 +146,12 @@ export const containerStop = (id: string) => dockerClient.getContainer(id).stop(
 export const containerRestart = (id: string) => dockerClient.getContainer(id).restart()
 export const containerRemove = (id: string) => dockerClient.getContainer(id).remove({ force: true })
 
-export const containerPrune = () => dockerClient.pruneContainers({})
+export const containerPrune = async () => {
+  const res = await dockerClient.pruneContainers({})
+  return {
+    // oxlint-disable-next-line typescript/no-unnecessary-condition
+    containersDeleted: res.ContainersDeleted ?? [],
+    // oxlint-disable-next-line typescript/no-unnecessary-condition
+    spaceReclaimed: res.SpaceReclaimed ?? 0,
+  }
+}
