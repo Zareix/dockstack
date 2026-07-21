@@ -1,23 +1,30 @@
 import { useAuth, useSession } from "@better-auth-ui/react"
+import { useQuery } from "@tanstack/react-query"
 import { Link, useLocation } from "@tanstack/react-router"
 import type { ValidateLinkOptions } from "@tanstack/react-router"
 import { ContainerIcon, DatabaseIcon, ImagesIcon, LayersIcon, NetworkIcon } from "lucide-react"
 
 import { UserButton } from "#/components/auth/user/user-button"
-import { useSettings } from "#/hooks/use-settings"
+import { ScrollArea } from "#/components/ui/scroll-area"
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
   useSidebar,
-} from "@/components/ui/sidebar"
+} from "#/components/ui/sidebar"
+import { useSettings } from "#/hooks/use-settings"
 
+import { listStacks } from "../lib/functions"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,16 +34,16 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu"
 
-const LINKS: Array<{
+const RESOURCES_LINKS: Array<{
   label: string
   linkOptions: ValidateLinkOptions
   icon: React.ReactNode
 }> = [
-  {
-    label: "Stacks",
-    linkOptions: { to: "/" },
-    icon: <LayersIcon className="size-5" />,
-  },
+  // {
+  //   label: "Stacks",
+  //   linkOptions: { to: "/" },
+  //   icon: <LayersIcon className="size-5" />,
+  // },
   {
     label: "Containers",
     linkOptions: { to: "/containers" },
@@ -65,6 +72,11 @@ export function AppSidebar() {
   const { authClient } = useAuth()
   const { data: session } = useSession(authClient)
   const { isMobile, toggleSidebar } = useSidebar()
+  const stacksQuery = useQuery({
+    queryKey: ["stacks"],
+    queryFn: listStacks,
+    refetchInterval: 5000,
+  })
 
   const toggleSidebarOnMobile = () => (isMobile ? toggleSidebar() : null)
 
@@ -110,9 +122,47 @@ export function AppSidebar() {
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
+          <SidebarGroupLabel>Stacks</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {LINKS.map((l, index) => (
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  isActive={pathname === "/"}
+                  render={
+                    <Link to="/" onClick={toggleSidebarOnMobile}>
+                      <LayersIcon className="size-5" />
+                      Stacks
+                    </Link>
+                  }
+                />
+              </SidebarMenuItem>
+              <ScrollArea>
+                <div className="max-h-52">
+                  <SidebarMenuSub>
+                    {stacksQuery.data?.map((item) => (
+                      <SidebarMenuSubItem key={item.name}>
+                        <SidebarMenuSubButton
+                          isActive={pathname.split("?")[0] === `/stacks/${item.name}`}
+                          render={
+                            <Link to="/stacks/$name" params={{ name: item.name }}>
+                              {item.name}
+                            </Link>
+                          }
+                        />
+                      </SidebarMenuSubItem>
+                    ))}
+                  </SidebarMenuSub>
+                </div>
+              </ScrollArea>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Ressources</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {RESOURCES_LINKS.map((l, index) => (
                 <SidebarMenuItem key={index}>
                   <SidebarMenuButton
                     render={<Link {...l.linkOptions} onClick={toggleSidebarOnMobile} />}
