@@ -1,5 +1,5 @@
+import { ArrowSquareOutIcon, LinkIcon } from "@phosphor-icons/react"
 import { useQuery } from "@tanstack/react-query"
-import { ExternalLinkIcon, LinkIcon } from "lucide-react"
 
 import { getStackContainers } from "#/lib/functions"
 
@@ -45,10 +45,12 @@ export function StackServiceLinks({ stackName }: { stackName: string }) {
             render={<a href={link.href} target="_blank" rel="noopener noreferrer" />}
           >
             <span className="mr-2 flex flex-col">
-              <span className="text-xs text-muted-foreground">{link.service}</span>
+              <span className="text-xs text-muted-foreground group-data-highlighted/dropdown-menu-item:text-accent-foreground/70">
+                {link.service}
+              </span>
               <span>{link.label}</span>
             </span>
-            <ExternalLinkIcon className="ml-auto text-muted-foreground" />
+            <ArrowSquareOutIcon className="ml-auto text-muted-foreground group-data-highlighted/dropdown-menu-item:text-accent-foreground/70" />
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>

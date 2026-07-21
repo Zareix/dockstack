@@ -3,8 +3,8 @@
 import { resolveInputType } from "@better-auth-ui/core"
 import type { AdditionalField as AdditionalFieldConfig } from "@better-auth-ui/core"
 import { useAuth } from "@better-auth-ui/react"
+import { CalendarIcon, CheckIcon, CaretDownIcon, CopyIcon } from "@phosphor-icons/react"
 import { format } from "date-fns"
-import { CalendarIcon, Check, ChevronDownIcon, Copy } from "lucide-react"
 import { useRef, useState } from "react"
 import { toast } from "sonner"
 
@@ -98,7 +98,7 @@ function CopyButton({
       onClick={handleCopy}
       disabled={isDisabled}
     >
-      {copied ? <Check /> : <Copy />}
+      {copied ? <CheckIcon /> : <CopyIcon />}
     </InputGroupButton>
   )
 }
@@ -484,7 +484,7 @@ function DateInput({ name, field, isPending }: AdditionalFieldProps) {
             }
           >
             {date ? format(date, "PPP") : <span>{field.placeholder}</span>}
-            {isDateTime ? <ChevronDownIcon /> : <CalendarIcon />}
+            {isDateTime ? <CaretDownIcon /> : <CalendarIcon />}
           </PopoverTrigger>
 
           <PopoverContent className="w-auto overflow-hidden p-0" align="start">

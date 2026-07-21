@@ -1,3 +1,4 @@
+import { ArrowDownIcon, ArrowUpIcon, FunnelIcon } from "@phosphor-icons/react"
 import {
   type Column,
   type ColumnDef,
@@ -11,7 +12,6 @@ import {
   type Table as TanstackTable,
   useReactTable,
 } from "@tanstack/react-table"
-import { ArrowDown, ArrowUp, FilterIcon } from "lucide-react"
 import { useState } from "react"
 
 import { Button } from "#/components/ui/button"
@@ -40,7 +40,7 @@ export function SortableHeader<TData, TValue>({
   label: string
 }) {
   const sorted = column.getIsSorted()
-  const Icon = sorted === "asc" ? ArrowUp : sorted === "desc" ? ArrowDown : null
+  const Icon = sorted === "asc" ? ArrowUpIcon : sorted === "desc" ? ArrowDownIcon : null
   return (
     <Button
       variant="ghost"
@@ -76,7 +76,7 @@ export function FilterableHeader<TData>({
         size="sm"
         className="w-28 border-none bg-transparent! shadow-none"
         icon={
-          <FilterIcon
+          <FunnelIcon
             className={cn(
               "pointer-events-none size-4 text-muted-foreground",
               disabled && "opacity-50",

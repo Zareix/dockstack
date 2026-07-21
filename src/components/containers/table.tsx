@@ -1,3 +1,5 @@
+import { LinkIcon } from "@phosphor-icons/react"
+import { ArrowSquareOutIcon } from "@phosphor-icons/react/dist/ssr/ArrowSquareOut"
 import { Link } from "@tanstack/react-router"
 import type { ColumnDef } from "@tanstack/react-table"
 
@@ -31,11 +33,15 @@ export const ContainersTable = ({ data, isLoading, showStack = true }: Props) =>
       cell: ({ row }) => {
         const stack: string | null = row.getValue("stack")
         return stack ? (
-          <Link to="/stacks/$name" params={{ name: stack }} className="text-sm hover:underline">
+          <Link
+            to="/stacks/$name"
+            params={{ name: stack }}
+            className="font-mono text-sm hover:underline"
+          >
             {stack}
           </Link>
         ) : (
-          <span className="text-sm text-muted-foreground">-</span>
+          <span className="font-mono text-sm text-muted-foreground">-</span>
         )
       },
       sortingFn: (a, b) => a.original.stack?.localeCompare(b.original.stack ?? "") ?? 0,
@@ -53,6 +59,8 @@ export const ContainersTable = ({ data, isLoading, showStack = true }: Props) =>
         <FilterableHeader
           items={[
             { label: "Status", value: "all" },
+            { label: "Healthy", value: "healthy" },
+            { label: "Unhealthy", value: "unhealthy" },
             { label: "Running", value: "running" },
             { label: "Stopped", value: "stopped" },
           ]}
@@ -100,16 +108,17 @@ export const ContainersTable = ({ data, isLoading, showStack = true }: Props) =>
       cell: ({ row }) => {
         const urls: ContainerInfo["urls"] = row.getValue("urls")
         return urls.length ? (
-          <div className="font-mono text-sm">
+          <div className="text-sm">
             {urls.map((u) => (
               <a
                 key={u}
                 href={u}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block hover:underline"
+                className="flex items-center gap-1 hover:underline"
               >
                 {u.replace("https://", "")}
+                <ArrowSquareOutIcon className="size-3" />
               </a>
             ))}
           </div>

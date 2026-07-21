@@ -1,7 +1,7 @@
 "use client"
 
 import { useAuth, useAuthPlugin } from "@better-auth-ui/react"
-import { Check, Copy, Key } from "lucide-react"
+import { CheckIcon, CopyIcon, KeyIcon } from "@phosphor-icons/react"
 import { useState } from "react"
 import { toast } from "sonner"
 
@@ -49,7 +49,7 @@ export function NewApiKeyDialog({ open, onOpenChange, name, secretKey }: NewApiK
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogMedia>
-            <Key />
+            <KeyIcon />
           </AlertDialogMedia>
 
           <AlertDialogTitle>{apiKeyLocalization.newApiKey}</AlertDialogTitle>
@@ -73,7 +73,7 @@ export function NewApiKeyDialog({ open, onOpenChange, name, secretKey }: NewApiK
               aria-label={localization.settings.copyToClipboard}
               onClick={copySecretKey}
             >
-              {copied ? <Check /> : <Copy />}
+              {copied ? <CheckIcon /> : <CopyIcon />}
             </InputGroupButton>
           </InputGroup>
         </div>

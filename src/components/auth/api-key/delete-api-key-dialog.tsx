@@ -5,7 +5,7 @@ import {
   useAuthPlugin,
   useDeleteApiKey,
 } from "@better-auth-ui/react"
-import { Key } from "lucide-react"
+import { KeyIcon } from "@phosphor-icons/react"
 
 import {
   AlertDialog,
@@ -54,7 +54,7 @@ export function DeleteApiKeyDialog({
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogMedia>
-            <Key />
+            <KeyIcon />
           </AlertDialogMedia>
 
           <AlertDialogTitle>{apiKeyLocalization.deleteApiKey}</AlertDialogTitle>

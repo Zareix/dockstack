@@ -4,7 +4,7 @@ import {
   useAuthPlugin,
   useCreateApiKey,
 } from "@better-auth-ui/react"
-import { Key } from "lucide-react"
+import { KeyIcon } from "@phosphor-icons/react"
 import { type SyntheticEvent, useState } from "react"
 
 import {
@@ -89,7 +89,7 @@ export function CreateApiKeyDialog({
           <form onSubmit={handleSubmit} className="flex flex-col gap-6">
             <AlertDialogHeader>
               <AlertDialogMedia>
-                <Key />
+                <KeyIcon />
               </AlertDialogMedia>
 
               <AlertDialogTitle>{apiKeyLocalization.createApiKey}</AlertDialogTitle>

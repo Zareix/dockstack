@@ -1,11 +1,17 @@
+import {
+  DownloadIcon,
+  PauseIcon,
+  PlayIcon,
+  ArrowsClockwiseIcon,
+  SquareIcon,
+} from "@phosphor-icons/react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router"
 import type { ColumnDef } from "@tanstack/react-table"
-import { DownloadIcon, PauseIcon, PlayIcon, RefreshCwIcon, SquareIcon } from "lucide-react"
 import { toast } from "sonner"
 
 import { CreateStackButton } from "#/components/stacks/create-stack-dialog"
-import { StatusBadge } from "#/components/stacks/status-badge"
+import { StatusBadge } from "#/components/status-badge"
 import { Button } from "#/components/ui/button"
 import { DataTable, FilterableHeader, SortableHeader } from "#/components/ui/data-table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "#/components/ui/tooltip"
@@ -82,7 +88,7 @@ function StackActions({ name }: { name: string }) {
 
   const actions = [
     { label: "Pull", icon: DownloadIcon, onClick: () => pullMutation.mutate() },
-    { label: "Restart", icon: RefreshCwIcon, onClick: () => restartMutation.mutate() },
+    { label: "Restart", icon: ArrowsClockwiseIcon, onClick: () => restartMutation.mutate() },
     { label: "Stop", icon: PauseIcon, onClick: () => stopMutation.mutate() },
     { label: "Down", icon: SquareIcon, onClick: () => downMutation.mutate() },
     { label: "Up", icon: PlayIcon, onClick: () => upMutation.mutate() },
@@ -124,7 +130,7 @@ function Home() {
     {
       accessorKey: "name",
       header: ({ column }) => <SortableHeader column={column} label="Name" />,
-      cell: ({ row }) => <span className="font-medium">{row.getValue("name")}</span>,
+      cell: ({ row }) => <span className="font-mono">{row.getValue("name")}</span>,
     },
     {
       accessorKey: "status",

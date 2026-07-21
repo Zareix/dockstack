@@ -1,7 +1,7 @@
 import { authMutationKeys, parseAdditionalFieldValue } from "@better-auth-ui/core"
 import { useAuth, useFetchOptions, useSignUpEmail } from "@better-auth-ui/react"
+import { EyeIcon, EyeSlashIcon } from "@phosphor-icons/react"
 import { useIsMutating } from "@tanstack/react-query"
-import { Eye, EyeOff } from "lucide-react"
 import { useState } from "react"
 import type { SyntheticEvent } from "react"
 import { toast } from "sonner"
@@ -302,7 +302,7 @@ export function SignUp({ className, socialLayout, socialPosition = "bottom" }: S
                           setIsPasswordVisible(!isPasswordVisible)
                         }}
                       >
-                        {isPasswordVisible ? <EyeOff /> : <Eye />}
+                        {isPasswordVisible ? <EyeSlashIcon /> : <EyeIcon />}
                       </InputGroupButton>
                     </InputGroupAddon>
                   </InputGroup>
@@ -359,7 +359,7 @@ export function SignUp({ className, socialLayout, socialPosition = "bottom" }: S
                           }
                           onClick={() => setIsConfirmPasswordVisible(!isConfirmPasswordVisible)}
                         >
-                          {isConfirmPasswordVisible ? <EyeOff /> : <Eye />}
+                          {isConfirmPasswordVisible ? <EyeSlashIcon /> : <EyeIcon />}
                         </InputGroupButton>
                       </InputGroupAddon>
                     </InputGroup>

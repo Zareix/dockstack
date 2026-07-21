@@ -1,5 +1,5 @@
+import { PlayIcon, ArrowsClockwiseIcon, SquareIcon, TrashIcon } from "@phosphor-icons/react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { PlayIcon, RefreshCwIcon, SquareIcon, Trash2Icon } from "lucide-react"
 import { toast } from "sonner"
 
 import { Button } from "#/components/ui/button"
@@ -96,7 +96,7 @@ export function ContainerActions({
         onClick={() => restartM.mutate()}
         title="Restart"
       >
-        <RefreshCwIcon size={14} />
+        <ArrowsClockwiseIcon size={14} />
       </Button>
       <Button
         size="icon"
@@ -106,7 +106,7 @@ export function ContainerActions({
         onClick={() => removeM.mutate()}
         title="Remove"
       >
-        <Trash2Icon size={14} />
+        <TrashIcon size={14} />
       </Button>
     </div>
   )

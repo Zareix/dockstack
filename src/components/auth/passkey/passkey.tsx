@@ -1,5 +1,5 @@
 import { useAuth, useAuthPlugin } from "@better-auth-ui/react"
-import { Fingerprint, X } from "lucide-react"
+import { FingerprintIcon, XIcon } from "@phosphor-icons/react"
 import { useState } from "react"
 
 import { Button } from "#/components/ui/button.tsx"
@@ -23,7 +23,7 @@ export function Passkey({ passkey }: PasskeyProps) {
     <Card className="border-0 bg-transparent shadow-none ring-0">
       <CardContent className="flex items-center gap-3">
         <div className="flex size-10 shrink-0 items-center justify-center rounded-md bg-muted">
-          <Fingerprint className="size-4.5" />
+          <FingerprintIcon className="size-4.5" />
         </div>
 
         <div className="flex min-w-0 flex-col">
@@ -44,7 +44,7 @@ export function Passkey({ passkey }: PasskeyProps) {
           onClick={() => setDeleteOpen(true)}
           aria-label={passkeyLocalization.deletePasskey.replace("{{name}}", passkeyName)}
         >
-          <X />
+          <XIcon />
 
           {localization.settings.delete}
         </Button>

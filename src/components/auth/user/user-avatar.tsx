@@ -2,8 +2,8 @@
 
 import { useAuth, useSession } from "@better-auth-ui/react"
 import type { UsernameAuthClient } from "@better-auth-ui/react"
+import { UserIcon } from "@phosphor-icons/react"
 import type { User } from "better-auth"
-import { User2 } from "lucide-react"
 import type { ReactNode } from "react"
 
 import { Avatar, AvatarFallback, AvatarImage } from "#/components/ui/avatar.tsx"
@@ -57,7 +57,7 @@ export function UserAvatar({ className, user, isPending, fallback }: UserAvatarP
         className="text-muted-foreground!"
         delay={resolvedUser?.image ? 600 : undefined}
       >
-        {fallback || initials || <User2 className="size-4" />}
+        {fallback || initials || <UserIcon className="size-4" />}
       </AvatarFallback>
     </Avatar>
   )

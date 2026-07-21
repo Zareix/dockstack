@@ -1,8 +1,14 @@
 import { useAuth, useSession } from "@better-auth-ui/react"
+import {
+  ShippingContainerIcon,
+  DatabaseIcon,
+  ImagesIcon,
+  StackIcon,
+  NetworkIcon,
+} from "@phosphor-icons/react"
 import { useQuery } from "@tanstack/react-query"
 import { Link, useLocation } from "@tanstack/react-router"
 import type { ValidateLinkOptions } from "@tanstack/react-router"
-import { ContainerIcon, DatabaseIcon, ImagesIcon, LayersIcon, NetworkIcon } from "lucide-react"
 
 import { UserButton } from "#/components/auth/user/user-button"
 import { ScrollArea } from "#/components/ui/scroll-area"
@@ -42,12 +48,12 @@ const RESOURCES_LINKS: Array<{
   // {
   //   label: "Stacks",
   //   linkOptions: { to: "/" },
-  //   icon: <LayersIcon className="size-5" />,
+  //   icon: <StackIcon className="size-5" />,
   // },
   {
     label: "Containers",
     linkOptions: { to: "/containers" },
-    icon: <ContainerIcon className="size-5" />,
+    icon: <ShippingContainerIcon className="size-5" />,
   },
   {
     label: "Images",
@@ -120,7 +126,7 @@ export function AppSidebar() {
           </Link>
         )}
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className="gap-0">
         <SidebarGroup>
           <SidebarGroupLabel>Stacks</SidebarGroupLabel>
           <SidebarGroupContent>
@@ -130,7 +136,7 @@ export function AppSidebar() {
                   isActive={pathname === "/"}
                   render={
                     <Link to="/" onClick={toggleSidebarOnMobile}>
-                      <LayersIcon className="size-5" />
+                      <StackIcon className="size-5" />
                       Stacks
                     </Link>
                   }
@@ -138,13 +144,19 @@ export function AppSidebar() {
               </SidebarMenuItem>
               <ScrollArea>
                 <div className="max-h-52">
-                  <SidebarMenuSub>
+                  <SidebarMenuSub className="gap-0.5">
                     {stacksQuery.data?.map((item) => (
                       <SidebarMenuSubItem key={item.name}>
                         <SidebarMenuSubButton
                           isActive={pathname.split("?")[0] === `/stacks/${item.name}`}
+                          size="sm"
+                          className="font-mono"
                           render={
-                            <Link to="/stacks/$name" params={{ name: item.name }}>
+                            <Link
+                              to="/stacks/$name"
+                              params={{ name: item.name }}
+                              onClick={toggleSidebarOnMobile}
+                            >
                               {item.name}
                             </Link>
                           }

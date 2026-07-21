@@ -1,3 +1,4 @@
+import { IconContext } from "@phosphor-icons/react"
 import { useQuery } from "@tanstack/react-query"
 import { Link, useNavigate } from "@tanstack/react-router"
 import { ThemeProvider, useTheme } from "next-themes"
@@ -40,8 +41,14 @@ export function Providers({ children }: { children: ReactNode }) {
             plugins={[themePlugin({ useTheme }), usernamePlugin(), apiKeyPlugin(), passkeyPlugin()]}
             Link={Link}
           >
-            <SidebarProvider>{children}</SidebarProvider>
-            <Toaster />
+            <IconContext
+              value={{
+                weight: "duotone",
+              }}
+            >
+              <SidebarProvider>{children}</SidebarProvider>
+              <Toaster />
+            </IconContext>
           </AuthProvider>
         )
       )}

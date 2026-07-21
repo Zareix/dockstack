@@ -1,13 +1,13 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { ClientOnly, createFileRoute, redirect } from "@tanstack/react-router"
 import {
   DownloadIcon,
   PauseIcon,
   PlayIcon,
-  RefreshCwIcon,
+  ArrowsClockwiseIcon,
   SquareIcon,
-  Trash2Icon,
-} from "lucide-react"
+  TrashIcon,
+} from "@phosphor-icons/react"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { ClientOnly, createFileRoute, redirect } from "@tanstack/react-router"
 import { useCallback } from "react"
 import { toast } from "sonner"
 import * as v from "valibot"
@@ -17,8 +17,8 @@ import { StackFiles } from "#/components/stacks/files"
 import { ContainerLogs } from "#/components/stacks/logs"
 import { StackServiceLinks } from "#/components/stacks/service-links"
 import { StackServices } from "#/components/stacks/services"
-import { StatusBadge } from "#/components/stacks/status-badge"
 import { StackTerminal } from "#/components/stacks/terminal"
+import { StatusBadge } from "#/components/status-badge"
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -105,7 +105,7 @@ function StackPage() {
             <AlertDialogTrigger
               render={
                 <Button variant="destructive" disabled={destroyMutation.isPending}>
-                  <Trash2Icon />
+                  <TrashIcon />
                   {destroyMutation.isPending ? "Destroying..." : "Destroy"}
                 </Button>
               }
@@ -144,7 +144,7 @@ function StackPage() {
             onDone={invalidateStatus}
           >
             <Button variant="outline">
-              <RefreshCwIcon />
+              <ArrowsClockwiseIcon />
               Restart
             </Button>
           </StackActionDialog>

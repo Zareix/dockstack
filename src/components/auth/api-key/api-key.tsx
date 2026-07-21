@@ -1,7 +1,7 @@
 "use client"
 
 import { type ListedApiKey, useAuth, useAuthPlugin } from "@better-auth-ui/react"
-import { Key, X } from "lucide-react"
+import { KeyIcon, XIcon } from "@phosphor-icons/react"
 import { useState } from "react"
 
 import { Button } from "#/components/ui/button.tsx"
@@ -29,7 +29,7 @@ export function ApiKey({ apiKey, hideDelete, organizationId }: ApiKeyProps) {
     <Card className="border-0 bg-transparent shadow-none ring-0">
       <CardContent className="flex items-center gap-3">
         <div className="flex size-10 shrink-0 items-center justify-center rounded-md bg-muted">
-          <Key className="size-4.5" />
+          <KeyIcon className="size-4.5" />
         </div>
 
         <div className="flex min-w-0 flex-col">
@@ -56,7 +56,7 @@ export function ApiKey({ apiKey, hideDelete, organizationId }: ApiKeyProps) {
               onClick={() => setDeleteOpen(true)}
               aria-label={apiKeyLocalization.deleteApiKey}
             >
-              <X />
+              <XIcon />
 
               {localization.settings.delete}
             </Button>

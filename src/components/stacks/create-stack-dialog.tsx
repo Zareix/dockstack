@@ -1,7 +1,7 @@
+import { PlusIcon } from "@phosphor-icons/react"
 import { useForm } from "@tanstack/react-form"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useNavigate } from "@tanstack/react-router"
-import { PlusIcon } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 import * as v from "valibot"
@@ -61,7 +61,7 @@ export function CreateStackButton() {
       <DialogTrigger
         render={
           <Button size="sm">
-            <PlusIcon />
+            <PlusIcon weight="regular" />
             New stack
           </Button>
         }

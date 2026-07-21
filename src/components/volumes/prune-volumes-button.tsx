@@ -1,5 +1,5 @@
+import { BroomIcon } from "@phosphor-icons/react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { BrushCleaningIcon } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 
@@ -37,7 +37,7 @@ export function PruneVolumesButton() {
       <AlertDialogTrigger
         render={
           <Button variant="outline" size="sm" disabled={pruneM.isPending}>
-            <BrushCleaningIcon className="mr-2 h-4 w-4" />
+            <BroomIcon className="mr-2 h-4 w-4" />
             Prune unused
           </Button>
         }

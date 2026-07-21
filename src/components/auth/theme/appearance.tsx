@@ -6,7 +6,7 @@ import {
   ThemePreviewSystem,
   useAuthPlugin,
 } from "@better-auth-ui/react"
-import { Monitor, Moon, Sun } from "lucide-react"
+import { MonitorIcon, MoonIcon, SunIcon } from "@phosphor-icons/react"
 import { useEffect, useState } from "react"
 
 import { Card, CardContent } from "#/components/ui/card.tsx"
@@ -57,7 +57,7 @@ export function Appearance({ className }: AppearanceProps) {
                     <FieldContent className="gap-2">
                       <div className="flex items-center justify-between gap-2">
                         <FieldTitle>
-                          <Monitor className="size-4 text-muted-foreground" />
+                          <MonitorIcon className="size-4 text-muted-foreground" />
 
                           {localization.system}
                         </FieldTitle>
@@ -77,7 +77,7 @@ export function Appearance({ className }: AppearanceProps) {
                     <FieldContent className="gap-2">
                       <div className="flex items-center justify-between gap-2">
                         <FieldTitle>
-                          <Sun className="size-4 text-muted-foreground" />
+                          <SunIcon className="size-4 text-muted-foreground" />
 
                           {localization.light}
                         </FieldTitle>
@@ -97,7 +97,7 @@ export function Appearance({ className }: AppearanceProps) {
                     <FieldContent className="gap-2">
                       <div className="flex items-center justify-between gap-2">
                         <FieldTitle>
-                          <Moon className="size-4 text-muted-foreground" />
+                          <MoonIcon className="size-4 text-muted-foreground" />
 
                           {localization.dark}
                         </FieldTitle>

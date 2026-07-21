@@ -1,5 +1,5 @@
 import { useAuthPlugin } from "@better-auth-ui/react"
-import { Monitor, Moon, PaletteIcon, Sun } from "lucide-react"
+import { MonitorIcon, MoonIcon, PaletteIcon, SunIcon } from "@phosphor-icons/react"
 import { useRef } from "react"
 
 import { DropdownMenuItem } from "#/components/ui/dropdown-menu.tsx"
@@ -60,7 +60,7 @@ export function ThemeToggleItem() {
       }}
       render={<div />}
     >
-      <PaletteIcon className="text-muted-foreground" />
+      <PaletteIcon className="text-muted-foreground group-data-highlighted/dropdown-menu-item:text-accent-foreground" />
       <span>{localization.theme}</span>
       <Tabs
         className="ml-auto"
@@ -71,17 +71,17 @@ export function ThemeToggleItem() {
         <TabsList ref={tabsListRef} className="h-6!">
           {themes.includes("system") && (
             <TabsTrigger value="system" className="size-5 p-0" aria-label={localization.system}>
-              <Monitor className="size-3" />
+              <MonitorIcon className="size-3" />
             </TabsTrigger>
           )}
           {themes.includes("light") && (
             <TabsTrigger value="light" className="size-5 p-0" aria-label={localization.light}>
-              <Sun className="size-3" />
+              <SunIcon className="size-3" />
             </TabsTrigger>
           )}
           {themes.includes("dark") && (
             <TabsTrigger value="dark" className="size-5 p-0" aria-label={localization.dark}>
-              <Moon className="size-3" />
+              <MoonIcon className="size-3" />
             </TabsTrigger>
           )}
         </TabsList>

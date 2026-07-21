@@ -4,7 +4,7 @@ import type { ColumnDef } from "@tanstack/react-table"
 
 import { ImageActions } from "#/components/images/image-actions"
 import { PruneImagesButton } from "#/components/images/prune-images-button"
-import { StatusBadge } from "#/components/status-badge.tsx"
+import { StatusBadge } from "#/components/status-badge"
 import { DataTable, FilterableHeader, SortableHeader } from "#/components/ui/data-table"
 import { Spinner } from "#/components/ui/spinner"
 import type { ImageInfo, StaleStatus } from "#/lib/docker"

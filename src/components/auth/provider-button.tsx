@@ -1,8 +1,8 @@
 import { authMutationKeys, getProviderName } from "@better-auth-ui/core"
 import { providerIcons, useAuth, useSignInSocial } from "@better-auth-ui/react"
+import { IdentificationCardIcon } from "@phosphor-icons/react"
 import { useIsMutating } from "@tanstack/react-query"
 import type { SocialProvider } from "better-auth/social-providers"
-import { IdCardIcon } from "lucide-react"
 import type { ComponentProps } from "react"
 
 import { Badge } from "#/components/ui/badge.tsx"
@@ -34,7 +34,7 @@ export function ProviderButton({
 
   const { mutate: signInSocial, isPending: signInSocialPending } = useSignInSocial(authClient)
 
-  const ProviderIcon = providerIcons[provider] ?? IdCardIcon
+  const ProviderIcon = providerIcons[provider] ?? IdentificationCardIcon
 
   const signInMutating = useIsMutating({
     mutationKey: authMutationKeys.signIn.all,

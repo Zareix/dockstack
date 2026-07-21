@@ -5,8 +5,8 @@ import {
   useAuthPlugin,
   useSignInPasskey,
 } from "@better-auth-ui/react"
+import { FingerprintIcon } from "@phosphor-icons/react"
 import { useIsMutating } from "@tanstack/react-query"
-import { Fingerprint } from "lucide-react"
 
 import { Badge } from "#/components/ui/badge.tsx"
 import { Button } from "#/components/ui/button.tsx"
@@ -58,7 +58,7 @@ export function PasskeyButton({ view }: PasskeyButtonProps) {
       className={cn("relative w-full", isPending && "pointer-events-none opacity-50")}
       onClick={() => signInPasskey()}
     >
-      {passkeyPending ? <Spinner /> : <Fingerprint />}
+      {passkeyPending ? <Spinner /> : <FingerprintIcon />}
       {localization.auth.continueWith.replace("{{provider}}", passkeyLocalization.passkey)}
       {isLastUsed && (
         <Badge

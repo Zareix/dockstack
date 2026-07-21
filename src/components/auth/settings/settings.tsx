@@ -1,6 +1,6 @@
 import type { SettingsView } from "@better-auth-ui/core"
 import { useAuth, useAuthenticate } from "@better-auth-ui/react"
-import { Shield, User2 } from "lucide-react"
+import { ShieldIcon, UserIcon } from "@phosphor-icons/react"
 import { useMemo } from "react"
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/components/ui/tabs.tsx"
@@ -69,7 +69,7 @@ export function Settings({ className, view, path, hideNav }: SettingsProps) {
                 />
               }
             >
-              <User2 className="text-muted-foreground" />
+              <UserIcon className="text-muted-foreground" />
               {localization.settings.account}
             </TabsTrigger>
 
@@ -83,7 +83,7 @@ export function Settings({ className, view, path, hideNav }: SettingsProps) {
                 />
               }
             >
-              <Shield className="text-muted-foreground" />
+              <ShieldIcon className="text-muted-foreground" />
               {localization.settings.security}
             </TabsTrigger>
 

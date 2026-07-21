@@ -6,7 +6,7 @@ import {
   useAuth,
   useAuthPlugin,
 } from "@better-auth-ui/react"
-import { Fingerprint } from "lucide-react"
+import { FingerprintIcon } from "@phosphor-icons/react"
 import type { SyntheticEvent } from "react"
 
 import {
@@ -54,7 +54,7 @@ export function AddPasskeyDialog({ open, onOpenChange }: AddPasskeyDialogProps) 
         <form onSubmit={handleSubmit} className="flex flex-col gap-6">
           <AlertDialogHeader>
             <AlertDialogMedia>
-              <Fingerprint />
+              <FingerprintIcon />
             </AlertDialogMedia>
 
             <AlertDialogTitle>{passkeyLocalization.addPasskey}</AlertDialogTitle>

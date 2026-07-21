@@ -1,7 +1,7 @@
 "use client"
 
 import { Menu as MenuPrimitive } from "@base-ui/react/menu"
-import { ChevronRightIcon, CheckIcon } from "lucide-react"
+import { CaretRightIcon, CheckIcon } from "@phosphor-icons/react"
 import * as React from "react"
 
 import { cn } from "#/lib/utils.ts"
@@ -119,7 +119,7 @@ function DropdownMenuSubTrigger({
       {...props}
     >
       {children}
-      <ChevronRightIcon className="ml-auto" />
+      <CaretRightIcon className="ml-auto" />
     </MenuPrimitive.SubmenuTrigger>
   )
 }

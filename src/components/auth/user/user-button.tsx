@@ -1,5 +1,11 @@
 import { useAuth, useSession } from "@better-auth-ui/react"
-import { ChevronsUpDown, LogIn, LogOut, Settings, UserPlus2 } from "lucide-react"
+import {
+  CaretUpDownIcon,
+  SignInIcon,
+  SignOutIcon,
+  GearSixIcon,
+  UserPlusIcon,
+} from "@phosphor-icons/react"
 import { isValidElement } from "react"
 import type { ComponentType, ReactElement, ReactNode } from "react"
 
@@ -47,7 +53,7 @@ export type UserButtonProps = {
   variant?: "default" | "destructive" | "ghost" | "link" | "outline" | "secondary"
   /** Additional menu entries rendered above the built-in items. */
   links?: (UserButtonLink | ReactElement)[]
-  /** Hide the built-in "Settings" link. Useful when replacing it via `links`. */
+  /** Hide the built-in "GearSixIcon" link. Useful when replacing it via `links`. */
   hideSettings?: boolean
 }
 
@@ -79,7 +85,7 @@ function renderUserLink(
  * @param size - "icon" renders only the avatar; "default" renders a full button with label and chevron
  * @param variant - Visual variant of the trigger button
  * @param links - Additional menu entries rendered above the built-in items
- * @param hideSettings - Hide the built-in "Settings" link
+ * @param hideSettings - Hide the built-in "GearSixIcon" link
  * @returns The dropdown menu component with user actions
  */
 export function UserButton({
@@ -129,7 +135,7 @@ export function UserButton({
                 </>
               )}
 
-              <ChevronsUpDown className="ml-auto size-4" />
+              <CaretUpDownIcon className="ml-auto size-4" />
             </Button>
           ) : undefined
         }
@@ -164,7 +170,7 @@ export function UserButton({
                 onClick={toggleSidebarOnMobile}
                 render={<Link href={`${basePaths.settings}/${viewPaths.settings.account}`} />}
               >
-                <Settings className="text-muted-foreground" />
+                <GearSixIcon className="text-muted-foreground group-data-highlighted/dropdown-menu-item:text-accent-foreground" />
                 {localization.settings.settings}
               </DropdownMenuItem>
             )}
@@ -180,7 +186,7 @@ export function UserButton({
             <DropdownMenuItem
               render={<Link href={`${basePaths.auth}/${viewPaths.auth.signOut}`} />}
             >
-              <LogOut className="text-muted-foreground" />
+              <SignOutIcon className="text-muted-foreground group-data-highlighted/dropdown-menu-item:text-accent-foreground" />
               {localization.auth.signOut}
             </DropdownMenuItem>
           </>
@@ -189,12 +195,12 @@ export function UserButton({
             {userLinks}
 
             <DropdownMenuItem render={<Link href={`${basePaths.auth}/${viewPaths.auth.signIn}`} />}>
-              <LogIn className="text-muted-foreground" />
+              <SignInIcon className="text-muted-foreground group-data-highlighted/dropdown-menu-item:text-accent-foreground" />
               {localization.auth.signIn}
             </DropdownMenuItem>
 
             <DropdownMenuItem render={<Link href={`${basePaths.auth}/${viewPaths.auth.signUp}`} />}>
-              <UserPlus2 className="text-muted-foreground" />
+              <UserPlusIcon className="text-muted-foreground group-data-highlighted/dropdown-menu-item:text-accent-foreground" />
               {localization.auth.signUp}
             </DropdownMenuItem>
 

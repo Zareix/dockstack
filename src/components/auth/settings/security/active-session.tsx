@@ -1,7 +1,7 @@
 import { useAuth, useRevokeSession, useSession } from "@better-auth-ui/react"
+import { SignOutIcon, MonitorIcon, DeviceMobileIcon, XIcon } from "@phosphor-icons/react"
 import type { Session } from "better-auth"
 import Bowser from "bowser"
-import { LogOut, Monitor, Smartphone, X } from "lucide-react"
 import { toast } from "sonner"
 
 import { Button } from "#/components/ui/button.tsx"
@@ -60,7 +60,11 @@ export function ActiveSession({ activeSession }: ActiveSessionProps) {
     <Card className="border-0 bg-transparent shadow-none ring-0">
       <CardContent className="flex items-center justify-between gap-3">
         <div className="flex size-10 shrink-0 items-center justify-center rounded-md bg-muted">
-          {isMobile ? <Smartphone className="size-4.5" /> : <Monitor className="size-4.5" />}
+          {isMobile ? (
+            <DeviceMobileIcon className="size-4.5" />
+          ) : (
+            <MonitorIcon className="size-4.5" />
+          )}
         </div>
 
         <div className="flex min-w-0 flex-col">
@@ -98,7 +102,7 @@ export function ActiveSession({ activeSession }: ActiveSessionProps) {
             isCurrentSession ? localization.auth.signOut : localization.settings.revokeSession
           }
         >
-          {isRevoking ? <Spinner /> : isCurrentSession ? <LogOut /> : <X />}
+          {isRevoking ? <Spinner /> : isCurrentSession ? <SignOutIcon /> : <XIcon />}
 
           {isCurrentSession ? localization.auth.signOut : localization.settings.revoke}
         </Button>

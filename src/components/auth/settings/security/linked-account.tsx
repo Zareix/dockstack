@@ -6,8 +6,8 @@ import {
   useLinkSocial,
   useUnlinkAccount,
 } from "@better-auth-ui/react"
+import { LinkSimpleIcon, LinkSimpleBreakIcon, PlugIcon } from "@phosphor-icons/react"
 import type { Account, SocialProvider } from "better-auth"
-import { Link2, Link2Off, Plug } from "lucide-react"
 import { toast } from "sonner"
 
 import { Button } from "#/components/ui/button.tsx"
@@ -61,7 +61,7 @@ export function LinkedAccount({ account, provider }: LinkedAccountProps) {
           {ProviderIcon ? (
             <ProviderIcon className={cn("size-4.5", !account && "opacity-50")} />
           ) : (
-            <Plug className={cn("size-4.5", !account && "opacity-50")} />
+            <PlugIcon className={cn("size-4.5", !account && "opacity-50")} />
           )}
         </div>
 
@@ -88,7 +88,7 @@ export function LinkedAccount({ account, provider }: LinkedAccountProps) {
             disabled={isUnlinking}
             aria-label={localization.settings.unlinkProvider.replace("{{provider}}", providerName)}
           >
-            {isUnlinking ? <Spinner /> : <Link2Off />}
+            {isUnlinking ? <Spinner /> : <LinkSimpleBreakIcon />}
             {localization.settings.unlinkProvider.replace("{{provider}}", "").trim()}
           </Button>
         ) : (
@@ -105,7 +105,7 @@ export function LinkedAccount({ account, provider }: LinkedAccountProps) {
             disabled={isLinking}
             aria-label={localization.settings.linkProvider.replace("{{provider}}", providerName)}
           >
-            {isLinking ? <Spinner /> : <Link2 />}
+            {isLinking ? <Spinner /> : <LinkSimpleIcon />}
             {localization.settings.link}
           </Button>
         )}

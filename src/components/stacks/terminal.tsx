@@ -1,5 +1,5 @@
+import { TerminalIcon } from "@phosphor-icons/react"
 import { useQuery } from "@tanstack/react-query"
-import { TerminalIcon } from "lucide-react"
 import { lazy, Suspense, useState } from "react"
 
 import {

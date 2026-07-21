@@ -1,7 +1,7 @@
 "use client"
 
 import { Combobox as ComboboxPrimitive } from "@base-ui/react"
-import { ChevronDownIcon, XIcon, CheckIcon } from "lucide-react"
+import { CaretDownIcon, XIcon, CheckIcon } from "@phosphor-icons/react"
 import * as React from "react"
 
 import { Button } from "#/components/ui/button.tsx"
@@ -27,7 +27,7 @@ function ComboboxTrigger({ className, children, ...props }: ComboboxPrimitive.Tr
       {...props}
     >
       {children}
-      <ChevronDownIcon className="pointer-events-none size-4 text-muted-foreground" />
+      <CaretDownIcon className="pointer-events-none size-4 text-muted-foreground" />
     </ComboboxPrimitive.Trigger>
   )
 }

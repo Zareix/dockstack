@@ -1,5 +1,5 @@
+import { TrashIcon } from "@phosphor-icons/react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { Trash2Icon } from "lucide-react"
 import { toast } from "sonner"
 
 import { Button } from "#/components/ui/button"
@@ -27,7 +27,7 @@ export function VolumeActions({ volume }: { volume: VolumeInfo }) {
       onClick={() => removeM.mutate()}
       title="Remove"
     >
-      <Trash2Icon size={14} />
+      <TrashIcon size={14} />
     </Button>
   )
 }

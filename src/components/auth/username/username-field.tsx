@@ -1,7 +1,7 @@
 import { useAuth, useAuthPlugin, useIsUsernameAvailable } from "@better-auth-ui/react"
 import type { UsernameAuthClient } from "@better-auth-ui/react"
+import { CheckIcon, XIcon } from "@phosphor-icons/react"
 import { useDebouncer } from "@tanstack/react-pacer"
-import { Check, X } from "lucide-react"
 import { useState } from "react"
 
 import type { AdditionalFieldProps } from "#/components/auth/additional-field.tsx"
@@ -102,9 +102,9 @@ export function UsernameField({ name, field, isPending }: AdditionalFieldProps) 
             }
           >
             {availability?.available ? (
-              <Check className="size-4 text-foreground" />
+              <CheckIcon className="size-4 text-foreground" />
             ) : availabilityError || availability?.available === false ? (
-              <X className="size-4 text-destructive" />
+              <XIcon className="size-4 text-destructive" />
             ) : (
               <Spinner />
             )}

@@ -4,7 +4,7 @@ import {
   useAuthPlugin,
   useDeletePasskey,
 } from "@better-auth-ui/react"
-import { Fingerprint } from "lucide-react"
+import { FingerprintIcon } from "@phosphor-icons/react"
 
 import {
   AlertDialog,
@@ -54,7 +54,7 @@ export function DeletePasskeyDialog({ open, onOpenChange, passkey }: DeletePassk
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogMedia>
-            <Fingerprint />
+            <FingerprintIcon />
           </AlertDialogMedia>
 
           <AlertDialogTitle>{passkeyLocalization.deletePasskeyTitle}</AlertDialogTitle>

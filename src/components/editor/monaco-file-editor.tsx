@@ -74,6 +74,7 @@ export default function MonacoFileEditor({
         readOnly,
         minimap: { enabled: false },
         fontSize: 13,
+        fontFamily: "var(--font-mono)",
         scrollBeyondLastLine: false,
         wordWrap: "off",
         tabSize: 2,

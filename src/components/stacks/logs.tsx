@@ -1,5 +1,11 @@
+import {
+  CaretRightIcon,
+  ArrowLineDownIcon,
+  PlayCircleIcon,
+  StopCircleIcon,
+} from "@phosphor-icons/react"
+import { AlignBottomSimpleIcon } from "@phosphor-icons/react/dist/ssr/AlignBottomSimple"
 import { useVirtualizer } from "@tanstack/react-virtual"
-import { ChevronRight, ListEnd, PlayCircleIcon, StopCircleIcon } from "lucide-react"
 import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react"
 
 import { Button } from "#/components/ui/button"
@@ -210,7 +216,7 @@ export function ContainerLogs({ stackName }: { stackName: string }) {
           size="icon"
           className="ml-auto"
         >
-          <ListEnd />
+          <AlignBottomSimpleIcon />
         </Button>
       </div>
       <div
@@ -251,7 +257,7 @@ export function ContainerLogs({ stackName }: { stackName: string }) {
                   )}
                 >
                   {parsed.kind === "json" && (
-                    <ChevronRight
+                    <CaretRightIcon
                       className={cn(
                         "mt-0.5 size-3 shrink-0 text-muted-foreground transition-transform",
                         isExpanded && "rotate-90",

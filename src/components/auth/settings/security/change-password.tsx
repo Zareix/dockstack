@@ -5,7 +5,7 @@ import {
   useRequestPasswordReset,
   useSession,
 } from "@better-auth-ui/react"
-import { Eye, EyeOff } from "lucide-react"
+import { EyeIcon, EyeSlashIcon } from "@phosphor-icons/react"
 import { useState } from "react"
 import type { SyntheticEvent } from "react"
 import { toast } from "sonner"
@@ -247,7 +247,7 @@ function ChangePasswordForm({
                       onClick={() => setIsNewPasswordVisible(!isNewPasswordVisible)}
                       disabled={isPending}
                     >
-                      {isNewPasswordVisible ? <EyeOff /> : <Eye />}
+                      {isNewPasswordVisible ? <EyeSlashIcon /> : <EyeIcon />}
                     </InputGroupButton>
                   </InputGroupAddon>
                 </InputGroup>
@@ -307,7 +307,7 @@ function ChangePasswordForm({
                         onClick={() => setIsConfirmPasswordVisible(!isConfirmPasswordVisible)}
                         disabled={isPending}
                       >
-                        {isConfirmPasswordVisible ? <EyeOff /> : <Eye />}
+                        {isConfirmPasswordVisible ? <EyeSlashIcon /> : <EyeIcon />}
                       </InputGroupButton>
                     </InputGroupAddon>
                   </InputGroup>
