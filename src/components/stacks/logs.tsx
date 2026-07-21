@@ -1,9 +1,4 @@
-import {
-  CaretRightIcon,
-  ArrowLineDownIcon,
-  PlayCircleIcon,
-  StopCircleIcon,
-} from "@phosphor-icons/react"
+import { CaretRightIcon, PlayCircleIcon, StopCircleIcon } from "@phosphor-icons/react"
 import { AlignBottomSimpleIcon } from "@phosphor-icons/react/dist/ssr/AlignBottomSimple"
 import { useVirtualizer } from "@tanstack/react-virtual"
 import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react"

@@ -1,4 +1,3 @@
-import { LinkIcon } from "@phosphor-icons/react"
 import { ArrowSquareOutIcon } from "@phosphor-icons/react/dist/ssr/ArrowSquareOut"
 import { Link } from "@tanstack/react-router"
 import type { ColumnDef } from "@tanstack/react-table"
