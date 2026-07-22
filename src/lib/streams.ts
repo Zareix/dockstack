@@ -1,3 +1,6 @@
+export const HEARTBEAT = "​"
+const HEARTBEAT_INTERVAL_MS = 5000
+
 async function* readLines(stream: ReadableStream<Uint8Array>) {
   const decoder = new TextDecoder()
   let buffer = ""
@@ -37,10 +40,24 @@ export async function* mergeStreams(
   drain(stderr)
 
   while (remaining > 0 || queue.length > 0) {
-    if (queue.length > 0) yield queue.shift()!
-    else
-      await new Promise<void>((r) => {
+    if (queue.length > 0) {
+      yield queue.shift()!
+      continue
+    }
+
+    let timedOut = false
+    await Promise.race([
+      new Promise<void>((r) => {
         resolve = r
-      })
+      }),
+      new Promise<void>((r) =>
+        setTimeout(() => {
+          timedOut = true
+          r()
+        }, HEARTBEAT_INTERVAL_MS),
+      ),
+    ])
+    // oxlint-disable-next-line no-unnecessary-condition
+    if (timedOut && queue.length === 0 && remaining > 0) yield HEARTBEAT
   }
 }

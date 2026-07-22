@@ -15,7 +15,6 @@ export function StackServiceLinks({ stackName }: { stackName: string }) {
   const query = useQuery({
     queryKey: ["stacks", stackName, "services"],
     queryFn: () => getStackContainers({ data: { stackName } }),
-    refetchInterval: 1000,
   })
 
   const links = (query.data ?? []).flatMap((container) =>

@@ -81,7 +81,6 @@ export function AppSidebar() {
   const stacksQuery = useQuery({
     queryKey: ["stacks"],
     queryFn: listStacks,
-    refetchInterval: 5000,
   })
 
   const toggleSidebarOnMobile = () => (isMobile ? toggleSidebar() : null)

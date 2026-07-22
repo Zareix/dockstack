@@ -45,19 +45,19 @@ const containerStateToStatus = (state: string, statusStr: string): StackStatus =
   }
 }
 
-const getContainerUrlsFromLabels = (c: Docker.ContainerInfo): string[] => {
+const getContainerUrlsFromLabels = (labels: Record<string, string>): string[] => {
   // Godoxy
-  if (c.Labels["proxy.aliases"] && env.AUTODETECT_URL_BASE_DOMAIN) {
-    return c.Labels["proxy.aliases"].split(",").map((a) => {
+  if (labels["proxy.aliases"] && env.AUTODETECT_URL_BASE_DOMAIN) {
+    return labels["proxy.aliases"].split(",").map((a) => {
       if (a.includes(".")) return `https://${a.trim()}`
       return `https://${a.trim()}.${env.AUTODETECT_URL_BASE_DOMAIN}`
     })
   }
 
   // Traefik
-  const label = Object.keys(c.Labels).find((l) => l.match(/^traefik\.http\.routers\.(.*)\.rule$/))
+  const label = Object.keys(labels).find((l) => l.match(/^traefik\.http\.routers\.(.*)\.rule$/))
   if (label) {
-    const routerName = c.Labels[label]
+    const routerName = labels[label]
     return routerName
       .split(",")
       .filter((r) => r.trim().startsWith("Host("))
@@ -86,7 +86,7 @@ const mapContainer = (c: Docker.ContainerInfo): ContainerInfo => ({
       (p, i, a) =>
         a.findIndex((p2) => p.hostPort === p2.hostPort && p.protocol === p2.protocol) === i,
     ),
-  urls: getContainerUrlsFromLabels(c),
+  urls: getContainerUrlsFromLabels(c.Labels),
 })
 
 export const getStackContainers = async (stackName: string): Promise<ContainerInfo[]> => {
@@ -107,7 +107,7 @@ export const getStackContainers = async (stackName: string): Promise<ContainerIn
         string,
         {
           image?: string
-          build?: unknown
+          labels?: Record<string, string>
         }
       >
     }
@@ -127,7 +127,7 @@ export const getStackContainers = async (stackName: string): Promise<ContainerIn
         status: "missing",
         uptime: "-",
         ports: [],
-        urls: [],
+        urls: getContainerUrlsFromLabels(svc.labels ?? {}),
       })
     }
   } catch {}

@@ -9,7 +9,10 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "#/components/ui/dialog"
+import { HEARTBEAT } from "#/lib/streams.ts"
 import { cn } from "#/lib/utils.ts"
+
+import { ScrollArea } from "../ui/scroll-area"
 
 type Props = {
   title: string
@@ -35,15 +38,17 @@ export function StackActionDialog({ title, action, onDone, children }: Props) {
     setRunning(true)
 
     const stopPromise = new Promise<void>((r) => (stopRef.current = r))
-    const stopped = { done: true as const, value: undefined }
-
     const iter = (await actionRef.current())[Symbol.asyncIterator]()
 
     try {
       // eslint-disable-next-line typescript/no-unnecessary-condition
       while (true) {
-        const result = await Promise.race([iter.next(), stopPromise.then(() => stopped)])
+        const result = await Promise.race([
+          iter.next(),
+          stopPromise.then(() => ({ done: true as const, value: undefined })),
+        ])
         if (result.done) break
+        if (result.value === HEARTBEAT) continue
         setLines((prev) => [...prev, result.value])
       }
     } finally {
@@ -77,7 +82,7 @@ export function StackActionDialog({ title, action, onDone, children }: Props) {
           </DialogTitle>
         </DialogHeader>
         <div className="overflow-hidden rounded-md bg-zinc-950 p-3 font-mono text-xs leading-5 text-zinc-200">
-          <div ref={scrollRef} className="h-96 overflow-auto">
+          <ScrollArea ref={scrollRef} className="h-96">
             {lines.map((line, i) => (
               <div
                 key={i}
@@ -91,7 +96,7 @@ export function StackActionDialog({ title, action, onDone, children }: Props) {
               </div>
             ))}
             {running && lines.length === 0 && <span className="text-zinc-500">Starting...</span>}
-          </div>
+          </ScrollArea>
         </div>
         <DialogFooter>
           <Button variant="outline" disabled={running} onClick={() => setOpen(false)}>

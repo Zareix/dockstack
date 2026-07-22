@@ -13,7 +13,7 @@ export function StackFiles({ stackName }: { stackName: string }) {
   const queryClient = useQueryClient()
 
   const filesQuery = useQuery({
-    queryKey: ["stack-files", stackName],
+    queryKey: ["stacks", stackName, "files"],
     queryFn: () => getStackFiles({ data: { stackName } }),
   })
 
@@ -37,7 +37,8 @@ export function StackFiles({ stackName }: { stackName: string }) {
         },
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["stack-files", stackName] })
+      queryClient.invalidateQueries({ queryKey: ["stacks", stackName, "files"] })
+      queryClient.invalidateQueries({ queryKey: ["stacks", stackName, "services"] })
       toast.success("Saved")
     },
     onError: () => toast.error("Failed to save"),
@@ -45,7 +46,7 @@ export function StackFiles({ stackName }: { stackName: string }) {
 
   const createDotEnvMutation = useMutation({
     mutationFn: () => createDotEnv({ data: { stackName } }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["stack-files", stackName] }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["stacks", stackName, "files"] }),
   })
 
   const isDirty =
