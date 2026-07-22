@@ -12,7 +12,7 @@ ENV NODE_ENV=production
 RUN bun run build
 
 
-FROM docker:29.6.1-cli AS docker-cli
+FROM docker:29.6.2-cli AS docker-cli
 
 
 FROM oven/bun:1.3.14-distroless AS runner
