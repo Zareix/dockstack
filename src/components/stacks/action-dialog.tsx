@@ -9,6 +9,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "#/components/ui/dialog"
+import { cn } from "#/lib/utils.ts"
 
 type Props = {
   title: string
@@ -49,6 +50,7 @@ export function StackActionDialog({ title, action, onDone, children }: Props) {
       await iter.return?.()
       stopRef.current = null
       setRunning(false)
+      setLines((prev) => [...prev, "Done."])
       onDoneRef.current?.()
     }
   }, [])
@@ -77,7 +79,14 @@ export function StackActionDialog({ title, action, onDone, children }: Props) {
         <div className="overflow-hidden rounded-md bg-zinc-950 p-3 font-mono text-xs leading-5 text-zinc-200">
           <div ref={scrollRef} className="h-96 overflow-auto">
             {lines.map((line, i) => (
-              <div key={i} className="whitespace-pre">
+              <div
+                key={i}
+                className={cn(
+                  "whitespace-pre",
+                  line === "Done." && "text-emerald-400",
+                  line.startsWith("$ ") && "text-zinc-400",
+                )}
+              >
                 {line}
               </div>
             ))}

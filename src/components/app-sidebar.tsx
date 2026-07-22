@@ -74,7 +74,7 @@ const RESOURCES_LINKS: Array<{
 
 export function AppSidebar() {
   const { appTitle, instances } = useSettings()
-  const { pathname } = useLocation()
+  const { pathname, search } = useLocation()
   const { authClient } = useAuth()
   const { data: session } = useSession(authClient)
   const { isMobile, toggleSidebar } = useSidebar()
@@ -155,6 +155,9 @@ export function AppSidebar() {
                             <Link
                               to="/stacks/$name"
                               params={{ name: item.name }}
+                              search={{
+                                tab: search.tab,
+                              }}
                               onClick={toggleSidebarOnMobile}
                             >
                               {item.name}
