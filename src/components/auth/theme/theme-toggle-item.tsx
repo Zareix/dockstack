@@ -68,19 +68,19 @@ export function ThemeToggleItem() {
         onValueChange={setTheme}
         onKeyDown={handleTabsKeyDown}
       >
-        <TabsList ref={tabsListRef} className="h-6!">
+        <TabsList ref={tabsListRef} className="h-[30px]!">
           {themes.includes("system") && (
-            <TabsTrigger value="system" className="size-5 p-0" aria-label={localization.system}>
+            <TabsTrigger value="system" className="size-6 p-0" aria-label={localization.system}>
               <MonitorIcon className="size-3" />
             </TabsTrigger>
           )}
           {themes.includes("light") && (
-            <TabsTrigger value="light" className="size-5 p-0" aria-label={localization.light}>
+            <TabsTrigger value="light" className="size-6 p-0" aria-label={localization.light}>
               <SunIcon className="size-3" />
             </TabsTrigger>
           )}
           {themes.includes("dark") && (
-            <TabsTrigger value="dark" className="size-5 p-0" aria-label={localization.dark}>
+            <TabsTrigger value="dark" className="size-6 p-0" aria-label={localization.dark}>
               <MoonIcon className="size-3" />
             </TabsTrigger>
           )}

@@ -192,14 +192,15 @@ function ChangePasswordForm({
                     }))
                   }}
                   aria-invalid={!!fieldErrors.currentPassword}
+                  aria-describedby={
+                    fieldErrors.currentPassword ? "currentPassword-error" : undefined
+                  }
                 />
               ) : (
-                <Skeleton>
-                  <Input className="invisible" />
-                </Skeleton>
+                <Skeleton className="h-9 w-full" />
               )}
 
-              <FieldError>{fieldErrors.currentPassword}</FieldError>
+              <FieldError id="currentPassword-error">{fieldErrors.currentPassword}</FieldError>
             </Field>
 
             <Field data-invalid={!!fieldErrors.newPassword}>
@@ -234,6 +235,7 @@ function ChangePasswordForm({
                       }))
                     }}
                     aria-invalid={!!fieldErrors.newPassword}
+                    aria-describedby={fieldErrors.newPassword ? "newPassword-error" : undefined}
                   />
 
                   <InputGroupAddon align="inline-end">
@@ -252,12 +254,10 @@ function ChangePasswordForm({
                   </InputGroupAddon>
                 </InputGroup>
               ) : (
-                <Skeleton>
-                  <Input className="invisible" />
-                </Skeleton>
+                <Skeleton className="h-9 w-full" />
               )}
 
-              <FieldError>{fieldErrors.newPassword}</FieldError>
+              <FieldError id="newPassword-error">{fieldErrors.newPassword}</FieldError>
             </Field>
 
             {emailAndPassword.confirmPassword && (
@@ -294,6 +294,9 @@ function ChangePasswordForm({
                         }))
                       }}
                       aria-invalid={!!fieldErrors.confirmPassword}
+                      aria-describedby={
+                        fieldErrors.confirmPassword ? "confirmPassword-error" : undefined
+                      }
                     />
 
                     <InputGroupAddon align="inline-end">
@@ -312,12 +315,10 @@ function ChangePasswordForm({
                     </InputGroupAddon>
                   </InputGroup>
                 ) : (
-                  <Skeleton>
-                    <Input className="invisible" />
-                  </Skeleton>
+                  <Skeleton className="h-9 w-full" />
                 )}
 
-                <FieldError>{fieldErrors.confirmPassword}</FieldError>
+                <FieldError id="confirmPassword-error">{fieldErrors.confirmPassword}</FieldError>
               </Field>
             )}
           </CardContent>

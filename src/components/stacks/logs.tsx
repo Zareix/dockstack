@@ -210,6 +210,7 @@ export function ContainerLogs({ stackName }: { stackName: string }) {
           variant="outline"
           size="icon"
           className="ml-auto"
+          aria-label="Scroll to bottom"
         >
           <AlignBottomSimpleIcon />
         </Button>
@@ -245,7 +246,20 @@ export function ContainerLogs({ stackName }: { stackName: string }) {
                 className="absolute top-0 left-0 w-full"
               >
                 <div
-                  onClick={toggle}
+                  onClick={parsed.kind === "json" ? toggle : undefined}
+                  role={parsed.kind === "json" ? "button" : undefined}
+                  tabIndex={parsed.kind === "json" ? 0 : undefined}
+                  aria-expanded={parsed.kind === "json" ? isExpanded : undefined}
+                  onKeyDown={
+                    parsed.kind === "json"
+                      ? (e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault()
+                            toggle()
+                          }
+                        }
+                      : undefined
+                  }
                   className={cn(
                     "flex gap-2 whitespace-pre",
                     parsed.kind === "json" && "cursor-pointer rounded px-0.5 hover:bg-muted/40",

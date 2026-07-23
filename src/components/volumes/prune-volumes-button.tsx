@@ -37,7 +37,7 @@ export function PruneVolumesButton() {
       <AlertDialogTrigger
         render={
           <Button variant="outline" size="sm" disabled={pruneM.isPending}>
-            <BroomIcon className="mr-2 h-4 w-4" />
+            <BroomIcon data-icon="inline-start" className="size-4" />
             Prune unused
           </Button>
         }

@@ -84,7 +84,7 @@ export function StackFiles({ stackName }: { stackName: string }) {
               ) : (
                 <div className="flex items-center rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
                   <Button onClick={() => createDotEnvMutation.mutate()} variant="ghost">
-                    <PlusIcon />
+                    <PlusIcon data-icon="inline-start" />
                     Create .env
                   </Button>
                 </div>

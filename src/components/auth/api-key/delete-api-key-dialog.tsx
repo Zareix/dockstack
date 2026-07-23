@@ -6,6 +6,7 @@ import {
   useDeleteApiKey,
 } from "@better-auth-ui/react"
 import { KeyIcon } from "@phosphor-icons/react"
+import { toast } from "sonner"
 
 import {
   AlertDialog,
@@ -45,7 +46,11 @@ export function DeleteApiKeyDialog({
   const { mutate: deleteApiKey, isPending: isDeleting } = useDeleteApiKey(
     authClient as ApiKeyAuthClient,
     {
-      onSuccess: () => onOpenChange(false),
+      onSuccess: () => {
+        onOpenChange(false)
+        toast.success(`${apiKeyLocalization.apiKey} deleted`)
+      },
+      onError: (error) => toast.error(error instanceof Error ? error.message : String(error)),
     },
   )
 

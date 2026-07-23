@@ -77,7 +77,7 @@ export function StackActionDialog({ title, action, onDone, children }: Props) {
           <DialogTitle>
             {title}
             {running && (
-              <span className="ml-2 inline-block size-2 animate-pulse rounded-full bg-green-400" />
+              <span className="ml-2 inline-block size-2 rounded-full bg-green-400 motion-safe:animate-pulse" />
             )}
           </DialogTitle>
         </DialogHeader>

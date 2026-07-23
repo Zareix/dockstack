@@ -166,9 +166,10 @@ export function SignIn({ className, socialLayout, socialPosition = "bottom" }: S
                       }))
                     }}
                     aria-invalid={!!fieldErrors.email}
+                    aria-describedby={fieldErrors.email ? "email-error" : undefined}
                   />
 
-                  <FieldError>{fieldErrors.email}</FieldError>
+                  <FieldError id="email-error">{fieldErrors.email}</FieldError>
                 </Field>
 
                 <Field data-invalid={!!fieldErrors.password}>
@@ -202,9 +203,10 @@ export function SignIn({ className, socialLayout, socialPosition = "bottom" }: S
                       }))
                     }}
                     aria-invalid={!!fieldErrors.password}
+                    aria-describedby={fieldErrors.password ? "password-error" : undefined}
                   />
 
-                  <FieldError>{fieldErrors.password}</FieldError>
+                  <FieldError id="password-error">{fieldErrors.password}</FieldError>
                 </Field>
 
                 {emailAndPassword.rememberMe && (

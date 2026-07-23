@@ -87,6 +87,7 @@ export function UsernameField({ name, field, isPending }: AdditionalFieldProps) 
             setError((e.target as HTMLInputElement).validationMessage)
           }}
           aria-invalid={!!error}
+          aria-describedby={error ? `${name}-error` : undefined}
           placeholder={field.placeholder}
         />
 
@@ -112,7 +113,7 @@ export function UsernameField({ name, field, isPending }: AdditionalFieldProps) 
         )}
       </InputGroup>
 
-      <FieldError>{error}</FieldError>
+      <FieldError id={`${name}-error`}>{error}</FieldError>
     </Field>
   )
 }

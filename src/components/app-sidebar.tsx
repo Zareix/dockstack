@@ -108,7 +108,10 @@ export function AppSidebar() {
                 {instances
                   .filter((instance) => !instance.isCurrent)
                   .map((instance, index) => (
-                    <DropdownMenuItem key={index} render={<a href={instance.url} />}>
+                    <DropdownMenuItem
+                      key={index}
+                      render={<a href={instance.url} aria-label={instance.title} />}
+                    >
                       {instance.title}
                     </DropdownMenuItem>
                   ))}
@@ -143,29 +146,33 @@ export function AppSidebar() {
               </SidebarMenuItem>
               <ScrollArea>
                 <div className="max-h-52">
-                  <SidebarMenuSub className="gap-0.5">
-                    {stacksQuery.data?.map((item) => (
-                      <SidebarMenuSubItem key={item.name}>
-                        <SidebarMenuSubButton
-                          isActive={pathname.split("?")[0] === `/stacks/${item.name}`}
-                          size="sm"
-                          className="font-mono"
-                          render={
-                            <Link
-                              to="/stacks/$name"
-                              params={{ name: item.name }}
-                              search={{
-                                tab: search.tab,
-                              }}
-                              onClick={toggleSidebarOnMobile}
-                            >
-                              {item.name}
-                            </Link>
-                          }
-                        />
-                      </SidebarMenuSubItem>
-                    ))}
-                  </SidebarMenuSub>
+                  {stacksQuery.data && stacksQuery.data.length === 0 ? (
+                    <p className="px-2 py-1.5 text-sm text-muted-foreground">No stacks yet</p>
+                  ) : (
+                    <SidebarMenuSub className="gap-0.5">
+                      {stacksQuery.data?.map((item) => (
+                        <SidebarMenuSubItem key={item.name}>
+                          <SidebarMenuSubButton
+                            isActive={pathname.split("?")[0] === `/stacks/${item.name}`}
+                            size="sm"
+                            className="font-mono"
+                            render={
+                              <Link
+                                to="/stacks/$name"
+                                params={{ name: item.name }}
+                                search={{
+                                  tab: search.tab,
+                                }}
+                                onClick={toggleSidebarOnMobile}
+                              >
+                                {item.name}
+                              </Link>
+                            }
+                          />
+                        </SidebarMenuSubItem>
+                      ))}
+                    </SidebarMenuSub>
+                  )}
                 </div>
               </ScrollArea>
             </SidebarMenu>
@@ -179,7 +186,13 @@ export function AppSidebar() {
               {RESOURCES_LINKS.map((l, index) => (
                 <SidebarMenuItem key={index}>
                   <SidebarMenuButton
-                    render={<Link {...l.linkOptions} onClick={toggleSidebarOnMobile} />}
+                    render={
+                      <Link
+                        {...l.linkOptions}
+                        aria-label={l.label}
+                        onClick={toggleSidebarOnMobile}
+                      />
+                    }
                     isActive={l.linkOptions.to === pathname}
                   >
                     {l.icon}

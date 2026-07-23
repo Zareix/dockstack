@@ -47,7 +47,7 @@ export function Passkeys({ className }: PasskeysProps) {
       </div>
 
       <Card className="p-0">
-        <CardContent className="p-0">
+        <CardContent className="p-0" role="status" aria-live="polite">
           {isPending ? (
             <PasskeySkeleton />
           ) : !passkeys?.length ? (

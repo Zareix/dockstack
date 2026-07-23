@@ -61,7 +61,7 @@ export function CreateStackButton() {
       <DialogTrigger
         render={
           <Button size="sm">
-            <PlusIcon weight="regular" />
+            <PlusIcon data-icon="inline-start" weight="regular" />
             New stack
           </Button>
         }
@@ -90,9 +90,12 @@ export function CreateStackButton() {
                       onChange={(e) => field.handleChange(e.target.value)}
                       onBlur={field.handleBlur}
                       aria-invalid={isInvalid}
+                      aria-describedby={isInvalid ? `${field.name}-error` : undefined}
                       autoFocus
                     />
-                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                    {isInvalid && (
+                      <FieldError id={`${field.name}-error`} errors={field.state.meta.errors} />
+                    )}
                   </div>
                 )
               }}

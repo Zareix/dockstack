@@ -82,14 +82,13 @@ export function ChangeEmail({ className }: ChangeEmailProps) {
                     }))
                   }}
                   aria-invalid={!!fieldErrors.email}
+                  aria-describedby={fieldErrors.email ? "email-error" : undefined}
                 />
               ) : (
-                <Skeleton>
-                  <Input className="invisible" />
-                </Skeleton>
+                <Skeleton className="h-9 w-full" />
               )}
 
-              <FieldError>{fieldErrors.email}</FieldError>
+              <FieldError id="email-error">{fieldErrors.email}</FieldError>
             </Field>
           </CardContent>
 

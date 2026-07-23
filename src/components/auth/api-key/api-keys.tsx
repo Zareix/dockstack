@@ -69,7 +69,7 @@ export function ApiKeys({
       </div>
 
       <Card className="p-0">
-        <CardContent className="p-0">
+        <CardContent className="p-0" role="status" aria-live="polite">
           {isPending ? (
             <ApiKeySkeleton />
           ) : !listData?.apiKeys.length ? (

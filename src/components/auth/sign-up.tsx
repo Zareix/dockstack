@@ -204,9 +204,10 @@ export function SignUp({ className, socialLayout, socialPosition = "bottom" }: S
                         }))
                       }}
                       aria-invalid={!!fieldErrors.name}
+                      aria-describedby={fieldErrors.name ? "name-error" : undefined}
                     />
 
-                    <FieldError>{fieldErrors.name}</FieldError>
+                    <FieldError id="name-error">{fieldErrors.name}</FieldError>
                   </Field>
                 )}
 
@@ -236,9 +237,10 @@ export function SignUp({ className, socialLayout, socialPosition = "bottom" }: S
                       }))
                     }}
                     aria-invalid={!!fieldErrors.email}
+                    aria-describedby={fieldErrors.email ? "email-error" : undefined}
                   />
 
-                  <FieldError>{fieldErrors.email}</FieldError>
+                  <FieldError id="email-error">{fieldErrors.email}</FieldError>
                 </Field>
 
                 {additionalFields?.map(
@@ -284,6 +286,7 @@ export function SignUp({ className, socialLayout, socialPosition = "bottom" }: S
                         }))
                       }}
                       aria-invalid={!!fieldErrors.password}
+                      aria-describedby={fieldErrors.password ? "password-error" : undefined}
                     />
 
                     <InputGroupAddon align="inline-end">
@@ -307,7 +310,7 @@ export function SignUp({ className, socialLayout, socialPosition = "bottom" }: S
                     </InputGroupAddon>
                   </InputGroup>
 
-                  <FieldError>{fieldErrors.password}</FieldError>
+                  <FieldError id="password-error">{fieldErrors.password}</FieldError>
                 </Field>
 
                 {emailAndPassword?.confirmPassword && (
@@ -343,6 +346,9 @@ export function SignUp({ className, socialLayout, socialPosition = "bottom" }: S
                           }))
                         }}
                         aria-invalid={!!fieldErrors.confirmPassword}
+                        aria-describedby={
+                          fieldErrors.confirmPassword ? "confirmPassword-error" : undefined
+                        }
                       />
 
                       <InputGroupAddon align="inline-end">
@@ -364,7 +370,9 @@ export function SignUp({ className, socialLayout, socialPosition = "bottom" }: S
                       </InputGroupAddon>
                     </InputGroup>
 
-                    <FieldError>{fieldErrors.confirmPassword}</FieldError>
+                    <FieldError id="confirmPassword-error">
+                      {fieldErrors.confirmPassword}
+                    </FieldError>
                   </Field>
                 )}
 

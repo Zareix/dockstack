@@ -91,6 +91,7 @@ export function ChangeAvatar({ className }: ChangeAvatarProps) {
         ref={fileInputRef}
         type="file"
         accept="image/*"
+        aria-label={localization.settings.uploadAvatar}
         className="hidden"
         onChange={handleFileChange}
       />
@@ -99,6 +100,7 @@ export function ChangeAvatar({ className }: ChangeAvatarProps) {
         <Button
           type="button"
           variant="ghost"
+          aria-label={localization.settings.changeAvatar}
           className="h-auto w-auto rounded-full p-0"
           disabled={isPending}
           onClick={() => fileInputRef.current?.click()}

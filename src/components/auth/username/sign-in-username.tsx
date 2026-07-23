@@ -121,7 +121,7 @@ export function SignInUsername({
   const Captcha = plugins.find((plugin) => plugin.captchaComponent)?.captchaComponent
 
   const [fieldErrors, setFieldErrors] = useState<{
-    email?: string
+    identifier?: string
     password?: string
   }>({})
 
@@ -129,19 +129,19 @@ export function SignInUsername({
     e.preventDefault()
 
     const formData = new FormData(e.currentTarget)
-    const email = formData.get("email") as string
+    const identifier = formData.get("identifier") as string
     const rememberMe = formData.get("rememberMe") === "on"
 
-    if (isEmail(email)) {
+    if (isEmail(identifier)) {
       signInEmail({
-        email,
+        email: identifier,
         password,
         ...(emailAndPassword?.rememberMe ? { rememberMe } : {}),
         fetchOptions,
       })
     } else {
       signInUsername({
-        username: email,
+        username: identifier,
         password,
         ...(emailAndPassword?.rememberMe ? { rememberMe } : {}),
         fetchOptions,
@@ -176,8 +176,8 @@ export function SignInUsername({
           {emailAndPassword?.enabled && (
             <form onSubmit={handleSubmit}>
               <FieldGroup>
-                <Field data-invalid={!!fieldErrors.email}>
-                  <Label htmlFor="email" className="flex items-center gap-2">
+                <Field data-invalid={!!fieldErrors.identifier}>
+                  <Label htmlFor="identifier" className="flex items-center gap-2">
                     {usernameLocalization.username}
                     {isLastUsedField && (
                       <Badge variant="secondary" className="border-border text-xs font-normal">
@@ -187,8 +187,8 @@ export function SignInUsername({
                   </Label>
 
                   <Input
-                    id="email"
-                    name="email"
+                    id="identifier"
+                    name="identifier"
                     type="text"
                     autoComplete="username"
                     placeholder={usernameLocalization.usernameOrEmailPlaceholder}
@@ -197,7 +197,7 @@ export function SignInUsername({
                     onChange={() => {
                       setFieldErrors((prev) => ({
                         ...prev,
-                        email: undefined,
+                        identifier: undefined,
                       }))
                     }}
                     onInvalid={(e) => {
@@ -205,13 +205,14 @@ export function SignInUsername({
 
                       setFieldErrors((prev) => ({
                         ...prev,
-                        email: (e.target as HTMLInputElement).validationMessage,
+                        identifier: (e.target as HTMLInputElement).validationMessage,
                       }))
                     }}
-                    aria-invalid={!!fieldErrors.email}
+                    aria-invalid={!!fieldErrors.identifier}
+                    aria-describedby={fieldErrors.identifier ? "identifier-error" : undefined}
                   />
 
-                  <FieldError>{fieldErrors.email}</FieldError>
+                  <FieldError id="identifier-error">{fieldErrors.identifier}</FieldError>
                 </Field>
 
                 <Field data-invalid={!!fieldErrors.password}>
@@ -245,9 +246,10 @@ export function SignInUsername({
                       }))
                     }}
                     aria-invalid={!!fieldErrors.password}
+                    aria-describedby={fieldErrors.password ? "password-error" : undefined}
                   />
 
-                  <FieldError>{fieldErrors.password}</FieldError>
+                  <FieldError id="password-error">{fieldErrors.password}</FieldError>
                 </Field>
 
                 {emailAndPassword.rememberMe && (

@@ -105,7 +105,7 @@ function StackPage() {
             <AlertDialogTrigger
               render={
                 <Button variant="destructive" disabled={destroyMutation.isPending}>
-                  <TrashIcon />
+                  <TrashIcon data-icon="inline-start" />
                   {destroyMutation.isPending ? "Destroying..." : "Destroy"}
                 </Button>
               }
@@ -133,7 +133,7 @@ function StackPage() {
             onDone={invalidateStatus}
           >
             <Button variant="outline">
-              <DownloadIcon />
+              <DownloadIcon data-icon="inline-start" />
               Pull
             </Button>
           </StackActionDialog>
@@ -144,7 +144,7 @@ function StackPage() {
             onDone={invalidateStatus}
           >
             <Button variant="outline">
-              <ArrowsClockwiseIcon />
+              <ArrowsClockwiseIcon data-icon="inline-start" />
               Restart
             </Button>
           </StackActionDialog>
@@ -155,7 +155,7 @@ function StackPage() {
             onDone={invalidateStatus}
           >
             <Button variant="outline">
-              <PauseIcon />
+              <PauseIcon data-icon="inline-start" />
               Stop
             </Button>
           </StackActionDialog>
@@ -166,7 +166,7 @@ function StackPage() {
             onDone={invalidateStatus}
           >
             <Button variant="outline">
-              <SquareIcon />
+              <SquareIcon data-icon="inline-start" />
               Down
             </Button>
           </StackActionDialog>
@@ -177,7 +177,7 @@ function StackPage() {
             onDone={invalidateStatus}
           >
             <Button>
-              <PlayIcon />
+              <PlayIcon data-icon="inline-start" />
               Up
             </Button>
           </StackActionDialog>

@@ -5,6 +5,7 @@ import { ThemeProvider, useTheme } from "next-themes"
 import type { ReactNode } from "react"
 
 import { SidebarProvider } from "#/components/ui/sidebar"
+import { useThemeHotkey } from "#/hooks/use-theme-hotkey"
 import { authClient } from "#/lib/auth-client"
 import { apiKeyPlugin } from "#/lib/auth/api-key-plugin"
 import { passkeyPlugin } from "#/lib/auth/passkey-plugin.ts"
@@ -14,6 +15,11 @@ import { getSocialProviders } from "#/lib/functions/auth"
 
 import { AuthProvider } from "./auth/auth-provider"
 import { Toaster } from "./ui/sonner"
+
+function ThemeHotkey() {
+  useThemeHotkey()
+  return null
+}
 
 export function Providers({ children }: { children: ReactNode }) {
   const providersQuery = useQuery({
@@ -47,11 +53,12 @@ export function Providers({ children }: { children: ReactNode }) {
               }}
             >
               <SidebarProvider>{children}</SidebarProvider>
-              <Toaster />
             </IconContext>
           </AuthProvider>
         )
       )}
+      <ThemeHotkey />
+      <Toaster />
     </ThemeProvider>
   )
 }

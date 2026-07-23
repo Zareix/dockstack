@@ -106,6 +106,7 @@ function StackActions({ name }: { name: string }) {
                 className="size-8"
                 onClick={onClick}
                 disabled={anyPending}
+                aria-label={label}
               >
                 <Icon className="size-4" />
               </Button>
@@ -152,7 +153,7 @@ function Home() {
     {
       id: "actions",
       cell: ({ row }) => (
-        <div className="text-right" onClick={(e) => e.stopPropagation()}>
+        <div className="text-right" data-row-action>
           <StackActions name={row.original.name} />
         </div>
       ),

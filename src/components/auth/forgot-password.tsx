@@ -87,9 +87,10 @@ export function ForgotPassword({ className }: ForgotPasswordProps) {
                   }))
                 }}
                 aria-invalid={!!fieldErrors.email}
+                aria-describedby={fieldErrors.email ? "email-error" : undefined}
               />
 
-              <FieldError>{fieldErrors.email}</FieldError>
+              <FieldError id="email-error">{fieldErrors.email}</FieldError>
             </Field>
 
             {Captcha && <div className="flex justify-center">{Captcha}</div>}

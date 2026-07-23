@@ -119,6 +119,7 @@ export function ResetPassword({ className }: ResetPasswordProps) {
                     }))
                   }}
                   aria-invalid={!!fieldErrors.password}
+                  aria-describedby={fieldErrors.password ? "password-error" : undefined}
                 />
 
                 <InputGroupAddon align="inline-end">
@@ -142,7 +143,7 @@ export function ResetPassword({ className }: ResetPasswordProps) {
                 </InputGroupAddon>
               </InputGroup>
 
-              <FieldError>{fieldErrors.password}</FieldError>
+              <FieldError id="password-error">{fieldErrors.password}</FieldError>
             </Field>
 
             {emailAndPassword?.confirmPassword && (
@@ -175,6 +176,9 @@ export function ResetPassword({ className }: ResetPasswordProps) {
                       }))
                     }}
                     aria-invalid={!!fieldErrors.confirmPassword}
+                    aria-describedby={
+                      fieldErrors.confirmPassword ? "confirmPassword-error" : undefined
+                    }
                   />
 
                   <InputGroupAddon align="inline-end">
@@ -198,7 +202,7 @@ export function ResetPassword({ className }: ResetPasswordProps) {
                   </InputGroupAddon>
                 </InputGroup>
 
-                <FieldError>{fieldErrors.confirmPassword}</FieldError>
+                <FieldError id="confirmPassword-error">{fieldErrors.confirmPassword}</FieldError>
               </Field>
             )}
 

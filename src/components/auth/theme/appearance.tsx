@@ -43,9 +43,10 @@ export function Appearance({ className }: AppearanceProps) {
       <Card className={cn(className)}>
         <CardContent>
           <Field>
-            <Label>{localization.theme}</Label>
+            <Label id="theme-label">{localization.theme}</Label>
 
             <RadioGroup
+              aria-labelledby="theme-label"
               value={isMounted ? theme : ""}
               onValueChange={setTheme}
               className="grid grid-cols-2 gap-3 sm:grid-cols-3"

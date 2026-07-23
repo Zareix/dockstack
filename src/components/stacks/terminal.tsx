@@ -58,7 +58,7 @@ export function StackTerminal({ stackName }: { stackName: string }) {
             value: r.id,
           }))}
         >
-          <SelectTrigger className="w-56">
+          <SelectTrigger className="w-56" aria-label="Select container">
             <SelectValue placeholder="Select container" />
           </SelectTrigger>
           <SelectContent>
@@ -75,7 +75,7 @@ export function StackTerminal({ stackName }: { stackName: string }) {
           onValueChange={(v) => setShell(v ?? "/bin/sh")}
           items={SHELLS.map((s) => ({ label: s, value: s }))}
         >
-          <SelectTrigger className="w-36 font-mono text-xs">
+          <SelectTrigger className="w-36 font-mono text-xs" aria-label="Select shell">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>

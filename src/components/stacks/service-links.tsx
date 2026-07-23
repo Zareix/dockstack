@@ -32,7 +32,7 @@ export function StackServiceLinks({ stackName }: { stackName: string }) {
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
-          <Button variant="ghost" size="icon-sm">
+          <Button variant="ghost" size="icon-sm" aria-label="Service links">
             <LinkIcon />
           </Button>
         }

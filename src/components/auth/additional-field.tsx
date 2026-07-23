@@ -448,10 +448,6 @@ function DateInput({ name, field, isPending }: AdditionalFieldProps) {
       <Label htmlFor={`${name}-date`}>{field.label}</Label>
 
       <div className="relative flex gap-2">
-        {/* Visually-hidden input so required constraint validation fires on submit.
-            onInvalid suppresses the native browser balloon and routes the message
-            through the styled <FieldError> below — matching the pattern used by
-            the Name / Email / Password fields in the sign-up form. */}
         <input
           type="text"
           name={name}
@@ -459,7 +455,9 @@ function DateInput({ name, field, isPending }: AdditionalFieldProps) {
           onChange={() => {}}
           required={field.required}
           tabIndex={-1}
-          aria-hidden="true"
+          aria-label={typeof field.label === "string" ? field.label : undefined}
+          aria-invalid={!!error}
+          aria-describedby={error ? `${name}-error` : undefined}
           className="pointer-events-none absolute inset-0 h-full w-full opacity-0"
           onInvalid={(e) => {
             e.preventDefault()
@@ -475,6 +473,7 @@ function DateInput({ name, field, isPending }: AdditionalFieldProps) {
                 id={`${name}-date`}
                 data-empty={!date}
                 aria-invalid={!!error}
+                aria-describedby={error ? `${name}-error` : undefined}
                 disabled={isPending || field.readOnly}
                 className={cn(
                   "flex-1 justify-between font-normal",
@@ -521,7 +520,7 @@ function DateInput({ name, field, isPending }: AdditionalFieldProps) {
         )}
       </div>
 
-      <FieldError>{error}</FieldError>
+      <FieldError id={`${name}-error`}>{error}</FieldError>
     </Field>
   )
 }

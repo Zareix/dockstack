@@ -5,6 +5,7 @@ import { HeadContent, Scripts, createRootRouteWithContext } from "@tanstack/reac
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools"
 
 import { AppSidebar } from "#/components/app-sidebar"
+import { ErrorBoundary, ErrorFallback } from "#/components/error-boundary"
 import { Navbar } from "#/components/navbar"
 import { Providers } from "#/components/providers"
 import type { getSettings } from "#/lib/functions/settings"
@@ -30,7 +31,11 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
         content: "width=device-width, initial-scale=1",
       },
       {
-        title: loaderData?.appTitle,
+        title: loaderData?.appTitle ?? "Dockstack",
+      },
+      {
+        name: "description",
+        content: "Manage Docker containers, images, volumes, and networks from one dashboard.",
       },
     ],
     links: [
@@ -47,6 +52,9 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       <p className="text-muted-foreground">Page not found</p>
     </div>
   ),
+  errorComponent: ({ error, reset }) => (
+    <ErrorFallback message={error.message} onReset={reset} className="min-h-[60vh]" />
+  ),
 })
 
 function RootDocument({ children }: { children: React.ReactNode }) {
@@ -56,11 +64,13 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body className="antialiased">
-        <Providers>
-          <AppSidebar />
-          <Navbar />
-          <main className="isolate min-h-screen w-full p-4 md:mx-auto md:p-8">{children}</main>
-        </Providers>
+        <ErrorBoundary>
+          <Providers>
+            <AppSidebar />
+            <Navbar />
+            <main className="isolate min-h-screen w-full p-4 md:mx-auto md:p-8">{children}</main>
+          </Providers>
+        </ErrorBoundary>
         <TanStackDevtools
           config={{
             position: "bottom-right",

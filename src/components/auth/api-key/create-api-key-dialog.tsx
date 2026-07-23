@@ -6,6 +6,7 @@ import {
 } from "@better-auth-ui/react"
 import { KeyIcon } from "@phosphor-icons/react"
 import { type SyntheticEvent, useState } from "react"
+import { toast } from "sonner"
 
 import {
   AlertDialog,
@@ -48,11 +49,18 @@ export function CreateApiKeyDialog({
   const [isNewKeyDialogOpen, setIsNewKeyDialogOpen] = useState(false)
   const [keyName, setKeyName] = useState<string | null>(null)
   const [secretKey, setSecretKey] = useState<string | null>(null)
+  const [nameError, setNameError] = useState<string>()
 
   const handleOpenChange = (nextOpen: boolean) => {
+    // Ignore dismiss attempts (Escape, Cancel) while a create request is in
+    // flight so the trigger stays disabled for the whole async action, not
+    // just the submit button.
+    if (isCreating) return
+
     if (!nextOpen) {
       setKeyName(null)
       setSecretKey(null)
+      setNameError(undefined)
     }
 
     onOpenChange(nextOpen)
@@ -79,6 +87,7 @@ export function CreateApiKeyDialog({
         setSecretKey(result.key)
         setIsNewKeyDialogOpen(true)
       },
+      onError: (error) => toast.error(error instanceof Error ? error.message : String(error)),
     })
   }
 
@@ -99,18 +108,26 @@ export function CreateApiKeyDialog({
               </AlertDialogDescription>
             </AlertDialogHeader>
 
-            <Field>
+            <Field data-invalid={!!nameError}>
               <Label htmlFor="api-key-name">{apiKeyLocalization.name}</Label>
 
               <Input
                 id="api-key-name"
                 name="name"
                 autoFocus
+                maxLength={64}
                 placeholder={localization.settings.optional}
                 disabled={isCreating}
+                onChange={() => setNameError(undefined)}
+                onInvalid={(e) => {
+                  e.preventDefault()
+                  setNameError((e.target as HTMLInputElement).validationMessage)
+                }}
+                aria-invalid={!!nameError}
+                aria-describedby={nameError ? "api-key-name-error" : undefined}
               />
 
-              <FieldError />
+              <FieldError id="api-key-name-error">{nameError}</FieldError>
             </Field>
 
             <AlertDialogFooter>

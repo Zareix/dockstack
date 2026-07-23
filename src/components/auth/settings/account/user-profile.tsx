@@ -112,14 +112,13 @@ export function UserProfile({ className }: UserProfileProps) {
                     }))
                   }}
                   aria-invalid={!!fieldErrors.name}
+                  aria-describedby={fieldErrors.name ? "name-error" : undefined}
                 />
               ) : (
-                <Skeleton>
-                  <Input className="invisible" />
-                </Skeleton>
+                <Skeleton className="h-9 w-full" />
               )}
 
-              <FieldError>{fieldErrors.name}</FieldError>
+              <FieldError id="name-error">{fieldErrors.name}</FieldError>
             </Field>
 
             {additionalFields?.map((field) => {
@@ -130,11 +129,7 @@ export function UserProfile({ className }: UserProfileProps) {
                   return null
                 }
 
-                return (
-                  <Skeleton key={field.name}>
-                    <Input className="invisible" />
-                  </Skeleton>
-                )
+                return <Skeleton key={field.name} className="h-9 w-full" />
               }
 
               const value = (session.user as Record<string, unknown>)[field.name]
