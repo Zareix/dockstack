@@ -128,7 +128,7 @@ export function DataTable<TData, TValue>({
   })
 
   return (
-    <div className="mx-auto md:max-w-4xl">
+    <div className="w-full">
       {toolbar?.(table)}
       <div className="overflow-hidden rounded-md border">
         <Table>
