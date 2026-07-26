@@ -71,9 +71,11 @@ export const listStacks = async () => {
   const entries = await readdir(env.STACKS_DIR)
   return (
     await Promise.all(
-      entries.map(async (name) =>
-        (await stat(join(env.STACKS_DIR, name))).isDirectory() ? name : null,
-      ),
+      entries
+        .filter((name) => !name.startsWith(".") && !name.startsWith("_"))
+        .map(async (name) =>
+          (await stat(join(env.STACKS_DIR, name))).isDirectory() ? name : null,
+        ),
     )
   )
     .filter(Boolean)
