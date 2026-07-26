@@ -59,6 +59,7 @@ stacks/
 | `OAUTH_CLIENT_SECRET`                 | no       | —             | OAuth client secret                                                                                                        |
 | `OAUTH_DISCOVERY_URL`                 | no       | —             | OIDC discovery endpoint URL                                                                                                |
 | `APP_TITLE`                           | no       | `Dockstack`   | Title of the application                                                                                                   |
+| `INSTANCE_NAME`                       | no       | —             | Instance name shown below the app title in the sidebar and browser tab title                                               |
 | `SERVER_HOST`                         | no       | `localhost`   | Host shown in port links in the UI                                                                                         |
 | `STACKS_DIR`                          | no       | `./stacks`    | Path to stacks directory inside container                                                                                  |
 | `DATABASE_PATH`                       | no       | `./db.sqlite` | Path to SQLite auth database                                                                                               |
