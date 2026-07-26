@@ -8,6 +8,7 @@ export const env = createEnv({
     ADMIN_EMAIL: v.pipe(v.string(), v.email()),
     DOCKER_CONFIG_DIR_PATH: v.optional(v.string(), "./.docker"),
     APP_TITLE: v.optional(v.pipe(v.string(), v.minLength(1)), "Dockstack"),
+    INSTANCE_NAME: v.optional(v.string(), ""),
     SERVER_HOST: v.optional(v.pipe(v.string(), v.minLength(1)), "localhost"),
     STACKS_DIR: v.optional(v.pipe(v.string(), v.minLength(1)), "./stacks"),
     OTHER_INSTANCE_URLS: v.pipe(
