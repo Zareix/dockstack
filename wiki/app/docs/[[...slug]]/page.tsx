@@ -11,7 +11,7 @@ import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 
 import { getMDXComponents } from "@/components/mdx"
-import { gitConfig } from "@/lib/shared"
+import { appName, gitConfig } from "@/lib/shared"
 import { getPageImageUrl, getPageMarkdownUrl, source } from "@/lib/source"
 
 export default async function Page(props: PageProps<"/docs/[[...slug]]">) {
@@ -55,7 +55,7 @@ export async function generateMetadata(props: PageProps<"/docs/[[...slug]]">): P
   if (!page) notFound()
 
   return {
-    title: `Dockstack | ${page.data.title}`,
+    title: `${appName} | ${page.data.title}`,
     description: page.data.description,
     openGraph: {
       images: getPageImageUrl(page).url,
