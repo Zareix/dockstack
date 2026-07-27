@@ -1,0 +1,6 @@
+{
+  "title": "Features",
+  "pages": ["auto-detected-urls", "api"],
+  "icon": "SquareFunction",
+  "defaultOpen": true
+}

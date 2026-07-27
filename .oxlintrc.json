@@ -11,6 +11,7 @@
     "typeCheck": true
   },
   "ignorePatterns": [
+    "**/wiki/**",
     "**/build/**",
     "**/coverage/**",
     "**/dist/**",

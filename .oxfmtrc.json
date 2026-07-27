@@ -8,5 +8,5 @@
     "functions": ["clsx", "cn"],
     "preserveWhitespace": true
   },
-  "ignorePatterns": ["bun.lock", "src/routeTree.gen.ts"]
+  "ignorePatterns": ["**/wiki/**", "bun.lock", "src/routeTree.gen.ts"]
 }

@@ -1,0 +1,32 @@
+---
+title: Authentication
+description: Login, OIDC, passkeys, API keys
+---
+
+There's no sign-up and no multi-user support — a single admin account is created at first startup from `ADMIN_EMAIL` env var, default password is `password`. Change it right after first login.
+
+## OIDC
+
+Optional, enables "sign in with" a generic OpenID Connect provider (Pocket ID, Authentik, etc.) in addition to the built-in email/password login.
+Set all four following variables to enable OIDC login.
+
+| Variable               | Description                          |
+| ----------------------- | -------------------------------------- |
+| `OAUTH_PROVIDER_ID`     | Display name for the OAuth provider    |
+| `OAUTH_CLIENT_ID`       | OAuth client ID                        |
+| `OAUTH_CLIENT_SECRET`   | OAuth client secret                    |
+| `OAUTH_DISCOVERY_URL`   | OIDC discovery endpoint URL            |
+
+
+## Passkeys
+
+Register a passkey from account settings to sign into the admin account without a password.
+
+## API keys
+
+Generate API keys from settings to authenticate [API requests](/docs/features/api). Send the key as a bearer token:
+
+```sh
+curl https://dockstack.example.com/api/stacks \
+  -H "Authorization: Bearer <your-api-key>"
+```

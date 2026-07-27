@@ -1,0 +1,26 @@
+---
+title: Introduction
+description: Self-hosted Docker Compose stack management UI
+icon: House
+---
+
+Dockstack is a self-hosted web UI for managing Docker Compose stacks. Browse, start, stop, restart, and redeploy your stacks — no database, no complex config, just your existing `compose.yaml` files.
+
+## Features
+
+- **Docker Compose first** — stacks are plain directories with a `compose.yaml` (and `.env`), managed on disk
+- **Fast** — built on Bun + TanStack Start
+- **Stateless and local-first** — SQLite used only for auth; stack state lives in Docker itself and on your filesystem
+- **Built-in editor** — edit compose files directly in the UI with YAML validation
+- **Webhook redeploy** — trigger a pull + restart of all running stacks from CI or a Git hook
+- **OIDC / OAuth login** — any OpenID Connect provider (Pocket ID, Authentik, etc.), plus passkeys
+- **Non-intrusive** — calls the Docker socket or plain `docker compose` commands under the hood; fully compatible with manual CLI usage, **no lock-in**
+
+## Next steps
+
+<Cards>
+  <Card title="Installation" href="/docs/installation" description="Run Dockstack with Docker Compose" />
+  <Card title="Configuration" href="/docs/configuration" description="Environment variables and stack layout" />
+  <Card title="Authentication" href="/docs/configuration/authentication" description="Admin login, OIDC, passkeys, API keys" />
+  <Card title="API" href="/docs/features/api" description="Webhook redeploy and other endpoints" />
+</Cards>

@@ -1,0 +1,10 @@
+---
+title: Auto-detected service URLs
+---
+
+Dockstack can link straight to a container's public URL from the stack view. It looks at each container's labels:
+
+- [**Godoxy**](https://github.com/yusing/godoxy) — reads `proxy.aliases` and builds `https://<alias>.<AUTODETECT_URL_BASE_DOMAIN>`. Requires `AUTODETECT_URL_BASE_DOMAIN` to be set.
+- [**Traefik**](https://traefik.io) — reads the `traefik.http.routers.<name>.rule` label and extracts the `Host(...)` value, no extra config needed.
+
+Neither is required — without matching labels, Dockstack still shows the container's exposed ports using `SERVER_HOST`.

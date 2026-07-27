@@ -1,0 +1,6 @@
+{
+  "title": "Configuration",
+  "pages": ["env-variables", "authentication"],
+  "icon": "Settings",
+  "defaultOpen": true
+}

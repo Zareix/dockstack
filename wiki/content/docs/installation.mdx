@@ -1,0 +1,58 @@
+---
+title: Installation
+description: Run Dockstack with Docker Compose
+icon: Rocket
+---
+
+## Docker Compose
+
+Dockstack ships as a single container. It needs access to the Docker socket (to manage containers) and a directory on disk where your stacks live.
+
+```yaml title="compose.yaml"
+services:
+  dockstack:
+    image: ghcr.io/zareix/dockstack:latest # or pin to a specific version like `v1.0.0`
+    ports:
+      - 3000:3000
+    volumes:
+      - ./stacks:/app/stacks
+      - dockstack-db:/app/data
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - BETTER_AUTH_SECRET=changeme
+      - BETTER_AUTH_URL=https://dockstack.example.com
+      - ADMIN_EMAIL=you@example.com
+
+volumes:
+  dockstack-db:
+```
+
+<Callout title="dockstack-db volume">
+  Only holds the SQLite auth database (sessions, users, API keys). Stack state itself lives in `/app/stacks` and Docker — nothing about your stacks is in this volume.
+</Callout>
+
+Run it:
+
+```sh
+docker compose up -d
+```
+
+Open the URL you set in `BETTER_AUTH_URL`, sign in with `ADMIN_EMAIL` / `password`, and change the password from settings.
+
+## Stack layout
+
+Each stack is a subdirectory under `STACKS_DIR` (`./stacks` by default) containing a compose file:
+
+<Files>
+  <Folder name="stacks" defaultOpen>
+    <Folder name="my-app" defaultOpen>
+      <File name="compose.yaml" />
+    </Folder>
+    <Folder name="another-service" defaultOpen>
+      <File name="compose.yaml" />
+      <File name=".env" />
+    </Folder>
+  </Folder>
+</Files>
+
+Dockstack reads and writes these files directly — nothing is stored in a database. You can keep managing stacks from the CLI (`docker compose ...`) alongside the UI without conflicts.
