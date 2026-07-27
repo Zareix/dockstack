@@ -31,7 +31,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
         content: "width=device-width, initial-scale=1",
       },
       {
-        title: loaderData?.appTitle ?? "Dockstack",
+        title: `${loaderData?.appTitle ?? "Dockstack"}${loaderData?.instanceName ? `・${loaderData.instanceName}` : ""}`,
       },
       {
         name: "description",

@@ -11,6 +11,7 @@ export const getSettings = createServerFn().handler(async () => {
   })
   return {
     appTitle: env.APP_TITLE,
+    instanceName: env.INSTANCE_NAME,
     instances,
   }
 })

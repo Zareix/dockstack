@@ -73,7 +73,7 @@ const RESOURCES_LINKS: Array<{
 ] as const
 
 export function AppSidebar() {
-  const { appTitle, instances } = useSettings()
+  const { appTitle, instanceName, instances } = useSettings()
   const { pathname, search } = useLocation()
   const { authClient } = useAuth()
   const { data: session } = useSession(authClient)
@@ -91,7 +91,7 @@ export function AppSidebar() {
 
   return (
     <Sidebar mobileSide="right">
-      <SidebarHeader className="flex-row items-center justify-between p-4">
+      <SidebarHeader className="flex-col items-center justify-between gap-0 p-4">
         {instances.length > 1 ? (
           <DropdownMenu>
             <DropdownMenuTrigger
@@ -127,6 +127,7 @@ export function AppSidebar() {
             {appTitle}
           </Link>
         )}
+        {instanceName && <p className="w-full text-sm text-muted-foreground">{instanceName}</p>}
       </SidebarHeader>
       <SidebarContent className="gap-0">
         <SidebarGroup>
