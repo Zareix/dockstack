@@ -16,7 +16,7 @@ export function getPageImageUrl(page: (typeof source)["$inferPage"]) {
 
   return {
     segments,
-    url: "/" + [page.locale, ...docsImageRoute.split("/"), ...segments].filter(Boolean).join("/"),
+    url: "https://zareix.github.io/" + [page.locale, ...docsImageRoute.split("/"), ...segments].filter(Boolean).join("/"),
   }
 }
 

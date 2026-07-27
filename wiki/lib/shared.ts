@@ -1,6 +1,6 @@
 export const appName = "Dockstack"
 export const docsRoute = "/docs"
-export const docsImageRoute = "https://zareix.github.io/dockstack/og/docs"
+export const docsImageRoute = "/dockstack/og/docs"
 export const docsContentRoute = "/llms.mdx/docs"
 
 export const gitConfig = {

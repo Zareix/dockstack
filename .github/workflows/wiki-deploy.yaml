@@ -21,15 +21,12 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: wiki
     steps:
       - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
-      - run: bun install --frozen-lockfile
-      - run: bun run build
-      - run: touch out/.nojekyll
+      - run: bun install --frozen-lockfile --filter wiki
+      - run: bun run wiki:build
+      - run: touch wiki/out/.nojekyll
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

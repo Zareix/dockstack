@@ -1,7 +1,10 @@
 {
   "name": "dockstack",
-  "version": "0.19.0",
+  "version": "0.19.1",
   "private": true,
+  "workspaces": [
+    "wiki"
+  ],
   "type": "module",
   "imports": {
     "#/*": "./src/*"
@@ -18,7 +21,8 @@
     "check": "bun run format && bun run lint:fix",
     "db:generate": "bunx drizzle-kit generate",
     "auth:generate": "bunx --bun @better-auth/cli generate --config src/lib/auth/index.ts --output src/db/schema/auth-schema.ts",
-    "wiki:dev": "bun run --cwd wiki dev"
+    "wiki:dev": "bun run --filter wiki dev",
+    "wiki:build": "bun run --filter wiki build"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",

@@ -9,7 +9,7 @@ const config = {
   basePath: "/dockstack",
   images: {
     unoptimized: true,
-  },
+  }
 }
 
 export default withMDX(config)
