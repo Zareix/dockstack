@@ -1,14 +1,19 @@
 import { docs } from "collections/server"
 import { loader } from "fumadocs-core/source"
-import { lucideIconsPlugin } from "fumadocs-core/source/lucide-icons"
+import * as icons from "@phosphor-icons/react/ssr"
 
 import { docsContentRoute, docsImageRoute, docsRoute } from "./shared"
+import { createElement } from "react";
 
-// See https://fumadocs.dev/docs/headless/source-api for more info
 export const source = loader({
   baseUrl: docsRoute,
   source: docs.toFumadocsSource(),
-  plugins: [lucideIconsPlugin()],
+  icon(icon) {
+    if (!icon) {
+      return;
+    }
+    if (icon in icons) return createElement(icons[icon as keyof typeof icons], { weight: "duotone", weights: new Map() });
+  },
 })
 
 export function getPageImageUrl(page: (typeof source)["$inferPage"]) {

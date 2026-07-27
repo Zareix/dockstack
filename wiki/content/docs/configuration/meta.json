@@ -1,6 +1,6 @@
 {
   "title": "Configuration",
   "pages": ["env-variables", "authentication"],
-  "icon": "Settings",
+  "icon": "Gear",
   "defaultOpen": true
 }

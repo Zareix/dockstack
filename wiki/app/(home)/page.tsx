@@ -1,5 +1,5 @@
 import { Card, Cards } from "fumadocs-ui/components/card"
-import { Container, KeyRound, Pencil, Server, Webhook, Zap } from "lucide-react"
+import { HardDrivesIcon, KeyIcon, LightningIcon, PackageIcon, PencilSimpleIcon, WebhooksLogoIcon } from "@phosphor-icons/react/ssr"
 import Link from "next/link"
 
 export const metadata = {
@@ -8,32 +8,32 @@ export const metadata = {
 
 const features = [
   {
-    icon: Container,
+    icon: PackageIcon,
     title: "Docker Compose first",
     description: "Stacks are plain directories with a compose.yaml, managed on disk",
   },
   {
-    icon: Server,
+    icon: HardDrivesIcon,
     title: "Stateless and local-first",
     description: "SQLite is used only for auth; stack state lives in Docker and your filesystem",
   },
   {
-    icon: Zap,
+    icon: LightningIcon,
     title: "Non-intrusive",
     description: "Calls the Docker socket or plain docker compose commands, no lock-in",
   },
   {
-    icon: Pencil,
+    icon: PencilSimpleIcon,
     title: "Built-in editor",
     description: "Edit compose files directly in the UI with YAML validation",
   },
   {
-    icon: Webhook,
+    icon: WebhooksLogoIcon,
     title: "Webhook redeploy",
     description: "Trigger a pull and restart of all running stacks from CI or a Git hook",
   },
   {
-    icon: KeyRound,
+    icon: KeyIcon,
     title: "OIDC / passkeys",
     description: "Sign in with any OpenID Connect provider, or a passkey",
   },
@@ -55,7 +55,7 @@ export default function HomePage() {
           {features.map((feature) => (
             <Card
               key={feature.title}
-              icon={<feature.icon className="text-fd-primary" />}
+              icon={<feature.icon className="text-fd-primary" weight="duotone" />}
               title={<span className="text-fd-foreground">{feature.title}</span>}
               description={feature.description}
               className="border-fd-border bg-fd-card transition-all duration-300 hover:border-fd-primary/50 hover:bg-fd-accent"
