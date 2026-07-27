@@ -2,9 +2,12 @@ FROM oven/bun:1.3.14 AS builder
 
 WORKDIR /app
 
-COPY package.json bun.lock ./
+RUN apt-get update && apt-get install -y --no-install-recommends python3 make g++ && rm -rf /var/lib/apt/lists/*
 
-RUN bun install --frozen-lockfile
+COPY package.json bun.lock ./
+COPY wiki/package.json ./wiki/package.json
+
+RUN bun install --frozen-lockfile --filter dockstack
 
 COPY . .
 
