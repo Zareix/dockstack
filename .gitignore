@@ -13,3 +13,4 @@ __unconfig*
 todos.json
 data/
 db.sqlite*
+wiki/openapi.yaml

@@ -1,6 +1,6 @@
 {
   "title": "Features",
-  "pages": ["auto-detected-urls", "api"],
+  "pages": ["auto-detect-urls", "api"],
   "icon": "Function",
   "defaultOpen": true
 }

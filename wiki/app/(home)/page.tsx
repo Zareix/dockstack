@@ -1,5 +1,12 @@
+import {
+  HardDrivesIcon,
+  KeyIcon,
+  LightningIcon,
+  PackageIcon,
+  PencilSimpleIcon,
+  WebhooksLogoIcon,
+} from "@phosphor-icons/react/ssr"
 import { Card, Cards } from "fumadocs-ui/components/card"
-import { HardDrivesIcon, KeyIcon, LightningIcon, PackageIcon, PencilSimpleIcon, WebhooksLogoIcon } from "@phosphor-icons/react/ssr"
 import Link from "next/link"
 
 export const metadata = {
@@ -44,8 +51,8 @@ export default function HomePage() {
     <div className="flex flex-1 flex-col justify-center">
       <div className="container mx-auto max-w-5xl space-y-8 px-4 py-16">
         <div className="space-y-4 text-center">
-          <h1 className="font-bold text-4xl md:text-5xl">Dockstack</h1>
-          <p className="mx-auto max-w-2xl text-fd-muted-foreground text-lg">
+          <h1 className="text-4xl font-bold md:text-5xl">Dockstack</h1>
+          <p className="text-fd-muted-foreground mx-auto max-w-2xl text-lg">
             Self-hosted Docker Compose stack management UI. Browse, start, stop, restart, and
             redeploy your stacks — no database, no complex config.
           </p>
@@ -58,7 +65,7 @@ export default function HomePage() {
               icon={<feature.icon className="text-fd-primary" weight="duotone" />}
               title={<span className="text-fd-foreground">{feature.title}</span>}
               description={feature.description}
-              className="border-fd-border bg-fd-card transition-all duration-300 hover:border-fd-primary/50 hover:bg-fd-accent"
+              className="border-fd-border bg-fd-card hover:border-fd-primary/50 hover:bg-fd-accent transition-all duration-300"
             />
           ))}
         </Cards>
@@ -66,7 +73,7 @@ export default function HomePage() {
         <div className="flex justify-center">
           <Link
             href="/docs"
-            className="cursor-pointer rounded-full bg-fd-accent px-6 py-3 font-medium text-fd-accent-foreground transition-colors hover:bg-fd-accent/90"
+            className="bg-fd-accent text-fd-accent-foreground hover:bg-fd-accent/90 cursor-pointer rounded-full px-6 py-3 font-medium transition-colors"
           >
             Explore Documentation
           </Link>

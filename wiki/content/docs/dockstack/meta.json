@@ -1,0 +1,7 @@
+{
+  "title": "Dockstack",
+  "pages": ["index", "installation", "configuration", "features"],
+  "root": true,
+  "icon": "ShippingContainer",
+  "defaultOpen": true
+}

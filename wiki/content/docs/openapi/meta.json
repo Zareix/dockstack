@@ -1,0 +1,6 @@
+{
+  "title": "API Reference",
+  "root": true,
+  "icon": "Shapes",
+  "pages": ["index", "...(generated)"]
+}
