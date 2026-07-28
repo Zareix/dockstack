@@ -23,6 +23,8 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+    env:
+      SKIP_ENV_VALIDATION: true
     steps:
       - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
