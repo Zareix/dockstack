@@ -72,7 +72,7 @@ export default function HomePage() {
 
         <div className="flex justify-center">
           <Link
-            href="/docs"
+            href="/docs/dockstack"
             className="bg-fd-accent text-fd-accent-foreground hover:bg-fd-accent/90 cursor-pointer rounded-full px-6 py-3 font-medium transition-colors"
           >
             Explore Documentation

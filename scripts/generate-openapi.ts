@@ -32,7 +32,7 @@ const spec = {
       "- `/api/ws/logs`, `/api/ws/exec` — WebSocket endpoints, not representable in OpenAPI.",
     ].join("\n"),
   },
-  servers: [{ url: "/" }],
+  servers: [{ url: "https://dockstack.example.com/" }],
   security: [{ apiKeyAuth: [] }],
   paths: {
     "/api/health": {

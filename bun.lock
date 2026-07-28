@@ -38,6 +38,7 @@
         "bowser": "^2.14.1",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
+        "cnfast": "^0.0.8",
         "crossws": "^0.4.10",
         "date-fns": "^4.3.0",
         "dockerode": "^5.0.1",
