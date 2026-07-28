@@ -1,3 +1,5 @@
+import { writeFile } from "node:fs/promises"
+
 import { notFound } from "next/navigation"
 
 import { getLLMText, getPageMarkdownUrl, source } from "@/lib/source"

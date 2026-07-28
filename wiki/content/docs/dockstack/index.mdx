@@ -4,7 +4,7 @@ description: Self-hosted Docker Compose stack management UI
 icon: House
 ---
 
-Dockstack is a self-hosted web UI for managing Docker Compose stacks. Browse, start, stop, restart, and redeploy your stacks — no database, no complex config, just your existing `compose.yaml` files.
+Dockstack is a self-hosted web UI for managing Docker Compose stacks. Browse, edit, start, stop, restart, and redeploy your stacks — no database, no complex config, just your existing `compose.yaml` files.
 
 ## Features
 
@@ -21,18 +21,21 @@ Dockstack is a self-hosted web UI for managing Docker Compose stacks. Browse, st
 <Cards>
   <Card
     title="Installation"
-    href="/docs/installation"
+    href="/docs/dockstack/installation"
     description="Run Dockstack with Docker Compose"
   />
   <Card
     title="Configuration"
-    href="/docs/configuration"
+    href="/docs/dockstack/configuration/env-variables"
     description="Environment variables and stack layout"
   />
   <Card
     title="Authentication"
-    href="/docs/configuration/authentication"
+    href="/docs/dockstack/configuration/authentication"
     description="Admin login, OIDC, passkeys, API keys"
   />
-  <Card title="API" href="/docs/features/api" description="Webhook redeploy and other endpoints" />
+  <Card 
+    title="API"
+    href="/docs/openapi/getHealth"
+    description="API documentation" />
 </Cards>

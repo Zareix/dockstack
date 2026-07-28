@@ -1,3 +1,5 @@
+import { writeFile } from "fs/promises"
+
 import {
   DocsBody,
   DocsDescription,
@@ -32,7 +34,7 @@ export default async function Page(props: PageProps<"/docs/[[...slug]]">) {
   }
 
   const MDX = page.data.body
-  const markdownUrl = getPageMarkdownUrl(page).url
+  const markdownUrl = "/dockstack" + getPageMarkdownUrl(page).url
 
   return (
     <DocsPage toc={page.data.toc} full={page.data.full}>
@@ -42,13 +44,12 @@ export default async function Page(props: PageProps<"/docs/[[...slug]]">) {
         <MarkdownCopyButton markdownUrl={markdownUrl} />
         <ViewOptionsPopover
           markdownUrl={markdownUrl}
-          githubUrl={`https://github.com/${gitConfig.user}/${gitConfig.repo}/blob/${gitConfig.branch}/content/docs/${page.path}`}
+          githubUrl={`https://github.com/${gitConfig.user}/${gitConfig.repo}/blob/${gitConfig.branch}/${gitConfig.directory}content/docs/${page.path}`}
         />
       </div>
       <DocsBody>
         <MDX
           components={getMDXComponents({
-            // this allows you to link to other pages with relative file paths
             a: createRelativeLink(source, page),
           })}
         />

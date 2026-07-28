@@ -7,4 +7,5 @@ export const gitConfig = {
   user: "zareix",
   repo: "dockstack",
   branch: "main",
+  directory: "wiki/",
 }

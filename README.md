@@ -1,6 +1,6 @@
 # Dockstack
 
-Self-hosted Docker Compose stack management UI. Browse, start, stop, restart, and redeploy your stacks from a web interface — no big database, no complex config.
+Self-hosted Docker Compose stack management UI. Browse, edit, start, stop, restart, and redeploy your stacks from a web interface — no big database, no complex config.
 
 ## Features
 

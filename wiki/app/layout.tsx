@@ -11,7 +11,9 @@ export default function Layout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={inter.className} suppressHydrationWarning>
       <body className="flex min-h-screen flex-col">
-        <RootProvider search={{ options: { type: "static" } }}>{children}</RootProvider>
+        <RootProvider search={{ options: { type: "static", api: "/dockstack/api/search" } }}>
+          {children}
+        </RootProvider>
       </body>
     </html>
   )

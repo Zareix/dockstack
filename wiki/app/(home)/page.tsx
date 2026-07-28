@@ -53,7 +53,7 @@ export default function HomePage() {
         <div className="space-y-4 text-center">
           <h1 className="text-4xl font-bold md:text-5xl">Dockstack</h1>
           <p className="text-fd-muted-foreground mx-auto max-w-2xl text-lg">
-            Self-hosted Docker Compose stack management UI. Browse, start, stop, restart, and
+            Self-hosted Docker Compose stack management UI. Browse, edit, start, stop, restart, and
             redeploy your stacks — no database, no complex config.
           </p>
         </div>
