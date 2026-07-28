@@ -6,17 +6,20 @@ import { env } from "#/env"
 import { mergeStreams } from "../streams"
 import { COMPOSE_FILENAMES, dockerClient } from "./client"
 
-export type StackStatus =
-  | "running"
-  | "healthy"
-  | "unhealthy"
-  | "starting"
-  | "restarting"
-  | "partial"
-  | "stopped"
-  | "down"
-  | "unknown"
-  | "missing"
+export const STACK_STATUSES = [
+  "running",
+  "healthy",
+  "unhealthy",
+  "starting",
+  "restarting",
+  "partial",
+  "stopped",
+  "down",
+  "unknown",
+  "missing",
+] as const
+
+export type StackStatus = (typeof STACK_STATUSES)[number]
 
 export type RedeployResult = {
   name: string

@@ -23,7 +23,7 @@
     "auth:generate": "bunx --bun @better-auth/cli generate --config src/lib/auth/index.ts --output src/db/schema/auth-schema.ts",
     "wiki:dev": "bun run --filter wiki dev",
     "wiki:build": "bun run --filter wiki build",
-    "openapi:generate": "bun run scripts/generate-openapi.ts"
+    "openapi:generate": "bun run scripts/generate-openapi.ts && oxfmt wiki/openapi.yaml"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",

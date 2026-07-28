@@ -24,7 +24,6 @@ export default async function Page(props: PageProps<"/docs/[[...slug]]">) {
     return (
       <DocsPage toc={page.data.toc} full>
         <DocsTitle>{page.data.title}</DocsTitle>
-        <DocsDescription>{page.data.description}</DocsDescription>
         <DocsBody>
           <OpenAPIPage {...page.data.getOpenAPIPageProps()} />
         </DocsBody>
