@@ -25,7 +25,7 @@ All configuration is done through environment variables.
 | `DOCKER_CONFIG_DIR_PATH`              | `./.docker`   | `/app/.docker`        | Path to Docker config directory (passed as `docker --config`), useful for private registry auth                                        |
 | `DOCKER_SYSTEM_PRUNE_CRON`            | —             | —                     | Cron expression to schedule automatic `docker system prune` (e.g. `0 3 * * *` for 3 AM daily)                                          |
 | `DOCKER_SYSTEM_PRUNE_INCLUDE_VOLUMES` | `false`       | `false`               | Set to `true` to also prune unused volumes during the scheduled prune                                                                  |
-| `REDEPLOY_SKIP`                       | —             | —                     | Comma-separated list of stack names to skip during [redeploy](/docs/features/api)                                                      |
+| `REDEPLOY_SKIP`                       | —             | —                     | Comma-separated list of service names to skip during [redeploy](/docs/openapi/redeployAllRunningStacks)                                                      |
 | `OTHER_INSTANCE_URLS`                 | —             | —                     | Other Dockstack instances, listed in a dropdown when clicking the app title in the sidebar. Format `name1,url1;name2,url2`             |
 | `AUTODETECT_URL_BASE_DOMAIN`          | —             | —                     | Base domain used to build service URLs from detected proxy labels, see [Auto-detected service URLs](/docs/features/auto-detected-urls) |
 

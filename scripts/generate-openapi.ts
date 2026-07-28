@@ -67,7 +67,7 @@ const spec = {
         operationId: "redeployAllRunningStacks",
         summary: "Redeploy all currently running stacks",
         description:
-          "Stacks listed in the server's [`REDEPLOY_SKIP`](/docs/dockstack/configuration/env-variables#optional) environment variable (comma-separated stack names) are skipped.",
+          "Service names listed in the server's [`REDEPLOY_SKIP`](/docs/dockstack/configuration/env-variables#optional) environment variable (comma-separated stack names) are skipped.",
         responses: {
           "200": {
             description: "Redeploy results per stack",
