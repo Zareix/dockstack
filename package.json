@@ -91,7 +91,7 @@
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.4",
     "dotenv": "^17.4.2",
-    "jsdom": "^29.1.1",
+    "jsdom": "^30.0.0",
     "oxfmt": "^0.60.0",
     "oxlint": "^1.75.0",
     "oxlint-tsgolint": "^7.0.2001",
