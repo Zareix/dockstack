@@ -84,6 +84,7 @@ export function AppSidebar() {
   })
 
   const toggleSidebarOnMobile = () => (isMobile ? toggleSidebar() : null)
+  const otherInstancePathname = pathname.includes("/stacks") ? "/" : pathname
 
   if (!session) {
     return null
@@ -91,16 +92,15 @@ export function AppSidebar() {
 
   return (
     <Sidebar mobileSide="right">
-      <SidebarHeader className="flex-col items-center justify-between gap-0 p-4">
+      <SidebarHeader className="p-4">
         {instances.length > 1 ? (
           <DropdownMenu>
             <DropdownMenuTrigger
               nativeButton={false}
-              render={
-                <div className="flex w-full cursor-default items-center gap-2 text-xl font-semibold" />
-              }
+              render={<div className="flex w-full cursor-default flex-col gap-0" />}
             >
-              {appTitle}
+              <p className="text-xl font-semibold">{appTitle}</p>
+              {instanceName && <p className="text-sm text-muted-foreground">{instanceName}</p>}
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               <DropdownMenuGroup>
@@ -110,7 +110,12 @@ export function AppSidebar() {
                   .map((instance, index) => (
                     <DropdownMenuItem
                       key={index}
-                      render={<a href={instance.url} aria-label={instance.title} />}
+                      render={
+                        <a
+                          href={instance.url + otherInstancePathname}
+                          aria-label={instance.title}
+                        />
+                      }
                     >
                       {instance.title}
                     </DropdownMenuItem>
@@ -127,7 +132,6 @@ export function AppSidebar() {
             {appTitle}
           </Link>
         )}
-        {instanceName && <p className="w-full text-sm text-muted-foreground">{instanceName}</p>}
       </SidebarHeader>
       <SidebarContent className="gap-0">
         <SidebarGroup>

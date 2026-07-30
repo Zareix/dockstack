@@ -7,8 +7,8 @@ import {
   TrashIcon,
 } from "@phosphor-icons/react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { ClientOnly, createFileRoute, redirect } from "@tanstack/react-router"
-import { useCallback } from "react"
+import { ClientOnly, createFileRoute, redirect, useRouter } from "@tanstack/react-router"
+import { useCallback, useEffect } from "react"
 import { toast } from "sonner"
 import * as v from "valibot"
 
@@ -33,8 +33,10 @@ import { Button } from "#/components/ui/button"
 import { Spinner } from "#/components/ui/spinner.tsx"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/components/ui/tabs"
 import {
+  createStack,
   getStackStatus,
   stackDestroy,
+  stackExists,
   streamStackDown,
   streamStackPull,
   streamStackRestart,
@@ -49,7 +51,7 @@ const tabSchema = v.object({
 
 export const Route = createFileRoute("/_private/stacks/$name")({
   validateSearch: tabSchema,
-  async beforeLoad({ context: { queryClient }, location }) {
+  async beforeLoad({ context: { queryClient }, location, params: { name } }) {
     const session = await ensureSession(queryClient)()
     if (!session) {
       throw redirect({
@@ -58,7 +60,10 @@ export const Route = createFileRoute("/_private/stacks/$name")({
         search: { redirectTo: location.href },
       })
     }
-    return { session }
+    return {
+      session,
+      stackExists: await stackExists({ data: { stackName: name } }),
+    }
   },
   pendingComponent: () => <Spinner />,
   component: StackPage,
@@ -66,6 +71,41 @@ export const Route = createFileRoute("/_private/stacks/$name")({
 
 function StackPage() {
   const { name } = Route.useParams()
+  const { stackExists: exists } = Route.useRouteContext()
+
+  if (!exists) {
+    return <StackNotFound name={name} />
+  }
+
+  return <StackDetails name={name} />
+}
+
+function StackNotFound({ name }: { name: string }) {
+  const router = useRouter()
+  const queryClient = useQueryClient()
+
+  const createMutation = useMutation({
+    mutationFn: () => createStack({ data: { stackName: name } }),
+    onError: (error) => toast.error(error.message),
+    onSuccess: () => {
+      toast.success(`Stack ${name} created`)
+      router.invalidate()
+      queryClient.invalidateQueries({ queryKey: ["stacks"] })
+    },
+  })
+
+  return (
+    <div className="flex flex-col items-center justify-center gap-4 py-24 text-center">
+      <h2 className="text-xl font-semibold">Stack "{name}" doesn't exist</h2>
+      <p className="text-muted-foreground">Want to create it?</p>
+      <Button onClick={() => createMutation.mutate()} disabled={createMutation.isPending}>
+        {createMutation.isPending ? "Creating..." : `Create "${name}"`}
+      </Button>
+    </div>
+  )
+}
+
+function StackDetails({ name }: { name: string }) {
   const { tab } = Route.useSearch()
   const queryClient = useQueryClient()
   const navigate = Route.useNavigate()
@@ -90,6 +130,12 @@ function StackPage() {
       navigate({ to: "/" })
     },
   })
+
+  useEffect(() => {
+    if (statusQuery.error) {
+      toast.error(statusQuery.error.message)
+    }
+  }, [statusQuery.error])
 
   return (
     <>

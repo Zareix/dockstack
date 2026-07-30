@@ -22,6 +22,11 @@ export const listStacks = createServerFn()
     )
   })
 
+export const stackExists = createServerFn()
+  .middleware([authMiddleware])
+  .validator(v.object({ stackName: v.pipe(v.string(), v.minLength(1)) }))
+  .handler(({ data: { stackName } }) => docker.stackExists(stackName))
+
 export const getStackStatus = createServerFn()
   .middleware([authMiddleware])
   .validator(v.object({ stackName: v.pipe(v.string(), v.minLength(1)) }))

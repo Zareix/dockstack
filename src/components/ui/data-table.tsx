@@ -128,7 +128,7 @@ export function DataTable<TData, TValue>({
   })
 
   return (
-    <div className="w-full">
+    <div className="w-full md:max-w-[calc(100vw-16rem-(2rem)*2)]">
       {toolbar?.(table)}
       <div className="overflow-hidden rounded-md border">
         <Table>

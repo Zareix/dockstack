@@ -4,9 +4,9 @@ import { ReactQueryDevtoolsPanel } from "@tanstack/react-query-devtools"
 import { HeadContent, Scripts, createRootRouteWithContext } from "@tanstack/react-router"
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools"
 
-import { AppSidebar } from "#/components/app-sidebar"
+import { AppSidebar } from "#/components/app-sidebar.tsx"
 import { ErrorBoundary, ErrorFallback } from "#/components/error-boundary"
-import { Navbar } from "#/components/navbar"
+import { Navbar } from "#/components/navbar.tsx"
 import { Providers } from "#/components/providers"
 import type { getSettings } from "#/lib/functions/settings"
 
@@ -68,7 +68,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
           <Providers>
             <AppSidebar />
             <Navbar />
-            <main className="isolate min-h-screen w-full p-4 md:mx-auto md:p-8">{children}</main>
+            <main className="isolate min-h-[calc(100vh-3rem)] w-full p-4 md:mx-auto md:min-h-screen md:p-8">
+              {children}
+            </main>
           </Providers>
         </ErrorBoundary>
         <TanStackDevtools

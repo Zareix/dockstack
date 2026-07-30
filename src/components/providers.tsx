@@ -33,7 +33,7 @@ export function Providers({ children }: { children: ReactNode }) {
       {providersQuery.isLoading ? (
         <></>
       ) : providersQuery.isError ? (
-        <div>Could not load providers.</div>
+        <div>An error occurred please try again.</div>
       ) : (
         providersQuery.data && (
           <AuthProvider

@@ -1,1 +1,10 @@
-[{"slug":["dockstack","content.md"]},{"slug":["dockstack","installation","content.md"]},{"slug":["dockstack","configuration","authentication","content.md"]},{"slug":["dockstack","configuration","env-variables","content.md"]},{"slug":["dockstack","features","auto-detect-urls","content.md"]},{"slug":["openapi","getHealth","content.md"]},{"slug":["openapi","listStacks","content.md"]},{"slug":["openapi","redeployAllRunningStacks","content.md"]}]
+[
+  { "slug": ["dockstack", "content.md"] },
+  { "slug": ["dockstack", "installation", "content.md"] },
+  { "slug": ["dockstack", "configuration", "authentication", "content.md"] },
+  { "slug": ["dockstack", "configuration", "env-variables", "content.md"] },
+  { "slug": ["dockstack", "features", "auto-detect-urls", "content.md"] },
+  { "slug": ["openapi", "getHealth", "content.md"] },
+  { "slug": ["openapi", "listStacks", "content.md"] },
+  { "slug": ["openapi", "redeployAllRunningStacks", "content.md"] }
+]

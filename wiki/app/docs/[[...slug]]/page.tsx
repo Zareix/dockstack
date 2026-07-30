@@ -1,5 +1,3 @@
-import { writeFile } from "fs/promises"
-
 import {
   DocsBody,
   DocsDescription,

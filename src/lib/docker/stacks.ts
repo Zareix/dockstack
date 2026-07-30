@@ -156,6 +156,11 @@ export const getRunningServices = async (stackName: string): Promise<string[]> =
   return [...new Set(containers.map((c) => c.Labels["com.docker.compose.service"]).filter(Boolean))]
 }
 
+export const stackExists = async (stackName: string): Promise<boolean> => {
+  const stacks = await listStacks()
+  return stacks.some((s) => s === stackName)
+}
+
 export const getStackStatus = async (stackName: string): Promise<StackStatus> => {
   const containers = await dockerClient.listContainers({
     all: true,
