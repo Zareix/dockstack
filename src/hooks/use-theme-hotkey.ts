@@ -5,10 +5,11 @@ import { toast } from "sonner"
 const THEME_CYCLE = ["system", "light", "dark"] as const
 
 function isEditableTarget(target: EventTarget | null): boolean {
-  if (!(target instanceof HTMLElement)) return false
-  if (target.isContentEditable) return true
+  if (!(target instanceof Element)) return false
+  if (target instanceof HTMLElement && target.isContentEditable) return true
   const tag = target.tagName
-  return tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT"
+  if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return true
+  return !!target.closest('[contenteditable="true"], .monaco-editor, .cm-editor, [role="textbox"]')
 }
 
 export function useThemeHotkey() {
