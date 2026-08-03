@@ -53,7 +53,9 @@ All configuration is done through environment variables.
               <code>{name}</code>
             </td>
             <td>{v.default ? <code>{v.default}</code> : "—"}</td>
-            <td>{v.dockerDefault ?? v.default ? <code>{v.dockerDefault ?? v.default}</code> : "—"}</td>
+            <td>
+              {(v.dockerDefault ?? v.default) ? <code>{v.dockerDefault ?? v.default}</code> : "—"}
+            </td>
             <td>{formatDescription(v.description)}</td>
           </tr>
         ))}
