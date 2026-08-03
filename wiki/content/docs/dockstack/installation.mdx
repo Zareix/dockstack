@@ -38,11 +38,11 @@ Run it:
 docker compose up -d
 ```
 
-Open the URL you set in `BETTER_AUTH_URL`, sign in with `ADMIN_EMAIL` / `password`, and change the password from settings.
+Open the URL you set in <EnvVar name="BETTER_AUTH_URL" />, sign in with <EnvVar name="ADMIN_EMAIL" /> / `password`, and change the password from settings.
 
 ## Stack layout
 
-Each stack is a subdirectory under `STACKS_DIR` (`./stacks` by default) containing a compose file:
+Each stack is a subdirectory under <EnvVar name="STACKS_DIR" /> (`./stacks` by default) containing a compose file:
 
 <Files>
   <Folder name="stacks" defaultOpen>

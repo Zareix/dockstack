@@ -2,31 +2,66 @@
 title: Environment Variables
 ---
 
+import { formatDescription } from "@/lib/format-description"
+import { envVars } from "@/lib/shared"
+
 All configuration is done through environment variables.
 
 ## Required
 
-| Variable             | Description                                                                         |
-| -------------------- | ----------------------------------------------------------------------------------- |
-| `BETTER_AUTH_SECRET` | Secret key for session signing (min 32 chars). Generate with `openssl rand -hex 32` |
-| `BETTER_AUTH_URL`    | Public URL of the Dockstack instance                                                |
-| `ADMIN_EMAIL`        | Email of the initial admin user (default password `password`)                       |
+<div class="relative overflow-auto prose-no-margin my-6">
+  <table>
+    <thead>
+      <tr>
+        <th>Variable</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      {Object.entries(envVars)
+        .filter(([, v]) => v.required)
+        .map(([name, v]) => (
+          <tr key={name}>
+            <td>
+              <code>{name}</code>
+            </td>
+            <td>{formatDescription(v.description)}</td>
+          </tr>
+        ))}
+    </tbody>
+  </table>
+</div>
 
 ## Optional
 
-| Variable                              | App default   | Image default         | Description                                                                                                                            |
-| ------------------------------------- | ------------- | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| `APP_TITLE`                           | `Dockstack`   | `Dockstack`           | Title shown in the UI                                                                                                                  |
-| `INSTANCE_NAME`                       | —             | —                     | Name of this instance, shown in the UI to tell instances apart                                                                         |
-| `SERVER_HOST`                         | `localhost`   | `localhost`           | Host shown in port links in the UI                                                                                                     |
-| `STACKS_DIR`                          | `./stacks`    | `/app/stacks`         | Path to the stacks directory inside the container                                                                                      |
-| `DATABASE_PATH`                       | `./db.sqlite` | `/app/data/db.sqlite` | Path to the SQLite auth database                                                                                                       |
-| `PORT`                                | `3000`        | `3000`                | HTTP port the server listens on                                                                                                        |
-| `DOCKER_CONFIG_DIR_PATH`              | `./.docker`   | `/app/.docker`        | Path to Docker config directory (passed as `docker --config`), useful for private registry auth                                        |
-| `DOCKER_SYSTEM_PRUNE_CRON`            | —             | —                     | Cron expression to schedule automatic `docker system prune` (e.g. `0 3 * * *` for 3 AM daily)                                          |
-| `DOCKER_SYSTEM_PRUNE_INCLUDE_VOLUMES` | `false`       | `false`               | Set to `true` to also prune unused volumes during the scheduled prune                                                                  |
-| `REDEPLOY_SKIP`                       | —             | —                     | Comma-separated list of service names to skip during [redeploy](/docs/openapi/redeployAllRunningStacks)                                |
-| `OTHER_INSTANCE_URLS`                 | —             | —                     | Other Dockstack instances, listed in a dropdown when clicking the app title in the sidebar. Format `name1,url1;name2,url2`             |
-| `AUTODETECT_URL_BASE_DOMAIN`          | —             | —                     | Base domain used to build service URLs from detected proxy labels, see [Auto-detected service URLs](/docs/features/auto-detected-urls) |
+<div class="relative overflow-auto prose-no-margin my-6">
+  <table>
+    <thead>
+      <tr>
+        <th>Variable</th>
+        <th>App default</th>
+        <th>Docker default</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      {Object.entries(envVars)
+        .filter(([, v]) => !v.required)
+        .map(([name, v]) => (
+          <tr key={name}>
+            <td>
+              <code>{name}</code>
+            </td>
+            <td>{v.default ? <code>{v.default}</code> : "—"}</td>
+            <td>{v.dockerDefault ?? v.default ? <code>{v.dockerDefault ?? v.default}</code> : "—"}</td>
+            <td>{formatDescription(v.description)}</td>
+          </tr>
+        ))}
+    </tbody>
+  </table>
+</div>
 
-The official image (`ghcr.io/zareix/dockstack`) sets `STACKS_DIR`, `DATABASE_PATH`, and `DOCKER_CONFIG_DIR_PATH` itself — matching the volume paths used in the [installation](/docs/installation) example. Override them only if you change those mount paths.
+See [redeploy](/docs/openapi/redeployAllRunningStacks) for <EnvVar name="REDEPLOY_SKIP" /> and
+[Auto-detected service URLs](/docs/features/auto-detected-urls) for <EnvVar name="AUTODETECT_URL_BASE_DOMAIN" />.
+
+The official docker image (`ghcr.io/zareix/dockstack`) sets <EnvVar name="STACKS_DIR" />, <EnvVar name="DATABASE_PATH" />, and <EnvVar name="DOCKER_CONFIG_DIR_PATH" /> itself — matching the volume paths used in the [installation](/docs/installation) example. Override them only if you change those mount paths.
