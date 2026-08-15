@@ -3,7 +3,12 @@ import { createFileRoute, redirect } from "@tanstack/react-router"
 import type { ColumnDef } from "@tanstack/react-table"
 
 import { StatusBadge } from "#/components/status-badge.tsx"
-import { DataTable, FilterableHeader, SortableHeader } from "#/components/ui/data-table"
+import {
+  DataTable,
+  type DataTableFeatures,
+  FilterableHeader,
+  SortableHeader,
+} from "#/components/ui/data-table"
 import type { NetworkInfo } from "#/lib/docker"
 import { listNetworks } from "#/lib/functions"
 import { ensureSession } from "#/lib/functions/auth"
@@ -28,7 +33,7 @@ function NetworksPage() {
     queryFn: listNetworks,
   })
 
-  const columns: ColumnDef<NetworkInfo>[] = [
+  const columns: ColumnDef<DataTableFeatures, NetworkInfo>[] = [
     {
       accessorKey: "name",
       header: ({ column }) => <SortableHeader column={column} label="Name" />,

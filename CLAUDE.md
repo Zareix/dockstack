@@ -29,6 +29,7 @@ All commands below run from the repo root and use **bun**, not npm/pnpm/yarn.
 - `bun run openapi:generate` — regenerate `wiki/openapi.yaml` from the API route tree
 
 Wiki subproject (run from `wiki/`, or via root's `bun run wiki:dev` / `wiki:build`):
+
 - `bun run dev` / `build` — Next.js dev/build
 - `bun run types:check` — fumadocs-mdx codegen + Next typegen + `tsc --noEmit`
 

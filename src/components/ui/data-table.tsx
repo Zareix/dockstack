@@ -2,17 +2,20 @@ import { ArrowDownIcon, ArrowUpIcon, FunnelIcon } from "@phosphor-icons/react"
 import {
   type Column,
   type ColumnDef,
-  type ColumnFiltersColumn,
-  type ColumnFiltersState,
+  columnFilteringFeature,
+  createFilteredRowModel,
+  createSortedRowModel,
+  filterFn_includesString,
   flexRender,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getSortedRowModel,
-  type SortingState,
+  type RowData,
+  rowSortingFeature,
+  sortFn_alphanumeric,
+  sortFn_datetime,
+  sortFn_text,
+  tableFeatures,
   type Table as TanstackTable,
-  useReactTable,
+  useTable,
 } from "@tanstack/react-table"
-import { useState } from "react"
 
 import { Button } from "#/components/ui/button"
 import {
@@ -32,11 +35,26 @@ import {
 } from "#/components/ui/table"
 import { cn } from "#/lib/utils.ts"
 
-export function SortableHeader<TData, TValue>({
+export const dataTableFeatures = tableFeatures({
+  rowSortingFeature,
+  columnFilteringFeature,
+  sortedRowModel: createSortedRowModel(),
+  filteredRowModel: createFilteredRowModel(),
+  filterFns: { includesString: filterFn_includesString },
+  sortFns: {
+    alphanumeric: sortFn_alphanumeric,
+    text: sortFn_text,
+    datetime: sortFn_datetime,
+  },
+})
+
+export type DataTableFeatures = typeof dataTableFeatures
+
+export function SortableHeader<TData extends RowData, TValue>({
   column,
   label,
 }: {
-  column: Column<TData, TValue>
+  column: Column<DataTableFeatures, TData, TValue>
   label: string
 }) {
   const sorted = column.getIsSorted()
@@ -54,12 +72,12 @@ export function SortableHeader<TData, TValue>({
   )
 }
 
-export function FilterableHeader<TData>({
+export function FilterableHeader<TData extends RowData>({
   column,
   disabled,
   items,
 }: {
-  column: ColumnFiltersColumn<TData>
+  column: Column<DataTableFeatures, TData>
   disabled: boolean
   items: { label: string; value: string }[]
 }) {
@@ -98,33 +116,25 @@ export function FilterableHeader<TData>({
   )
 }
 
-interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[]
+interface DataTableProps<TData extends RowData> {
+  columns: ColumnDef<DataTableFeatures, TData>[]
   data: TData[]
   isLoading?: boolean
-  toolbar?: (table: TanstackTable<TData>) => React.ReactNode
+  toolbar?: (table: TanstackTable<DataTableFeatures, TData>) => React.ReactNode
   onRowClick?: (row: TData) => void
 }
 
-export function DataTable<TData, TValue>({
+export function DataTable<TData extends RowData>({
   columns,
   data,
   isLoading,
   toolbar,
   onRowClick,
-}: DataTableProps<TData, TValue>) {
-  const [sorting, setSorting] = useState<SortingState>([])
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-
-  const table = useReactTable({
+}: DataTableProps<TData>) {
+  const table = useTable({
+    features: dataTableFeatures,
     data,
     columns,
-    state: { sorting, columnFilters },
-    onSortingChange: setSorting,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    onColumnFiltersChange: setColumnFilters,
-    getFilteredRowModel: getFilteredRowModel(),
   })
 
   return (
@@ -158,7 +168,6 @@ export function DataTable<TData, TValue>({
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
                   className={onRowClick ? "cursor-pointer" : undefined}
                   onClick={
                     onRowClick
@@ -182,7 +191,7 @@ export function DataTable<TData, TValue>({
                       : undefined
                   }
                 >
-                  {row.getVisibleCells().map((cell) => (
+                  {row.getAllCells().map((cell) => (
                     <TableCell key={cell.id}>
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>

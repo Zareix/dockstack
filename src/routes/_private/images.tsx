@@ -5,7 +5,12 @@ import type { ColumnDef } from "@tanstack/react-table"
 import { ImageActions } from "#/components/images/image-actions"
 import { PruneImagesButton } from "#/components/images/prune-images-button"
 import { StatusBadge } from "#/components/status-badge"
-import { DataTable, FilterableHeader, SortableHeader } from "#/components/ui/data-table"
+import {
+  DataTable,
+  type DataTableFeatures,
+  FilterableHeader,
+  SortableHeader,
+} from "#/components/ui/data-table"
 import { Spinner } from "#/components/ui/spinner"
 import type { ImageInfo, StaleStatus } from "#/lib/docker"
 import { checkImagesStale, listImages } from "#/lib/functions"
@@ -59,7 +64,7 @@ function ImagesPage() {
     staleTime: 60_000,
   })
 
-  const columns: ColumnDef<ImageInfo>[] = [
+  const columns: ColumnDef<DataTableFeatures, ImageInfo>[] = [
     {
       accessorKey: "tags",
       header: ({ column }) => <SortableHeader column={column} label="Tag" />,
@@ -69,7 +74,7 @@ function ImagesPage() {
           <span className="font-mono text-sm">{tags.length > 0 ? tags.join(", ") : "<none>"}</span>
         )
       },
-      sortingFn: (a, b) => {
+      sortFn: (a, b) => {
         const tagA = a.original.tags[0] ?? ""
         const tagB = b.original.tags[0] ?? ""
         return tagA.localeCompare(tagB)

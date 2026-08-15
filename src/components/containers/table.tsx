@@ -5,7 +5,12 @@ import type { ColumnDef } from "@tanstack/react-table"
 import type { ContainerInfo } from "#/lib/docker/index.ts"
 
 import { StatusBadge } from "../status-badge"
-import { DataTable, FilterableHeader, SortableHeader } from "../ui/data-table"
+import {
+  DataTable,
+  type DataTableFeatures,
+  FilterableHeader,
+  SortableHeader,
+} from "../ui/data-table"
 import { ContainerActions } from "./container-actions"
 
 type Props = {
@@ -15,7 +20,7 @@ type Props = {
 }
 
 export const ContainersTable = ({ data, isLoading, showStack = true }: Props) => {
-  const columns: (ColumnDef<ContainerInfo> | false)[] = [
+  const columns: (ColumnDef<DataTableFeatures, ContainerInfo> | false)[] = [
     !showStack && {
       accessorKey: "serviceName",
       header: ({ column }) => <SortableHeader column={column} label="Service" />,
@@ -43,7 +48,7 @@ export const ContainersTable = ({ data, isLoading, showStack = true }: Props) =>
           <span className="font-mono text-sm text-muted-foreground">-</span>
         )
       },
-      sortingFn: (a, b) => a.original.stack?.localeCompare(b.original.stack ?? "") ?? 0,
+      sortFn: (a, b) => a.original.stack?.localeCompare(b.original.stack ?? "") ?? 0,
     },
     {
       accessorKey: "image",

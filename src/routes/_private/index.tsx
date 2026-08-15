@@ -13,7 +13,12 @@ import { toast } from "sonner"
 import { CreateStackButton } from "#/components/stacks/create-stack-dialog"
 import { StatusBadge } from "#/components/status-badge"
 import { Button } from "#/components/ui/button"
-import { DataTable, FilterableHeader, SortableHeader } from "#/components/ui/data-table"
+import {
+  DataTable,
+  type DataTableFeatures,
+  FilterableHeader,
+  SortableHeader,
+} from "#/components/ui/data-table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "#/components/ui/tooltip"
 import { listStacks, stackDown, stackPull, stackRestart, stackStop, stackUp } from "#/lib/functions"
 import { ensureSession } from "#/lib/functions/auth"
@@ -127,7 +132,7 @@ function Home() {
     refetchInterval: 5000,
   })
 
-  const columns: ColumnDef<Stack>[] = [
+  const columns: ColumnDef<DataTableFeatures, Stack>[] = [
     {
       accessorKey: "name",
       header: ({ column }) => <SortableHeader column={column} label="Name" />,

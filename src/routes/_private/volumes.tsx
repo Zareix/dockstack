@@ -3,7 +3,12 @@ import { createFileRoute, redirect } from "@tanstack/react-router"
 import type { ColumnDef } from "@tanstack/react-table"
 
 import { StatusBadge } from "#/components/status-badge.tsx"
-import { DataTable, FilterableHeader, SortableHeader } from "#/components/ui/data-table"
+import {
+  DataTable,
+  type DataTableFeatures,
+  FilterableHeader,
+  SortableHeader,
+} from "#/components/ui/data-table"
 import { PruneVolumesButton } from "#/components/volumes/prune-volumes-button"
 import { VolumeActions } from "#/components/volumes/volume-actions"
 import type { VolumeInfo } from "#/lib/docker"
@@ -30,7 +35,7 @@ function VolumesPage() {
     queryFn: listVolumes,
   })
 
-  const columns: ColumnDef<VolumeInfo>[] = [
+  const columns: ColumnDef<DataTableFeatures, VolumeInfo>[] = [
     {
       accessorKey: "name",
       header: ({ column }) => <SortableHeader column={column} label="Name" />,
