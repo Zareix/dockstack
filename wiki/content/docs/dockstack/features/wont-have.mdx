@@ -1,0 +1,23 @@
+---
+title: Things Dockstack will probably never have
+---
+
+Some things fit the "manage Docker Compose stacks" scope, some don't. This is a non-exhaustive list of
+features that come up in other Docker managers but are unlikely to land in Dockstack, and why.
+
+## Multi-host support
+
+Managing multiple Docker hosts from a single Dockstack instance adds a lot of overhead (agents,
+networking, auth between hosts) and a lot of surface for state to drift out of sync. Running one
+Dockstack instance per host is simpler and keeps each instance stateless/local-first, which is the
+whole point of the project.
+
+You can still link related instances together — see <EnvVar name="INSTANCE_NAME" /> and <EnvVar name="OTHER_INSTANCE_URLS" /> in
+[Environment Variables](/docs/dockstack/configuration/env-variables) for linking to a container's public URL
+across proxies.
+
+## System vitals / host monitoring
+
+CPU, RAM, disk, network graphs for the host itself are out of scope. Dockstack is meant to stay
+focused on stacks and Docker, not turn into an all-in-one server dashboard. There are dedicated tools
+for host monitoring that do it better.
