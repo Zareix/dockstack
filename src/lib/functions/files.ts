@@ -58,6 +58,9 @@ export const createStack = createServerFn()
     }),
   )
   .handler(async ({ data: { stackName } }) => {
+    if (await docker.stackExists(stackName)) {
+      throw new Error(`A stack named "${stackName}" already exists`)
+    }
     const dir = join(env.STACKS_DIR, stackName)
     await Bun.write(
       join(dir, "compose.yaml"),

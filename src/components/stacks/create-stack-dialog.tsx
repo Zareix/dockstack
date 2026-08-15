@@ -18,7 +18,7 @@ import {
 import { FieldError } from "#/components/ui/field"
 import { Input } from "#/components/ui/input"
 import { Label } from "#/components/ui/label"
-import { createStack } from "#/lib/functions"
+import { createStack, stackExists } from "#/lib/functions"
 
 const schema = v.object({
   name: v.pipe(
@@ -77,7 +77,17 @@ export function CreateStackButton() {
           }}
         >
           <div className="grid gap-2">
-            <form.Field name="name">
+            <form.Field
+              name="name"
+              validators={{
+                onChangeAsync: async ({ value }) => {
+                  if (!v.safeParse(schema.entries.name, value).success) return undefined
+                  const exists = await stackExists({ data: { stackName: value } })
+                  return exists ? `A stack named "${value}" already exists` : undefined
+                },
+                onChangeAsyncDebounceMs: 300,
+              }}
+            >
               {(field) => {
                 const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
                 return (
@@ -94,7 +104,12 @@ export function CreateStackButton() {
                       autoFocus
                     />
                     {isInvalid && (
-                      <FieldError id={`${field.name}-error`} errors={field.state.meta.errors} />
+                      <FieldError
+                        id={`${field.name}-error`}
+                        errors={field.state.meta.errors.map((error) =>
+                          typeof error === "string" ? { message: error } : error,
+                        )}
+                      />
                     )}
                   </div>
                 )
@@ -102,9 +117,13 @@ export function CreateStackButton() {
             </form.Field>
           </div>
           <DialogFooter className="mt-4">
-            <Button type="submit" disabled={mutation.isPending}>
-              {mutation.isPending ? "Creating..." : "Create"}
-            </Button>
+            <form.Subscribe selector={(state) => state.isValidating}>
+              {(isValidating) => (
+                <Button type="submit" disabled={mutation.isPending || isValidating}>
+                  {mutation.isPending ? "Creating..." : "Create"}
+                </Button>
+              )}
+            </form.Subscribe>
           </DialogFooter>
         </form>
       </DialogContent>
