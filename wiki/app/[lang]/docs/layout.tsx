@@ -3,9 +3,10 @@ import { DocsLayout } from "fumadocs-ui/layouts/docs"
 import { baseOptions } from "@/lib/layout.shared"
 import { source } from "@/lib/source"
 
-export default function Layout({ children }: LayoutProps<"/docs">) {
+export default async function Layout({ children, params }: LayoutProps<"/[lang]/docs">) {
+  const { lang } = await params
   return (
-    <DocsLayout tree={source.getPageTree()} {...baseOptions()}>
+    <DocsLayout tree={source.getPageTree(lang)} {...baseOptions(lang)}>
       {children}
     </DocsLayout>
   )

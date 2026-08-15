@@ -1,0 +1,31 @@
+---
+title: Authentification
+description: Connexion, OIDC, passkeys, clés API
+---
+
+Il n'y a pas d'inscription ni de support multi-utilisateur — un unique compte admin est créé au premier démarrage à partir de la variable d'environnement <EnvVar name="ADMIN_EMAIL" />, avec `password` comme mot de passe par défaut. Changez-le juste après la première connexion.
+
+## OIDC
+
+Optionnel, active la connexion via un fournisseur OpenID Connect générique (Pocket ID, Authentik, etc.) en plus de la connexion intégrée par email/mot de passe.
+Définissez les quatre variables suivantes pour activer la connexion OIDC.
+
+| Variable              | Description                                  |
+| --------------------- | --------------------------------------------- |
+| `OAUTH_PROVIDER_ID`   | Nom affiché pour le fournisseur OAuth         |
+| `OAUTH_CLIENT_ID`     | ID client OAuth                               |
+| `OAUTH_CLIENT_SECRET` | Secret client OAuth                           |
+| `OAUTH_DISCOVERY_URL` | URL du endpoint de découverte OIDC            |
+
+## Passkeys
+
+Enregistrez une passkey depuis les paramètres du compte pour vous connecter au compte admin sans mot de passe.
+
+## Clés API
+
+Générez des clés API depuis les paramètres pour authentifier les [requêtes API](/fr/docs/openapi/getHealth). Envoyez la clé comme jeton bearer :
+
+```sh
+curl https://dockstack.example.com/api/stacks \
+  -H "Authorization: Bearer <your-api-key>"
+```

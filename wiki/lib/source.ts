@@ -3,6 +3,7 @@ import { docs } from "collections/server"
 import { loader } from "fumadocs-core/source"
 import { createElement } from "react"
 
+import { i18n } from "./i18n"
 import { openapi } from "./openapi"
 import { docsContentRoute, docsImageRoute, docsRoute } from "./shared"
 
@@ -14,6 +15,7 @@ export const source = loader(
     }),
   },
   {
+    i18n,
     baseUrl: docsRoute,
     icon(icon) {
       if (!icon) {
@@ -42,7 +44,6 @@ export function getPageImageUrl(page: (typeof source)["$inferPage"]) {
 
 export function getPageMarkdownUrl(page: (typeof source)["$inferPage"]) {
   const segments = [...page.slugs, "content.md"]
-
   return {
     segments,
     url: "/" + [page.locale, ...docsContentRoute.split("/"), ...segments].filter(Boolean).join("/"),

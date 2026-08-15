@@ -1,0 +1,60 @@
+---
+title: Installation
+description: Lancer Dockstack avec Docker Compose
+icon: Rocket
+---
+
+## Docker Compose
+
+Dockstack est distribué sous forme d'un seul conteneur. Il a besoin d'accéder au socket Docker (pour gérer les conteneurs) et à un répertoire sur disque où vivent vos stacks.
+
+```yaml title="compose.yaml"
+services:
+  dockstack:
+    image: ghcr.io/zareix/dockstack:latest # ou fixez une version précise comme `v1.0.0`
+    ports:
+      - 3000:3000
+    volumes:
+      - ./stacks:/app/stacks
+      - dockstack-db:/app/data
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - BETTER_AUTH_SECRET=changeme
+      - BETTER_AUTH_URL=https://dockstack.example.com
+      - ADMIN_EMAIL=you@example.com
+
+volumes:
+  dockstack-db:
+```
+
+<Callout title="Volume dockstack-db">
+  Ne contient que la base de données SQLite d'authentification (sessions, utilisateurs, clés API).
+  L'état des stacks lui-même vit dans `/app/stacks` et dans Docker — rien concernant vos stacks
+  n'est dans ce volume.
+</Callout>
+
+Lancez-le :
+
+```sh
+docker compose up -d
+```
+
+Ouvrez l'URL définie dans <EnvVar name="BETTER_AUTH_URL" />, connectez-vous avec <EnvVar name="ADMIN_EMAIL" /> / `password`, puis changez le mot de passe depuis les paramètres.
+
+## Structure des stacks
+
+Chaque stack est un sous-répertoire sous <EnvVar name="STACKS_DIR" /> (`./stacks` par défaut) contenant un fichier compose :
+
+<Files>
+  <Folder name="stacks" defaultOpen>
+    <Folder name="my-app" defaultOpen>
+      <File name="compose.yaml" />
+    </Folder>
+    <Folder name="another-service" defaultOpen>
+      <File name="compose.yaml" />
+      <File name=".env" />
+    </Folder>
+  </Folder>
+</Files>
+
+Dockstack lit et écrit ces fichiers directement — rien n'est stocké dans une base de données. Vous pouvez continuer à gérer vos stacks depuis la CLI (`docker compose ...`) en parallèle de l'interface, sans conflit.

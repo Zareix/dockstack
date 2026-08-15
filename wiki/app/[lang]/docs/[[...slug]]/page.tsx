@@ -15,9 +15,9 @@ import { getMDXComponents } from "@/components/mdx"
 import { appName, gitConfig } from "@/lib/shared"
 import { getPageImageUrl, getPageMarkdownUrl, source } from "@/lib/source"
 
-export default async function Page(props: PageProps<"/docs/[[...slug]]">) {
+export default async function Page(props: PageProps<"/[lang]/docs/[[...slug]]">) {
   const params = await props.params
-  const page = source.getPage(params.slug)
+  const page = source.getPage(params.slug, params.lang)
   if (!page) notFound()
 
   if (page.type === "openapi") {
@@ -60,9 +60,11 @@ export async function generateStaticParams() {
   return source.generateParams()
 }
 
-export async function generateMetadata(props: PageProps<"/docs/[[...slug]]">): Promise<Metadata> {
+export async function generateMetadata(
+  props: PageProps<"/[lang]/docs/[[...slug]]">,
+): Promise<Metadata> {
   const params = await props.params
-  const page = source.getPage(params.slug)
+  const page = source.getPage(params.slug, params.lang)
   if (!page) notFound()
 
   return {

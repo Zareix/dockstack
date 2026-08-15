@@ -1,13 +1,13 @@
 ---
-title: Environment Variables
+title: Variables d'environnement
 ---
 
 import { formatDescription } from "@/lib/format-description"
 import { envVars } from "@/lib/shared"
 
-All configuration is done through environment variables.
+Toute la configuration se fait via des variables d'environnement.
 
-## Required
+## Requises
 
 <div class="relative overflow-auto prose-no-margin my-6">
   <table>
@@ -32,15 +32,15 @@ All configuration is done through environment variables.
   </table>
 </div>
 
-## Optional
+## Optionnelles
 
 <div class="relative overflow-auto prose-no-margin my-6">
   <table>
     <thead>
       <tr>
         <th>Variable</th>
-        <th>App default</th>
-        <th>Docker default</th>
+        <th>Défaut app</th>
+        <th>Défaut Docker</th>
         <th>Description</th>
       </tr>
     </thead>
@@ -63,7 +63,7 @@ All configuration is done through environment variables.
   </table>
 </div>
 
-See [redeploy](/en/docs/openapi/redeployAllRunningStacks) for <EnvVar name="REDEPLOY_SKIP" /> and
-[Auto-detected service URLs](/en/docs/dockstack/features/auto-detect-urls) for <EnvVar name="AUTODETECT_URL_BASE_DOMAIN" />.
+Voir [redeploy](/fr/docs/openapi/redeployAllRunningStacks) pour <EnvVar name="REDEPLOY_SKIP" /> et
+[URLs de services auto-détectées](/fr/docs/dockstack/features/auto-detect-urls) pour <EnvVar name="AUTODETECT_URL_BASE_DOMAIN" />.
 
-The official docker image (`ghcr.io/zareix/dockstack`) sets <EnvVar name="STACKS_DIR" />, <EnvVar name="DATABASE_PATH" />, and <EnvVar name="DOCKER_CONFIG_DIR_PATH" /> itself — matching the volume paths used in the [installation](/en/docs/dockstack/installation) example. Override them only if you change those mount paths.
+L'image Docker officielle (`ghcr.io/zareix/dockstack`) définit elle-même <EnvVar name="STACKS_DIR" />, <EnvVar name="DATABASE_PATH" /> et <EnvVar name="DOCKER_CONFIG_DIR_PATH" /> — correspondant aux chemins de volumes utilisés dans l'exemple d'[installation](/fr/docs/dockstack/installation). Ne les remplacez que si vous changez ces chemins de montage.

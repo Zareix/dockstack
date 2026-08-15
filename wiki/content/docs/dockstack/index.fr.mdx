@@ -1,0 +1,38 @@
+---
+title: Introduction
+description: Interface de gestion de stacks Docker Compose auto-hébergée
+icon: House
+---
+
+Dockstack est une interface web auto-hébergée pour gérer vos stacks Docker Compose. Parcourez, modifiez, démarrez, arrêtez, redémarrez et redéployez vos stacks — pas de base de données, pas de configuration complexe, juste vos fichiers `compose.yaml` existants.
+
+## Fonctionnalités
+
+- **Docker Compose avant tout** — les stacks sont de simples répertoires avec un `compose.yaml` (et un `.env`), gérés sur disque
+- **Rapide** — construit sur Bun + TanStack Start
+- **Sans état et local-first** — SQLite n'est utilisé que pour l'authentification ; l'état des stacks vit dans Docker lui-même et sur votre système de fichiers
+- **Éditeur intégré** — modifiez les fichiers compose directement dans l'interface avec validation YAML
+- **Redéploiement par webhook** — déclenchez un pull + redémarrage de toutes les stacks en cours d'exécution depuis une CI ou un hook Git
+- **Connexion OIDC / OAuth** — n'importe quel fournisseur OpenID Connect (Pocket ID, Authentik, etc.), plus les passkeys
+- **Non-intrusif** — appelle le socket Docker ou de simples commandes `docker compose` en coulisses ; entièrement compatible avec une utilisation manuelle en CLI, **aucun lock-in**
+
+## Prochaines étapes
+
+<Cards>
+  <Card
+    title="Installation"
+    href="/docs/dockstack/installation"
+    description="Lancer Dockstack avec Docker Compose"
+  />
+  <Card
+    title="Configuration"
+    href="/docs/dockstack/configuration/env-variables"
+    description="Variables d'environnement et structure des stacks"
+  />
+  <Card
+    title="Authentification"
+    href="/docs/dockstack/configuration/authentication"
+    description="Connexion admin, OIDC, passkeys, clés API"
+  />
+  <Card title="API" href="/docs/openapi/getHealth" description="Documentation de l'API" />
+</Cards>

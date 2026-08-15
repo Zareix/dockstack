@@ -1,0 +1,10 @@
+---
+title: URLs de services auto-détectées
+---
+
+Dockstack peut créer un lien direct vers l'URL publique d'un conteneur depuis la vue de la stack. Il examine les labels de chaque conteneur :
+
+- [**Godoxy**](https://github.com/yusing/godoxy) — lit `proxy.aliases` et construit `https://<alias>.<AUTODETECT_URL_BASE_DOMAIN>`. Nécessite que <EnvVar name="AUTODETECT_URL_BASE_DOMAIN" /> soit défini.
+- [**Traefik**](https://traefik.io) — lit le label `traefik.http.routers.<name>.rule` et extrait la valeur `Host(...)`, aucune configuration supplémentaire nécessaire.
+
+Aucun des deux n'est requis — sans labels correspondants, Dockstack affiche quand même les ports exposés du conteneur en utilisant <EnvVar name="SERVER_HOST" />.
