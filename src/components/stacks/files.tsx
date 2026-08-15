@@ -60,9 +60,6 @@ export function StackFiles({ stackName }: { stackName: string }) {
         <>
           <div className="grid gap-4 md:grid-cols-12">
             <div className="md:col-span-7">
-              <p className="mb-2 font-mono text-xs text-muted-foreground">
-                {filesQuery.data.composeFile}
-              </p>
               <div className="h-[60vh] md:h-[70vh]">
                 <Suspense fallback={<Spinner />}>
                   <Editor
@@ -74,7 +71,6 @@ export function StackFiles({ stackName }: { stackName: string }) {
               </div>
             </div>
             <div className="md:col-span-5 ">
-              <p className="mb-2 font-mono text-xs text-muted-foreground">.env</p>
               {envContent !== null ? (
                 <div className="h-[60vh] md:h-[70vh]">
                   <Suspense fallback={<Spinner />}>
