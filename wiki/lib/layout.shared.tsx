@@ -19,6 +19,7 @@ export const translations = i18n
       "Choose a language(language switcher)": "Choisir une langue",
       "Search(search dialog)": "Rechercher",
       "Search(search trigger)": "Rechercher",
+      "Open(page actions)": "Ouvrir",
     },
   })
 
