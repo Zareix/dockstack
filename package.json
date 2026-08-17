@@ -57,6 +57,7 @@
     "base-ui": "^0.0.294",
     "better-auth": "^1.6.27",
     "bowser": "^2.14.1",
+    "bunqueue": "^2.8.59",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cnfast": "^0.1.0",
