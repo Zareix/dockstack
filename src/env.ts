@@ -50,7 +50,6 @@ export const env = createEnv({
               .filter(Boolean),
       ),
     ),
-    REDEPLOY_QUEUE_PATH: v.optional(v.pipe(v.string(), v.minLength(1)), "./redeploy-queue.db"),
     AUTODETECT_URL_BASE_DOMAIN: v.optional(v.pipe(v.string(), v.minLength(1))),
   },
   clientPrefix: "VITE_",
