@@ -4,8 +4,8 @@ import { env } from "#/env"
 import { formatImageTag } from "#/lib/docker/images"
 
 import { dockerClient } from "./client"
+import type { StackStatus } from "./constants"
 import { findComposePath } from "./stacks"
-import type { StackStatus } from "./stacks"
 
 export type ContainerInfo = {
   id: string

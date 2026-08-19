@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 import { join } from "node:path"
 
-import { STACK_STATUSES } from "#/lib/docker/stacks"
+import { STACK_STATUSES } from "#/lib/docker/constants"
 
 import pkg from "../package.json" with { type: "json" }
 
