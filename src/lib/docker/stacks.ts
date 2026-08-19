@@ -5,37 +5,7 @@ import { env } from "#/env"
 
 import { mergeStreams } from "../streams"
 import { COMPOSE_FILENAMES, dockerClient } from "./client"
-
-export const STACK_STATUSES = [
-  "running",
-  "healthy",
-  "unhealthy",
-  "starting",
-  "restarting",
-  "partial",
-  "stopped",
-  "down",
-  "unknown",
-  "missing",
-] as const
-
-export type StackStatus = (typeof STACK_STATUSES)[number]
-
-export type RedeployResult = {
-  name: string
-} & (
-  | {
-      action: "skipped"
-    }
-  | {
-      action: "redeployed"
-      services: string[]
-    }
-  | {
-      action: "error"
-      error: string
-    }
-)
+import type { RedeployResult, StackStatus } from "./constants"
 
 export const getDockerEnv = () => {
   const dockerEnv = { ...process.env }

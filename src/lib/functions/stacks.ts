@@ -6,9 +6,10 @@ import * as v from "valibot"
 
 import { env } from "#/env"
 import * as docker from "#/lib/docker"
+import type { StackStatus } from "#/lib/docker/constants"
 import { authMiddleware } from "#/lib/middleware"
 
-export type Stack = { name: string; status: docker.StackStatus }
+export type Stack = { name: string; status: StackStatus }
 
 export const listStacks = createServerFn()
   .middleware([authMiddleware])

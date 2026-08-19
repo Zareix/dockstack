@@ -1,6 +1,7 @@
 import { Badge } from "#/components/ui/badge"
 
-import type { NetworkInfo, StackStatus, StaleStatus, VolumeInfo } from "../lib/docker"
+import type { NetworkInfo, StaleStatus, VolumeInfo } from "../lib/docker"
+import type { StackStatus } from "../lib/docker/constants"
 
 type StatusVariant = {
   variant: "default" | "secondary" | "destructive" | "outline" | "warning"
