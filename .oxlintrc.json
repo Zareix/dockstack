@@ -20,7 +20,8 @@
     ".output",
     "src/components/editor/yaml.worker.js",
     "src/components/ui",
-    "src/components/auth"
+    "src/components/auth",
+    "wiki/**"
   ],
   "rules": {},
   "overrides": [
