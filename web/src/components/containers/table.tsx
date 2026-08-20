@@ -85,7 +85,7 @@ export const ContainersTable = ({ data, isLoading, showStack = true }: Props) =>
       accessorKey: "ports",
       header: "Ports",
       cell: ({ row }) => {
-        const ports: ContainerInfo["ports"] = row.getValue("ports")
+        const ports = row.getValue<ContainerInfo["ports"] | null>("ports") ?? []
         return ports.length ? (
           <div className="font-mono text-sm">
             {ports.map((p) => (
@@ -110,7 +110,7 @@ export const ContainersTable = ({ data, isLoading, showStack = true }: Props) =>
       accessorKey: "urls",
       header: "URLs",
       cell: ({ row }) => {
-        const urls: ContainerInfo["urls"] = row.getValue("urls")
+        const urls = row.getValue<ContainerInfo["urls"] | null>("urls") ?? []
         return urls.length ? (
           <div className="text-sm">
             {urls.map((u) => (
