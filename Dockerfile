@@ -2,8 +2,8 @@
 FROM oven/bun:1.3.14 AS web-builder
 
 WORKDIR /app/web
-COPY web/package.json web/bun.lock* ./
-RUN bun install --frozen-lockfile || bun install
+COPY web/package.json ./
+RUN bun install
 COPY web/ .
 RUN bun run build
 
@@ -16,7 +16,7 @@ RUN go mod download
 
 COPY . .
 # Mirror the built SPA into the embed location.
-RUN rm -rf internal/server/web-dist && cp -R web/dist internal/server/web-dist
+COPY --from=web-builder /app/web/dist ./internal/server/web-dist
 RUN CGO_ENABLED=0 go build -ldflags="-s -w" -o /out/dockstack ./cmd/dockstack
 
 # ---- Stage 3: runtime ----

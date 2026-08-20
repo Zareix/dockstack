@@ -107,20 +107,6 @@ func (s *Server) requireAPIKey(next http.Handler) http.Handler {
 	})
 }
 
-// requireAny accepts either a session cookie or a Bearer API key.
-func (s *Server) requireAny(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if cookie, err := r.Cookie(auth.CookieName); err == nil {
-			if sess, user, err := s.store.SessionUserFromCookie(r.Context(), cookie.Value); err == nil {
-				r = r.WithContext(WithUser(r.Context(), user, sess, nil))
-				next.ServeHTTP(w, r)
-				return
-			}
-		}
-		s.requireAPIKey(next).ServeHTTP(w, r)
-	})
-}
-
 // statusRecorder captures the response status code for logging.
 type statusRecorder struct {
 	http.ResponseWriter

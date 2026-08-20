@@ -58,8 +58,7 @@ export const Route = createFileRoute("/_private/stacks/$name")({
       .catch(() => null)
     if (!session) {
       throw redirect({
-        to: "/auth/$path",
-        params: { path: "sign-in" },
+        to: "/auth/sign-in",
         search: { redirectTo: location.href },
       })
     }

@@ -4,8 +4,6 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
-	"errors"
-	"fmt"
 	"io"
 	"net"
 	"net/http"
@@ -71,9 +69,9 @@ func (c *Client) RemoteDigest(ctx context.Context, tag string) (string, bool) {
 	if err != nil {
 		return "", false
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	if resp.StatusCode != http.StatusOK {
-		io.Copy(io.Discard, resp.Body)
+		_, _ = io.Copy(io.Discard, resp.Body)
 		return "", false
 	}
 	var data struct {
@@ -85,15 +83,6 @@ func (c *Client) RemoteDigest(ctx context.Context, tag string) (string, bool) {
 		return "", false
 	}
 	return data.Descriptor.Digest, true
-}
-
-var ErrDockerUnavailable = errors.New("docker is unavailable")
-
-func (c *Client) ensureAvailable(ctx context.Context) error {
-	if err := c.Ping(ctx); err != nil {
-		return fmt.Errorf("%w: %v", ErrDockerUnavailable, err)
-	}
-	return nil
 }
 
 func registryFromTag(tag string) string {

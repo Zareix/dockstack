@@ -124,11 +124,6 @@ func getDockerEnv() []string {
 	return out
 }
 
-type ComposeOutput struct {
-	cmd string
-	err error
-}
-
 func (s *Stacks) hasConfigFile() bool {
 	if s.configDir == "" {
 		return false
@@ -200,7 +195,7 @@ func (s *Stacks) StreamCompose(ctx context.Context, stackName string, args ...st
 		done := make(chan struct{})
 		go func() {
 			wg.Wait()
-			cmd.Wait()
+			_ = cmd.Wait()
 			close(done)
 		}()
 

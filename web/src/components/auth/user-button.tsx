@@ -1,5 +1,6 @@
-import { SignOutIcon, UserCircleIcon } from "@phosphor-icons/react"
+import { DesktopIcon, MoonIcon, SignOutIcon, SunIcon, UserCircleIcon } from "@phosphor-icons/react"
 import { Link } from "@tanstack/react-router"
+import { useTheme } from "next-themes"
 
 import { useSession } from "#/lib/app-context"
 
@@ -8,14 +9,21 @@ import { Button } from "../ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu"
 
 export function UserButton() {
   const { session } = useSession()
+  const { theme = "system", setTheme } = useTheme()
   const user = session?.user
 
   if (!user) return null
@@ -32,28 +40,55 @@ export function UserButton() {
       <DropdownMenuTrigger
         nativeButton={false}
         render={
-          <Button variant="ghost" className="w-full justify-start gap-2">
-            <Avatar className="size-6">
+          <Button variant="ghost" className="w-full justify-start gap-2 py-6">
+            <Avatar>
               {user.avatar ? <AvatarImage src={user.avatar} alt={user.name} /> : null}
               <AvatarFallback>{initials}</AvatarFallback>
             </Avatar>
-            <span className="truncate text-sm font-medium">{user.name}</span>
+            <div>
+              <div className="truncate text-start text-sm font-medium">{user.name}</div>
+              <div className="truncate text-xs font-normal text-muted-foreground">{user.email}</div>
+            </div>
           </Button>
         }
       />
-      <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuLabel>
-          <div className="flex flex-col gap-0.5">
-            <span className="text-sm font-medium">{user.name}</span>
-            <span className="text-xs font-normal text-muted-foreground">{user.email}</span>
-          </div>
-        </DropdownMenuLabel>
+      <DropdownMenuContent align="center" className="w-60">
+        <DropdownMenuGroup>
+          <DropdownMenuLabel>
+            <div className="text-sm font-medium">{user.name}</div>
+            <div className="text-xs font-normal text-muted-foreground">{user.email}</div>
+          </DropdownMenuLabel>
+        </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem render={<Link to="/settings/$path" params={{ path: "account" }} />}>
+        <DropdownMenuItem render={<Link to="/settings/account" />}>
           <UserCircleIcon className="size-4" />
           Settings
         </DropdownMenuItem>
-        <DropdownMenuItem render={<Link to="/auth/$path" params={{ path: "sign-out" }} />}>
+        <DropdownMenuSeparator />
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger>
+            <SunIcon className="size-4" />
+            Theme
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent>
+            <DropdownMenuRadioGroup value={theme} onValueChange={(value) => setTheme(value)}>
+              <DropdownMenuRadioItem value="system">
+                <DesktopIcon className="size-4" />
+                System
+              </DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="light">
+                <SunIcon className="size-4" />
+                Light
+              </DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="dark">
+                <MoonIcon className="size-4" />
+                Dark
+              </DropdownMenuRadioItem>
+            </DropdownMenuRadioGroup>
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem render={<Link to="/auth/sign-out" />}>
           <SignOutIcon className="size-4" />
           Sign out
         </DropdownMenuItem>

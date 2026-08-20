@@ -21,7 +21,7 @@ func newTestServer(t *testing.T) (*Server, *sql.DB) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Cleanup(func() { sqlDB.Close() })
+	t.Cleanup(func() { _ = sqlDB.Close() })
 	if err := db.Migrate(sqlDB); err != nil {
 		t.Fatal(err)
 	}

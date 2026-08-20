@@ -17,26 +17,21 @@ Self-hosted Docker Compose stack management UI. Browse, edit, start, stop, resta
 
 - **Backend** — Go (chi router) in `cmd/dockstack` + `internal/`. Talks to the Docker engine via `github.com/docker/docker/client`; Compose operations shell out to the `docker compose` plugin. Auth state lives in SQLite (`modernc.org/sqlite`), embedded migrations run at boot, an admin user is seeded on first run.
 - **Frontend** — `web/` is a TanStack Router + React SPA (Vite build) that talks to the Go REST/SSE/WS API. Built output (`web/dist`) is embedded into the Go binary via `//go:embed`.
-- **Docs** — `wiki/` is a separate Fumadocs (Next.js) site, published to https://zareix.github.io/dockstack/. Its `openapi.yaml` is generated from the Go handlers with `make openapi` (swag).
+- **Docs** — `wiki/` is a separate Fumadocs (Next.js) site, published to https://zareix.github.io/dockstack/. Its `openapi.yaml` is generated from the Go handlers with `just openapi` (swag).
 
 ## Development
 
-Prerequisites: Go 1.26+, Bun, and a Docker daemon (the docker socket path is controlled by `DOCKER_HOST`, default `unix:///var/run/docker.sock`).
+Prerequisites: Go 1.26+, Bun, `just`, and a Docker daemon (the docker socket path is controlled by `DOCKER_HOST`, default `unix:///var/run/docker.sock`).
 
 ```sh
-# 1. Backend (port 3000)
-ADMIN_EMAIL=you@example.com AUTH_SECRET=change-me go run ./cmd/dockstack
-
-# 2. Frontend dev server (port 5173, proxies /api and WebSockets to :3000)
-bun install
-bun run web:dev
+# Run backend (port 3000) and frontend dev server (port 5173, proxies /api + WS to :3000) together
+just dev
 ```
 
 Build everything (SPA → embed → binary):
 
 ```sh
-bun run web:build
-make build        # produces ./bin/dockstack
+just build        # produces ./bin/dockstack
 ```
 
 Run tests:

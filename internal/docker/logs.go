@@ -79,7 +79,7 @@ func (s *Stacks) StreamStackLogs(ctx context.Context, stackName string) (<-chan 
 			go emit(stdout, "stdout")
 			go emit(stderr, "stderr")
 			streamWG.Wait()
-			cmd.Wait()
+			_ = cmd.Wait()
 		}(containerName, c.ID)
 	}
 

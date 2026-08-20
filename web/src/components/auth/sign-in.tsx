@@ -23,7 +23,7 @@ import { Spinner } from "../ui/spinner"
 
 export function SignIn() {
   const navigate = useNavigate()
-  const { redirectTo } = useSearch({ from: "/auth/$path" })
+  const { redirectTo } = useSearch({ from: "/auth/sign-in" })
   const { isAuthenticated } = useSession()
 
   const providersQuery = useQuery({
@@ -114,11 +114,7 @@ export function SignIn() {
             )}
           </form.Field>
           <div className="flex items-center justify-between text-sm">
-            <Link
-              to="/auth/$path"
-              params={{ path: "forgot-password" }}
-              className="text-muted-foreground hover:underline"
-            >
+            <Link to="/auth/forgot-password" className="text-muted-foreground hover:underline">
               Forgot password?
             </Link>
           </div>

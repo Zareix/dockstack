@@ -55,7 +55,7 @@ func (s *PasskeyService) userCredentials(ctx context.Context, userID string) ([]
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	var creds []webauthn.Credential
 	for rows.Next() {
 		var raw []byte
@@ -202,7 +202,7 @@ func (s *PasskeyService) List(ctx context.Context, userID string) ([]Passkey, er
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	var out []Passkey
 	for rows.Next() {
 		var p Passkey

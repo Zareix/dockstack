@@ -49,7 +49,6 @@ func New(cfg *config.Config, db *sql.DB, store *auth.Store, keys *auth.APIKeySto
 func (s *Server) Handler() http.Handler {
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)
-	r.Use(middleware.RealIP)
 	r.Use(middleware.Recoverer)
 	r.Use(requestLogger)
 

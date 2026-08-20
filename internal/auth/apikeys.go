@@ -80,7 +80,7 @@ func (k *APIKeyStore) List(ctx context.Context, userID string) ([]APIKey, error)
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	var keys []APIKey
 	for rows.Next() {
 		var key APIKey

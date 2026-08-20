@@ -15,7 +15,7 @@ export function SignOut() {
     mutationFn: logout,
     onSuccess: () => {
       toast.success("Signed out")
-      navigate({ to: "/auth/$path", params: { path: "sign-in" } })
+      navigate({ to: "/auth/sign-in" })
     },
     onError: (e) => toast.error(e.message),
   })
