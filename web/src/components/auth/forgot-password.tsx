@@ -59,11 +59,7 @@ export function ForgotPassword() {
             Send reset token
           </Button>
           <div className="text-center text-sm">
-            <Link
-              to="/auth/$path"
-              params={{ path: "sign-in" }}
-              className="text-muted-foreground hover:underline"
-            >
+            <Link to="/auth/sign-in" className="text-muted-foreground hover:underline">
               Back to sign in
             </Link>
           </div>

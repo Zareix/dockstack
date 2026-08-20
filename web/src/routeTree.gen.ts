@@ -10,17 +10,30 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as PrivateRouteRouteImport } from './routes/_private/route'
+import { Route as AuthRouteRouteImport } from './routes/auth/route'
 import { Route as PrivateIndexRouteImport } from './routes/_private/index'
 import { Route as PrivateContainersRouteImport } from './routes/_private/containers'
 import { Route as PrivateImagesRouteImport } from './routes/_private/images'
 import { Route as PrivateNetworksRouteImport } from './routes/_private/networks'
+import { Route as PrivateSettingsRouteRouteImport } from './routes/_private/settings/route'
 import { Route as PrivateVolumesRouteImport } from './routes/_private/volumes'
-import { Route as AuthPathRouteImport } from './routes/auth/$path'
-import { Route as PrivateSettingsPathRouteImport } from './routes/_private/settings/$path'
+import { Route as AuthIndexRouteImport } from './routes/auth/index'
+import { Route as AuthForgotPasswordRouteImport } from './routes/auth/forgot-password'
+import { Route as AuthResetPasswordRouteImport } from './routes/auth/reset-password'
+import { Route as AuthSignInRouteImport } from './routes/auth/sign-in'
+import { Route as AuthSignOutRouteImport } from './routes/auth/sign-out'
+import { Route as PrivateSettingsIndexRouteImport } from './routes/_private/settings/index'
+import { Route as PrivateSettingsAccountRouteImport } from './routes/_private/settings/account'
+import { Route as PrivateSettingsSecurityRouteImport } from './routes/_private/settings/security'
 import { Route as PrivateStacksNameRouteImport } from './routes/_private/stacks.$name'
 
 const PrivateRouteRoute = PrivateRouteRouteImport.update({
   id: '/_private',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRouteRoute = AuthRouteRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivateIndexRoute = PrivateIndexRouteImport.update({
@@ -43,20 +56,55 @@ const PrivateNetworksRoute = PrivateNetworksRouteImport.update({
   path: '/networks',
   getParentRoute: () => PrivateRouteRoute,
 } as any)
+const PrivateSettingsRouteRoute = PrivateSettingsRouteRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => PrivateRouteRoute,
+} as any)
 const PrivateVolumesRoute = PrivateVolumesRouteImport.update({
   id: '/volumes',
   path: '/volumes',
   getParentRoute: () => PrivateRouteRoute,
 } as any)
-const AuthPathRoute = AuthPathRouteImport.update({
-  id: '/auth/$path',
-  path: '/auth/$path',
-  getParentRoute: () => rootRouteImport,
+const AuthIndexRoute = AuthIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthRouteRoute,
 } as any)
-const PrivateSettingsPathRoute = PrivateSettingsPathRouteImport.update({
-  id: '/settings/$path',
-  path: '/settings/$path',
-  getParentRoute: () => PrivateRouteRoute,
+const AuthForgotPasswordRoute = AuthForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
+  getParentRoute: () => AuthRouteRoute,
+} as any)
+const AuthResetPasswordRoute = AuthResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => AuthRouteRoute,
+} as any)
+const AuthSignInRoute = AuthSignInRouteImport.update({
+  id: '/sign-in',
+  path: '/sign-in',
+  getParentRoute: () => AuthRouteRoute,
+} as any)
+const AuthSignOutRoute = AuthSignOutRouteImport.update({
+  id: '/sign-out',
+  path: '/sign-out',
+  getParentRoute: () => AuthRouteRoute,
+} as any)
+const PrivateSettingsIndexRoute = PrivateSettingsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => PrivateSettingsRouteRoute,
+} as any)
+const PrivateSettingsAccountRoute = PrivateSettingsAccountRouteImport.update({
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => PrivateSettingsRouteRoute,
+} as any)
+const PrivateSettingsSecurityRoute = PrivateSettingsSecurityRouteImport.update({
+  id: '/security',
+  path: '/security',
+  getParentRoute: () => PrivateSettingsRouteRoute,
 } as any)
 const PrivateStacksNameRoute = PrivateStacksNameRouteImport.update({
   id: '/stacks/$name',
@@ -66,73 +114,117 @@ const PrivateStacksNameRoute = PrivateStacksNameRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof PrivateIndexRoute
+  '/auth': typeof AuthRouteRouteWithChildren
+  '/settings': typeof PrivateSettingsRouteRouteWithChildren
   '/containers': typeof PrivateContainersRoute
   '/images': typeof PrivateImagesRoute
   '/networks': typeof PrivateNetworksRoute
   '/volumes': typeof PrivateVolumesRoute
-  '/auth/$path': typeof AuthPathRoute
-  '/settings/$path': typeof PrivateSettingsPathRoute
+  '/auth/forgot-password': typeof AuthForgotPasswordRoute
+  '/auth/reset-password': typeof AuthResetPasswordRoute
+  '/auth/sign-in': typeof AuthSignInRoute
+  '/auth/sign-out': typeof AuthSignOutRoute
+  '/auth/': typeof AuthIndexRoute
+  '/settings/account': typeof PrivateSettingsAccountRoute
+  '/settings/security': typeof PrivateSettingsSecurityRoute
   '/stacks/$name': typeof PrivateStacksNameRoute
+  '/settings/': typeof PrivateSettingsIndexRoute
 }
 export interface FileRoutesByTo {
   '/containers': typeof PrivateContainersRoute
   '/images': typeof PrivateImagesRoute
   '/networks': typeof PrivateNetworksRoute
   '/volumes': typeof PrivateVolumesRoute
-  '/auth/$path': typeof AuthPathRoute
+  '/auth/forgot-password': typeof AuthForgotPasswordRoute
+  '/auth/reset-password': typeof AuthResetPasswordRoute
+  '/auth/sign-in': typeof AuthSignInRoute
+  '/auth/sign-out': typeof AuthSignOutRoute
   '/': typeof PrivateIndexRoute
-  '/settings/$path': typeof PrivateSettingsPathRoute
+  '/auth': typeof AuthIndexRoute
+  '/settings/account': typeof PrivateSettingsAccountRoute
+  '/settings/security': typeof PrivateSettingsSecurityRoute
   '/stacks/$name': typeof PrivateStacksNameRoute
+  '/settings': typeof PrivateSettingsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_private': typeof PrivateRouteRouteWithChildren
+  '/auth': typeof AuthRouteRouteWithChildren
+  '/_private/settings': typeof PrivateSettingsRouteRouteWithChildren
   '/_private/containers': typeof PrivateContainersRoute
   '/_private/images': typeof PrivateImagesRoute
   '/_private/networks': typeof PrivateNetworksRoute
   '/_private/volumes': typeof PrivateVolumesRoute
-  '/auth/$path': typeof AuthPathRoute
+  '/auth/forgot-password': typeof AuthForgotPasswordRoute
+  '/auth/reset-password': typeof AuthResetPasswordRoute
+  '/auth/sign-in': typeof AuthSignInRoute
+  '/auth/sign-out': typeof AuthSignOutRoute
   '/_private/': typeof PrivateIndexRoute
-  '/_private/settings/$path': typeof PrivateSettingsPathRoute
+  '/auth/': typeof AuthIndexRoute
+  '/_private/settings/account': typeof PrivateSettingsAccountRoute
+  '/_private/settings/security': typeof PrivateSettingsSecurityRoute
   '/_private/stacks/$name': typeof PrivateStacksNameRoute
+  '/_private/settings/': typeof PrivateSettingsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/auth'
+    | '/settings'
     | '/containers'
     | '/images'
     | '/networks'
     | '/volumes'
-    | '/auth/$path'
-    | '/settings/$path'
+    | '/auth/forgot-password'
+    | '/auth/reset-password'
+    | '/auth/sign-in'
+    | '/auth/sign-out'
+    | '/auth/'
+    | '/settings/account'
+    | '/settings/security'
     | '/stacks/$name'
+    | '/settings/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/containers'
     | '/images'
     | '/networks'
     | '/volumes'
-    | '/auth/$path'
+    | '/auth/forgot-password'
+    | '/auth/reset-password'
+    | '/auth/sign-in'
+    | '/auth/sign-out'
     | '/'
-    | '/settings/$path'
+    | '/auth'
+    | '/settings/account'
+    | '/settings/security'
     | '/stacks/$name'
+    | '/settings'
   id:
     | '__root__'
     | '/_private'
+    | '/auth'
+    | '/_private/settings'
     | '/_private/containers'
     | '/_private/images'
     | '/_private/networks'
     | '/_private/volumes'
-    | '/auth/$path'
+    | '/auth/forgot-password'
+    | '/auth/reset-password'
+    | '/auth/sign-in'
+    | '/auth/sign-out'
     | '/_private/'
-    | '/_private/settings/$path'
+    | '/auth/'
+    | '/_private/settings/account'
+    | '/_private/settings/security'
     | '/_private/stacks/$name'
+    | '/_private/settings/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   PrivateRouteRoute: typeof PrivateRouteRouteWithChildren
-  AuthPathRoute: typeof AuthPathRoute
+  AuthRouteRoute: typeof AuthRouteRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -142,6 +234,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof PrivateRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_private/': {
@@ -172,6 +271,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivateNetworksRouteImport
       parentRoute: typeof PrivateRouteRoute
     }
+    '/_private/settings': {
+      id: '/_private/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof PrivateSettingsRouteRouteImport
+      parentRoute: typeof PrivateRouteRoute
+    }
     '/_private/volumes': {
       id: '/_private/volumes'
       path: '/volumes'
@@ -179,19 +285,61 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivateVolumesRouteImport
       parentRoute: typeof PrivateRouteRoute
     }
-    '/auth/$path': {
-      id: '/auth/$path'
-      path: '/auth/$path'
-      fullPath: '/auth/$path'
-      preLoaderRoute: typeof AuthPathRouteImport
-      parentRoute: typeof rootRouteImport
+    '/auth/': {
+      id: '/auth/'
+      path: '/'
+      fullPath: '/auth/'
+      preLoaderRoute: typeof AuthIndexRouteImport
+      parentRoute: typeof AuthRouteRoute
     }
-    '/_private/settings/$path': {
-      id: '/_private/settings/$path'
-      path: '/settings/$path'
-      fullPath: '/settings/$path'
-      preLoaderRoute: typeof PrivateSettingsPathRouteImport
-      parentRoute: typeof PrivateRouteRoute
+    '/auth/forgot-password': {
+      id: '/auth/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/auth/forgot-password'
+      preLoaderRoute: typeof AuthForgotPasswordRouteImport
+      parentRoute: typeof AuthRouteRoute
+    }
+    '/auth/reset-password': {
+      id: '/auth/reset-password'
+      path: '/reset-password'
+      fullPath: '/auth/reset-password'
+      preLoaderRoute: typeof AuthResetPasswordRouteImport
+      parentRoute: typeof AuthRouteRoute
+    }
+    '/auth/sign-in': {
+      id: '/auth/sign-in'
+      path: '/sign-in'
+      fullPath: '/auth/sign-in'
+      preLoaderRoute: typeof AuthSignInRouteImport
+      parentRoute: typeof AuthRouteRoute
+    }
+    '/auth/sign-out': {
+      id: '/auth/sign-out'
+      path: '/sign-out'
+      fullPath: '/auth/sign-out'
+      preLoaderRoute: typeof AuthSignOutRouteImport
+      parentRoute: typeof AuthRouteRoute
+    }
+    '/_private/settings/': {
+      id: '/_private/settings/'
+      path: '/'
+      fullPath: '/settings/'
+      preLoaderRoute: typeof PrivateSettingsIndexRouteImport
+      parentRoute: typeof PrivateSettingsRouteRoute
+    }
+    '/_private/settings/account': {
+      id: '/_private/settings/account'
+      path: '/account'
+      fullPath: '/settings/account'
+      preLoaderRoute: typeof PrivateSettingsAccountRouteImport
+      parentRoute: typeof PrivateSettingsRouteRoute
+    }
+    '/_private/settings/security': {
+      id: '/_private/settings/security'
+      path: '/security'
+      fullPath: '/settings/security'
+      preLoaderRoute: typeof PrivateSettingsSecurityRouteImport
+      parentRoute: typeof PrivateSettingsRouteRoute
     }
     '/_private/stacks/$name': {
       id: '/_private/stacks/$name'
@@ -203,23 +351,38 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface PrivateSettingsRouteRouteChildren {
+  PrivateSettingsAccountRoute: typeof PrivateSettingsAccountRoute
+  PrivateSettingsSecurityRoute: typeof PrivateSettingsSecurityRoute
+  PrivateSettingsIndexRoute: typeof PrivateSettingsIndexRoute
+}
+
+const PrivateSettingsRouteRouteChildren: PrivateSettingsRouteRouteChildren = {
+  PrivateSettingsAccountRoute: PrivateSettingsAccountRoute,
+  PrivateSettingsSecurityRoute: PrivateSettingsSecurityRoute,
+  PrivateSettingsIndexRoute: PrivateSettingsIndexRoute,
+}
+
+const PrivateSettingsRouteRouteWithChildren =
+  PrivateSettingsRouteRoute._addFileChildren(PrivateSettingsRouteRouteChildren)
+
 interface PrivateRouteRouteChildren {
+  PrivateSettingsRouteRoute: typeof PrivateSettingsRouteRouteWithChildren
   PrivateContainersRoute: typeof PrivateContainersRoute
   PrivateImagesRoute: typeof PrivateImagesRoute
   PrivateNetworksRoute: typeof PrivateNetworksRoute
   PrivateVolumesRoute: typeof PrivateVolumesRoute
   PrivateIndexRoute: typeof PrivateIndexRoute
-  PrivateSettingsPathRoute: typeof PrivateSettingsPathRoute
   PrivateStacksNameRoute: typeof PrivateStacksNameRoute
 }
 
 const PrivateRouteRouteChildren: PrivateRouteRouteChildren = {
+  PrivateSettingsRouteRoute: PrivateSettingsRouteRouteWithChildren,
   PrivateContainersRoute: PrivateContainersRoute,
   PrivateImagesRoute: PrivateImagesRoute,
   PrivateNetworksRoute: PrivateNetworksRoute,
   PrivateVolumesRoute: PrivateVolumesRoute,
   PrivateIndexRoute: PrivateIndexRoute,
-  PrivateSettingsPathRoute: PrivateSettingsPathRoute,
   PrivateStacksNameRoute: PrivateStacksNameRoute,
 }
 
@@ -227,9 +390,29 @@ const PrivateRouteRouteWithChildren = PrivateRouteRoute._addFileChildren(
   PrivateRouteRouteChildren,
 )
 
+interface AuthRouteRouteChildren {
+  AuthForgotPasswordRoute: typeof AuthForgotPasswordRoute
+  AuthResetPasswordRoute: typeof AuthResetPasswordRoute
+  AuthSignInRoute: typeof AuthSignInRoute
+  AuthSignOutRoute: typeof AuthSignOutRoute
+  AuthIndexRoute: typeof AuthIndexRoute
+}
+
+const AuthRouteRouteChildren: AuthRouteRouteChildren = {
+  AuthForgotPasswordRoute: AuthForgotPasswordRoute,
+  AuthResetPasswordRoute: AuthResetPasswordRoute,
+  AuthSignInRoute: AuthSignInRoute,
+  AuthSignOutRoute: AuthSignOutRoute,
+  AuthIndexRoute: AuthIndexRoute,
+}
+
+const AuthRouteRouteWithChildren = AuthRouteRoute._addFileChildren(
+  AuthRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   PrivateRouteRoute: PrivateRouteRouteWithChildren,
-  AuthPathRoute: AuthPathRoute,
+  AuthRouteRoute: AuthRouteRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

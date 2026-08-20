@@ -14,7 +14,7 @@ func clearEnv() {
 		"OAUTH_DISCOVERY_URL", "DOCKER_SYSTEM_PRUNE_CRON", "DOCKER_SYSTEM_PRUNE_INCLUDE_VOLUMES",
 		"REDEPLOY_SKIP", "AUTODETECT_URL_BASE_DOMAIN",
 	} {
-		os.Unsetenv(k)
+		_ = os.Unsetenv(k)
 	}
 }
 

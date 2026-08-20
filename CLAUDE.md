@@ -30,8 +30,9 @@ Backend (Go):
 - `go build ./cmd/dockstack` — build the binary
 - `go test ./...` — run Go tests
 - `go vet ./...` — static checks
-- `make build` — build SPA into `internal/server/web-dist`, then compile the binary
-- `make openapi` — regenerate `wiki/openapi.yaml` from swag annotations on the Go handlers
+- `just build` — build SPA into `internal/server/web-dist`, then compile the binary
+- `just openapi` — regenerate `wiki/openapi.yaml` from swag annotations on the Go handlers
+- `just dev` — run backend + frontend dev servers in parallel
 
 Frontend (run from repo root with bun, or from `web/`):
 
@@ -44,7 +45,7 @@ Wiki subproject (run from `wiki/`, or via root's `bun run wiki:dev` / `wiki:buil
 - `bun run dev` / `build` — Next.js dev/build
 - `bun run types:check` — fumadocs-mdx codegen + Next typegen + `tsc --noEmit`
 
-Always run `gofmt` (via `make lint` or `go vet`) and `go test ./...` before considering a Go change
+Always run `gofmt` (via `just lint` or `go vet`) and `go test ./...` before considering a Go change
 done; for `web/**` use oxlint/oxfmt as CI expects.
 
 ## Architecture

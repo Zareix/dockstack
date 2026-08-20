@@ -14,7 +14,7 @@ func setupTestDB(t *testing.T) *sql.DB {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Cleanup(func() { db.Close() })
+	t.Cleanup(func() { _ = db.Close() })
 	schema := `
 CREATE TABLE users (
     id TEXT PRIMARY KEY,

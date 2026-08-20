@@ -43,20 +43,16 @@ func (s *Server) handleSettings(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-type socialProvider struct {
-	ID string `json:"id"`
-}
-
 // @Summary List social providers
 // @Description OAuth provider IDs available for sign-in.
 // @Tags auth
 // @Produce json
-// @Success 200 {array} socialProvider
+// @Success 200 {array} string
 // @Router /api/auth/providers [get]
 func (s *Server) handleProviders(w http.ResponseWriter, r *http.Request) {
-	providers := []socialProvider{}
+	providers := []string{}
 	if s.cfg.OAuth != nil {
-		providers = append(providers, socialProvider{ID: s.cfg.OAuth.ProviderID})
+		providers = append(providers, s.cfg.OAuth.ProviderID)
 	}
 	writeJSON(w, http.StatusOK, providers)
 }

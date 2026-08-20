@@ -18,7 +18,7 @@ export function ResetPassword() {
       resetPassword(token, newPassword),
     onSuccess: () => {
       toast.success("Password reset. You can now sign in.")
-      navigate({ to: "/auth/$path", params: { path: "sign-in" } })
+      navigate({ to: "/auth/sign-in" })
     },
     onError: (e) => toast.error(e.message),
   })
@@ -93,11 +93,7 @@ export function ResetPassword() {
             Reset password
           </Button>
           <div className="text-center text-sm">
-            <Link
-              to="/auth/$path"
-              params={{ path: "sign-in" }}
-              className="text-muted-foreground hover:underline"
-            >
+            <Link to="/auth/sign-in" className="text-muted-foreground hover:underline">
               Back to sign in
             </Link>
           </div>

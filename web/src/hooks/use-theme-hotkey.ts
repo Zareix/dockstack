@@ -41,3 +41,8 @@ export function useThemeHotkey() {
     return () => window.removeEventListener("keydown", handleKeyDown)
   }, [theme, setTheme])
 }
+
+export function ThemeHotkey() {
+  useThemeHotkey()
+  return null
+}

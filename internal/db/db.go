@@ -54,7 +54,7 @@ func Migrate(sqlDB *sql.DB) error {
 	if err != nil {
 		return fmt.Errorf("query schema_migrations: %w", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	applied = map[int]bool{}
 	for rows.Next() {
 		var v int
@@ -95,11 +95,11 @@ func Migrate(sqlDB *sql.DB) error {
 			return err
 		}
 		if _, err := tx.Exec(string(content)); err != nil {
-			tx.Rollback()
+			_ = tx.Rollback()
 			return fmt.Errorf("apply migration %s: %w", name, err)
 		}
 		if _, err := tx.Exec(`INSERT INTO schema_migrations (version) VALUES (?)`, version); err != nil {
-			tx.Rollback()
+			_ = tx.Rollback()
 			return fmt.Errorf("record migration %s: %w", name, err)
 		}
 		if err := tx.Commit(); err != nil {
