@@ -9,10 +9,10 @@ services:
       - ./data/stacks:/app/stacks
       - db:/app/data
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./data/config/config.json:/app/docker/config.json:ro
+      - ./data/config/config.json:/app/.docker/config.json:ro
     environment:
-      - BETTER_AUTH_URL=${BETTER_AUTH_URL}
-      - BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET}
+      - APP_URL=${APP_URL}
+      - AUTH_SECRET=${AUTH_SECRET}
       - ADMIN_EMAIL=${ADMIN_EMAIL}
       - OAUTH_PROVIDER_ID=${OAUTH_PROVIDER_ID}
       - OAUTH_CLIENT_ID=${OAUTH_CLIENT_ID}

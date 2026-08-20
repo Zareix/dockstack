@@ -6,76 +6,86 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Dockstack — a self-hosted Docker Compose stack management UI. Stacks are plain directories with a
 `compose.yaml` (and `.env`) on disk; the app is stateless/local-first (SQLite is used only for auth).
-Built on Bun + TanStack Start (Vite + Nitro), talking to the Docker socket via `dockerode` /
-`docker compose` under the hood.
 
-This is a Bun workspace with **one nested project**: `wiki/` is a separate Fumadocs (Next.js) docs
-site with its own `package.json`, published to https://zareix.github.io/dockstack/. It is listed in
-the root `package.json`'s `workspaces`. Do not run root lint/format/test commands expecting them to
-cover `wiki/` — it has its own toolchain (Next.js/TypeScript, no oxlint/oxfmt configured there).
+**Backend**: Go (`cmd/dockstack` + `internal/`), a single static binary. It talks to the Docker
+engine via the official SDK (`github.com/docker/docker/client`) and shells out to `docker compose`
+for stack operations. Auth (sessions, API keys, passkeys, OAuth) is implemented in Go against a
+clean SQLite schema (`modernc.org/sqlite`, embedded migrations). The built SPA is embedded via
+`//go:embed internal/server/web-dist` (mirrored from `web/dist` at build time).
+
+**Frontend**: `web/` is a TanStack Router + React **SPA** (Vite build, Bun tooling) that talks to the
+Go REST/SSE/WS API via a typed fetch client (`web/src/lib/api/`). There is no SSR and no server
+runtime in the frontend — all data comes from `/api/*`.
+
+**Docs**: `wiki/` is a separate Fumadocs (Next.js) docs site with its own `package.json`, published
+to https://zareix.github.io/dockstack/. It is listed in the root `package.json`'s `workspaces`
+alongside `web`. Do not run root lint/format/test commands expecting them to cover `wiki/` — it has
+its own toolchain.
 
 ## Commands
 
-All commands below run from the repo root and use **bun**, not npm/pnpm/yarn.
+Backend (Go):
 
-- `bun run dev` — start the app (Vite dev server, port 3000)
-- `bun run build` / `bun run preview` — production build / preview
-- `bun test` — run tests (Bun's test runner)
-- `bun run lint` / `bun run lint:fix` — oxlint (type-aware; see `.oxlintrc.json`)
-- `bun run format` / `bun run format:check` — oxfmt (see `.oxfmtrc.json`)
-- `bun run check` — format + lint:fix, run this before considering a change done
-- `bun run db:generate` — generate a drizzle migration after editing `src/db/schema/*`
-- `bun run auth:generate` — regenerate `src/db/schema/auth-schema.ts` from the better-auth config
-- `bun run openapi:generate` — regenerate `wiki/openapi.yaml` from the API route tree
+- `go run ./cmd/dockstack` — run the server (env vars required, see README)
+- `go build ./cmd/dockstack` — build the binary
+- `go test ./...` — run Go tests
+- `go vet ./...` — static checks
+- `make build` — build SPA into `internal/server/web-dist`, then compile the binary
+- `make openapi` — regenerate `wiki/openapi.yaml` from swag annotations on the Go handlers
+
+Frontend (run from repo root with bun, or from `web/`):
+
+- `bun run web:dev` / `web:build` / `web:typecheck` — Vite dev (port 5173, proxies `/api` + WS to
+  the Go server on :3000), production build, `tsc --noEmit`
+- `bun run --filter dockstack-web lint` / `format` — oxlint / oxfmt scoped to `web/`
 
 Wiki subproject (run from `wiki/`, or via root's `bun run wiki:dev` / `wiki:build`):
 
 - `bun run dev` / `build` — Next.js dev/build
 - `bun run types:check` — fumadocs-mdx codegen + Next typegen + `tsc --noEmit`
 
-Always use `bun run lint:fix` / `bun run format` (not editor auto-format) to validate changes in
-`src/**` — that's what CI/the maintainer expects clean.
+Always run `gofmt` (via `make lint` or `go vet`) and `go test ./...` before considering a Go change
+done; for `web/**` use oxlint/oxfmt as CI expects.
 
 ## Architecture
 
-**Routing**: TanStack Router, file-based, in `src/routes/`. `_private/route.tsx` is a layout route
-whose `beforeLoad` calls `ensureSession` and redirects to `/auth/$path` when unauthenticated — every
-route under `src/routes/_private/` is gated by this. `src/routes/api/**` are server routes (REST +
-two WebSocket endpoints under `api/ws/` for the container terminal (`exec.ts`, hijacks the Docker
-exec HTTP upgrade directly over the socket) and live log streaming (`logs.ts`)).
+**Routing (Go)**: `internal/server/` mounts a chi router. Public endpoints: `/api/health`,
+`/api/settings`, `/api/auth/providers`. Auth endpoints under `/api/auth/*` (sign-in, sessions,
+passkeys, OAuth, API keys). Session-gated resource API: `/api/stacks`, `/api/containers`,
+`/api/images`, `/api/volumes`, `/api/networks`. Webhook (Bearer API key): `GET /api/stacks/` and
+`POST /api/stacks/redeploy`. WebSockets (session cookie or `?token=` API key): `/api/ws/exec`
+(container terminal, Docker exec hijack) and `/api/ws/logs` (live stack logs). SPA assets are
+served from the embedded `web-dist`, with a fallback to `index.html` for client routes.
 
-**Server functions layer** (`src/lib/functions/*`): one file per domain (stacks, containers, images,
-volumes, networks, logs, settings, auth, files). Each exported function is a TanStack Start
-`createServerFn()` with a `valibot` `.validator()` for input and `.middleware([authMiddleware])` for
-auth — this is the only layer client components should import from for server calls. Components never
-call `src/lib/docker/*` directly.
+**Docker layer** (`internal/docker/`): the engine client wrapper (`Client`), the Compose runner
+(`Stacks` — `docker compose` subprocesses with env scrubbing and merged output streaming), logs
+streaming, and the domain models (ContainerInfo, ImageInfo, VolumeInfo, NetworkInfo, StackStatus).
+This is the only place that talks to the Docker socket or shells out to `docker compose`.
 
-**Docker layer** (`src/lib/docker/*`): the actual `dockerode` / compose-on-disk logic, mirrored
-one-to-one with the functions layer (`docker/stacks.ts` backs `functions/stacks.ts`, etc.), plus
-`client.ts` (the shared `dockerode` client) and `system.ts`. This is the only place that talks to the
-Docker socket or shells out to `docker compose`.
+**API layer** (`internal/server/`): one file per domain (stacks, resources/containers+images+volumes
++networks, auth, passkeys, oauth, ws). Handlers are thin — they validate input, call the docker
+layer, and return JSON/SSE/WS. Middleware (`middleware.go`) handles session (`dockstack_session`
+cookie, HMAC-signed) and API-key auth.
 
-**Auth**: `src/lib/auth/index.ts` configures `better-auth` (drizzle/SQLite adapter) with plugins for
-admin, username/passkey login, API keys, and optional generic OAuth (enabled only when
-`OAUTH_PROVIDER_ID`/`OAUTH_CLIENT_ID` env vars are set). `src/lib/middleware.ts` has the
-`authMiddleware` (session-gated) and `apiKeyMiddleware` (Bearer API key, used by the webhook redeploy
-endpoint) used across server functions/routes.
+**Auth** (`internal/auth/`): sessions (signed cookies + token-hash rows), passwords (argon2id),
+passkeys (`github.com/go-webauthn/webauthn`), API keys (SHA-256 stored, 100 req/min rate limit),
+reset tokens. OAuth uses `golang.org/x/oauth2` + `coreos/go-oidc`. The DB schema lives in
+`internal/db/migrations/*.sql` and runs at boot (`internal/db/db.go`); the admin user is seeded on
+first run (`internal/db/seed.go`).
 
-**Env vars**: all validated centrally in `src/env.ts` via `@t3-oss/env-core` + valibot — add new env
-vars there, not via raw `process.env` reads elsewhere.
+**Env vars**: validated in `internal/config/config.go` — add new env vars there, not via raw
+`os.Getenv` reads elsewhere. See README for the full list.
 
-**DB**: Drizzle + SQLite, schema in `src/db/schema/`. `auth-schema.ts` is generated (see
-`auth:generate` above) — don't hand-edit it, change the better-auth config instead and regenerate.
+**Frontend** (`web/`): TanStack Router file-based routes in `web/src/routes/`. `_private/route.tsx`
+is a layout whose `beforeLoad` gates on a session fetch (`/api/auth/session`). `web/src/lib/api/`
+holds the typed fetch client, SSE helper, and auth client. `web/src/lib/app-context.tsx` provides
+settings and session React contexts. UI components in `web/src/components/ui` are shadcn-generated
+(base-ui primitives + `class-variance-authority`); treat them as vendored, prefer composing over
+editing. Monaco (compose editor) and xterm (terminal) are client-only bundles.
 
-**Editor**: `src/components/editor/monaco-file-editor.tsx` wraps `@monaco-editor/react` with
-`monaco-yaml` for compose-file schema validation (schema fetched from the compose-spec repo). Monaco
-workers are excluded from Nitro's server bundle (see `vite.config.ts` `rollupConfig.external`) since
-they're client-only.
+## Security notes
 
-**Terminal**: `src/components/terminal` (xterm.js) talks to `api/ws/exec.ts` over WebSocket; only
-shells in `AUTHORIZED_SHELLS` (`exec.ts`) may be requested.
-
-**UI components**: `src/components/ui` is shadcn-generated (base-ui primitives + `class-variance-authority`).
-`src/components/auth` builds on `@better-auth-ui/react` (sign-in/sign-up, settings, provider buttons,
-etc. wrap that library's components rather than hand-rolled forms). Both directories are excluded from
-oxlint (see `.oxlintrc.json` `ignorePatterns`) — treat them as vendored, prefer composing over editing.
+- The compose runner scrubs app-specific env vars from child processes (see `getDockerEnv`).
+- Stack names are validated against `^[a-zA-Z0-9_-]+$` before filesystem access.
+- WebSocket endpoints require a session cookie or a Bearer API key (`?token=` query param).
+- `/api/health`, `/api/settings`, and `/api/auth/providers` are intentionally public (pre-auth UI).
