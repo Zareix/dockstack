@@ -2,6 +2,7 @@ package config
 
 import (
 	"os"
+	"path/filepath"
 	"testing"
 )
 
@@ -14,6 +15,47 @@ func clearEnv() {
 		"REDEPLOY_SKIP", "AUTODETECT_URL_BASE_DOMAIN",
 	} {
 		os.Unsetenv(k)
+	}
+}
+
+func TestLoadDotEnv(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, ".env"), []byte("APP_TITLE=FromDotEnv\n# a comment\nINSTANCE_NAME=local\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	t.Chdir(dir)
+
+	if err := LoadDotEnv(); err != nil {
+		t.Fatalf("LoadDotEnv: %v", err)
+	}
+	if got := os.Getenv("APP_TITLE"); got != "FromDotEnv" {
+		t.Errorf("APP_TITLE = %q", got)
+	}
+	if got := os.Getenv("INSTANCE_NAME"); got != "local" {
+		t.Errorf("INSTANCE_NAME = %q", got)
+	}
+}
+
+func TestLoadDotEnvDoesNotOverride(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, ".env"), []byte("APP_TITLE=FromDotEnv\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	t.Chdir(dir)
+	t.Setenv("APP_TITLE", "FromProcess")
+
+	if err := LoadDotEnv(); err != nil {
+		t.Fatalf("LoadDotEnv: %v", err)
+	}
+	if got := os.Getenv("APP_TITLE"); got != "FromProcess" {
+		t.Errorf("APP_TITLE = %q, want process value to take precedence", got)
+	}
+}
+
+func TestLoadDotEnvMissingFile(t *testing.T) {
+	t.Chdir(t.TempDir())
+	if err := LoadDotEnv(); err != nil {
+		t.Fatalf("LoadDotEnv: %v", err)
 	}
 }
 

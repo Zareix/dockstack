@@ -22,6 +22,10 @@ import (
 )
 
 func main() {
+	if err := config.LoadDotEnv(); err != nil {
+		fatal("dotenv", err)
+	}
+
 	setupLogging()
 
 	cfg, err := config.Load()
