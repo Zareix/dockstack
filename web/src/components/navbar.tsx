@@ -1,0 +1,20 @@
+import { Link } from "@tanstack/react-router"
+
+import { SidebarTrigger } from "#/components/ui/sidebar"
+import { useSession, useSettings } from "#/lib/app-context"
+
+export const Navbar = () => {
+  const settings = useSettings()
+  const { isAuthenticated } = useSession()
+
+  if (!isAuthenticated || !settings) return null
+
+  return (
+    <nav className="sticky top-0 z-50 flex items-center justify-between bg-background/50 px-4 py-2 backdrop-blur-lg md:hidden">
+      <Link to="/" className="text-lg font-bold">
+        {settings.appTitle}
+      </Link>
+      <SidebarTrigger />
+    </nav>
+  )
+}
