@@ -68,8 +68,8 @@ func TestGetContainerURLs(t *testing.T) {
 		t.Fatalf("traefik urls: %v", urls)
 	}
 	// Nothing
-	if urls := getContainerURLs(map[string]string{"foo": "bar"}, ""); urls != nil {
-		t.Fatalf("expected nil urls, got %v", urls)
+	if urls := getContainerURLs(map[string]string{"foo": "bar"}, ""); len(urls) != 0 {
+		t.Fatalf("expected empty urls, got %v", urls)
 	}
 }
 

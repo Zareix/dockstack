@@ -80,7 +80,7 @@ func getContainerURLs(labels map[string]string, baseDomain string) []string {
 
 	for label, value := range labels {
 		if traefikRuleRe.MatchString(label) {
-			var urls []string
+			urls := []string{}
 			for _, rule := range strings.Split(value, ",") {
 				rule = strings.TrimSpace(rule)
 				if !strings.HasPrefix(rule, "Host(") {
@@ -94,7 +94,7 @@ func getContainerURLs(labels map[string]string, baseDomain string) []string {
 			return urls
 		}
 	}
-	return nil
+	return []string{}
 }
 
 func formatImageTag(tag string) string {
@@ -114,6 +114,7 @@ func mapContainer(c container.Summary, serverHost, baseDomain string) ContainerI
 		Image:  formatImageTag(c.Image),
 		Status: string(containerStateToStatus(string(c.State), c.Status)),
 		Uptime: strings.TrimSpace(regexp.MustCompile(`\s*\(.*?\)`).ReplaceAllString(c.Status, "")),
+		Ports:  []Port{},
 		URLs:   getContainerURLs(c.Labels, baseDomain),
 	}
 	if svc, ok := c.Labels["com.docker.compose.service"]; ok {
