@@ -5,6 +5,8 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/joho/godotenv"
 )
 
 type Config struct {
@@ -42,6 +44,14 @@ type OAuthConfig struct {
 	ClientID     string
 	ClientSecret string
 	DiscoveryURL string
+}
+
+func LoadDotEnv() error {
+	err := godotenv.Load()
+	if os.IsNotExist(err) {
+		return nil
+	}
+	return err
 }
 
 func getenv(key, def string) string {
