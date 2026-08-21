@@ -166,6 +166,7 @@ function Home() {
         data={stacksQuery.data ?? []}
         isLoading={stacksQuery.isLoading}
         onRowClick={({ name }) => navigate({ to: "/stacks/$name", params: { name } })}
+        getRowAriaLabel={({ name }) => `Open stack ${name}`}
       />
     </>
   )

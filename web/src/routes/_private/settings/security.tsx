@@ -1,12 +1,32 @@
 import { startRegistration } from "@simplewebauthn/browser"
 import type { PublicKeyCredentialCreationOptionsJSON } from "@simplewebauthn/browser"
+import { CopyIcon } from "@phosphor-icons/react"
 import { useForm } from "@tanstack/react-form"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
+import { useState } from "react"
 import { toast } from "sonner"
 
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "#/components/ui/alert-dialog"
 import { Button } from "#/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "#/components/ui/card"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "#/components/ui/dialog"
 import { Input } from "#/components/ui/input"
 import { Label } from "#/components/ui/label"
 import {
@@ -39,10 +59,6 @@ function SecuritySettings() {
 }
 
 function ChangePassword() {
-  const form = useForm({
-    defaultValues: { currentPassword: "", newPassword: "" },
-    onSubmit: ({ value }) => mutation.mutate(value),
-  })
   const mutation = useMutation({
     mutationFn: ({
       currentPassword,
@@ -56,6 +72,10 @@ function ChangePassword() {
       form.reset()
     },
     onError: (e) => toast.error(e.message),
+  })
+  const form = useForm({
+    defaultValues: { currentPassword: "", newPassword: "" },
+    onSubmit: ({ value }) => mutation.mutate(value),
   })
   return (
     <Card>
@@ -172,12 +192,14 @@ function SessionsSection() {
 function ApiKeysSection() {
   const queryClient = useQueryClient()
   const keysQuery = useQuery({ queryKey: ["api-keys"], queryFn: listApiKeys })
+  const [createdKey, setCreatedKey] = useState<{ name: string; key: string } | null>(null)
 
   const create = useMutation({
     mutationFn: (name: string) => createApiKey(name),
-    onSuccess: (result) => {
-      toast.success(`API key created: ${result.key}`)
+    onSuccess: (result, name) => {
+      setCreatedKey({ name, key: result.key })
       queryClient.invalidateQueries({ queryKey: ["api-keys"] })
+      form.reset()
     },
     onError: (e) => toast.error(e.message),
   })
@@ -191,6 +213,16 @@ function ApiKeysSection() {
     defaultValues: { name: "" },
     onSubmit: ({ value }) => create.mutate(value.name),
   })
+
+  const copyKey = async () => {
+    if (!createdKey) return
+    try {
+      await navigator.clipboard.writeText(createdKey.key)
+      toast.success("API key copied")
+    } catch {
+      toast.error("Failed to copy")
+    }
+  }
 
   return (
     <Card>
@@ -231,12 +263,53 @@ function ApiKeysSection() {
             className="flex items-center justify-between rounded-md border px-3 py-2 text-sm"
           >
             <span className="font-mono">{key.name}</span>
-            <Button variant="ghost" size="sm" onClick={() => remove.mutate(key.id)}>
-              Delete
-            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger
+                render={
+                  <Button variant="destructive" size="sm" disabled={remove.isPending}>
+                    Delete
+                  </Button>
+                }
+              />
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete API key?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    The "{key.name}" key will be revoked immediately. This cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogCancel variant="destructive" onClick={() => remove.mutate(key.id)}>
+                    Delete
+                  </AlertDialogCancel>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         ))}
       </CardContent>
+
+      <Dialog open={createdKey !== null} onOpenChange={(open) => !open && setCreatedKey(null)}>
+        <DialogContent showCloseButton={false}>
+          <DialogHeader>
+            <DialogTitle>API key created</DialogTitle>
+            <DialogDescription>
+              Copy your new API key now. It will not be shown again.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex items-center gap-2 rounded-md border bg-muted/50 p-2">
+            <code className="min-w-0 flex-1 text-xs break-all">{createdKey?.key}</code>
+            <Button variant="outline" size="sm" onClick={copyKey} aria-label="Copy API key">
+              <CopyIcon className="size-4" />
+              Copy
+            </Button>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setCreatedKey(null)}>Done</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   )
 }

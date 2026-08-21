@@ -7,7 +7,7 @@ import {
   TrashIcon,
 } from "@phosphor-icons/react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { ClientOnly, createFileRoute, redirect, useRouter } from "@tanstack/react-router"
+import { ClientOnly, createFileRoute, useRouter } from "@tanstack/react-router"
 import { useCallback, useEffect } from "react"
 import { toast } from "sonner"
 import * as v from "valibot"
@@ -34,13 +34,11 @@ import { Spinner } from "#/components/ui/spinner.tsx"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/components/ui/tabs"
 import {
   createStack,
-  getSession,
   getStackStatus,
   stackDestroy,
   stackExists,
   streamStackAction,
 } from "#/lib/api"
-import { queryClient as rootQueryClient } from "#/lib/query-client"
 
 const tabSchema = v.object({
   tab: v.optional(v.picklist(["services", "files", "logs", "terminal"]), "files"),
@@ -48,22 +46,8 @@ const tabSchema = v.object({
 
 export const Route = createFileRoute("/_private/stacks/$name")({
   validateSearch: tabSchema,
-  async beforeLoad({ location, params: { name } }) {
-    const session = await rootQueryClient
-      .ensureQueryData({
-        queryKey: ["session"],
-        queryFn: getSession,
-        retry: false,
-      })
-      .catch(() => null)
-    if (!session) {
-      throw redirect({
-        to: "/auth/sign-in",
-        search: { redirectTo: location.href },
-      })
-    }
+  async beforeLoad({ params: { name } }) {
     return {
-      session,
       stackExists: await stackExists(name),
     }
   },

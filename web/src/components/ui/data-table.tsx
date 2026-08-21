@@ -122,6 +122,7 @@ interface DataTableProps<TData extends RowData> {
   isLoading?: boolean
   toolbar?: (table: TanstackTable<DataTableFeatures, TData>) => React.ReactNode
   onRowClick?: (row: TData) => void
+  getRowAriaLabel?: (row: TData) => string
 }
 
 export function DataTable<TData extends RowData>({
@@ -130,6 +131,7 @@ export function DataTable<TData extends RowData>({
   isLoading,
   toolbar,
   onRowClick,
+  getRowAriaLabel,
 }: DataTableProps<TData>) {
   const table = useTable({
     features: dataTableFeatures,
@@ -179,6 +181,7 @@ export function DataTable<TData extends RowData>({
                   }
                   role={onRowClick ? "button" : undefined}
                   tabIndex={onRowClick ? 0 : undefined}
+                  aria-label={onRowClick ? getRowAriaLabel?.(row.original) : undefined}
                   onKeyDown={
                     onRowClick
                       ? (e) => {
