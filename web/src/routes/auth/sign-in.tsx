@@ -3,7 +3,7 @@ import { startAuthentication } from "@simplewebauthn/browser"
 import type { PublicKeyCredentialRequestOptionsJSON } from "@simplewebauthn/browser"
 import { useForm } from "@tanstack/react-form"
 import { useMutation, useQuery } from "@tanstack/react-query"
-import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router"
+import { createFileRoute, Link, Navigate, useNavigate, useSearch } from "@tanstack/react-router"
 import { toast } from "sonner"
 import * as v from "valibot"
 
@@ -75,8 +75,7 @@ function SignIn() {
   })
 
   if (isAuthenticated) {
-    navigate({ to: "/" })
-    return null
+    return <Navigate to="/" />
   }
 
   return (

@@ -9,7 +9,7 @@ type StatusVariant = {
 
 type Status = VolumeInfo["status"] | StackStatus | StaleStatus | NetworkInfo["status"]
 
-const statusMap: Record<Status, StatusVariant> = {
+const statusMap: Partial<Record<Status, StatusVariant>> = {
   running: {
     variant: "default",
     className: "bg-green-600 text-white dark:bg-green-700",
@@ -60,7 +60,11 @@ const statusMap: Record<Status, StatusVariant> = {
 }
 
 export function StatusBadge({ status }: { status: Status }) {
-  const config = statusMap[status]
+  const config: StatusVariant = statusMap[status] ?? {
+    variant: "outline",
+    className: "text-muted-foreground",
+    label: String(status),
+  }
   return (
     <Badge variant={config.variant} className={config.className}>
       {config.label}

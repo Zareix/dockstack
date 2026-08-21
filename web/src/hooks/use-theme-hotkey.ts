@@ -20,10 +20,9 @@ export function useThemeHotkey() {
       if (event.key.toLowerCase() !== "d") return
       if (isEditableTarget(event.target)) return
 
-      const isPlainD = !event.metaKey && !event.ctrlKey && !event.altKey && !event.shiftKey
       const isCmdOrCtrlShiftD = (event.metaKey || event.ctrlKey) && event.shiftKey && !event.altKey
 
-      if (!isPlainD && !isCmdOrCtrlShiftD) return
+      if (!isCmdOrCtrlShiftD) return
 
       event.preventDefault()
 

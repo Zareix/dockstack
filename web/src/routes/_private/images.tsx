@@ -108,10 +108,7 @@ function ImagesPage() {
       header: ({ column }) => <SortableHeader column={column} label="Created" />,
       cell: ({ row }) => (
         <span className="text-sm text-muted-foreground">
-          {new Date(
-            // @ts-ignore It's typed as a number, but the ts can't infer the actual value
-            row.getValue("created") * 1000,
-          ).toLocaleDateString()}
+          {new Date((row.getValue("created") as number) * 1000).toLocaleDateString()}
         </span>
       ),
     },

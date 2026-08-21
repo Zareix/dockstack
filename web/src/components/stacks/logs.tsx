@@ -1,7 +1,7 @@
 import { CaretRightIcon, PlayCircleIcon, StopCircleIcon } from "@phosphor-icons/react"
 import { AlignBottomSimpleIcon } from "@phosphor-icons/react/dist/ssr/AlignBottomSimple"
 import { useVirtualizer } from "@tanstack/react-virtual"
-import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
 
 import { Button } from "#/components/ui/button"
 import { Label } from "#/components/ui/label"
@@ -156,6 +156,16 @@ export function ContainerLogs({ stackName }: { stackName: string }) {
       wsRef.current = null
     }
     setStreaming(false)
+  }, [])
+
+  useEffect(() => {
+    return () => {
+      const ws = wsRef.current
+      if (ws) {
+        ws.close()
+        wsRef.current = null
+      }
+    }
   }, [])
 
   useLayoutEffect(() => {

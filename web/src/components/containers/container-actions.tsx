@@ -72,7 +72,7 @@ export function ContainerActions({
           className="size-7"
           disabled={busy}
           onClick={() => stopM.mutate()}
-          title="Stop"
+          aria-label="Stop"
         >
           <SquareIcon size={14} />
         </Button>
@@ -83,7 +83,7 @@ export function ContainerActions({
           className="size-7"
           disabled={busy}
           onClick={() => startM.mutate()}
-          title="Start"
+          aria-label="Start"
         >
           <PlayIcon size={14} />
         </Button>
@@ -94,7 +94,7 @@ export function ContainerActions({
         className="size-7"
         disabled={busy || !running}
         onClick={() => restartM.mutate()}
-        title="Restart"
+        aria-label="Restart"
       >
         <ArrowsClockwiseIcon size={14} />
       </Button>
@@ -104,7 +104,7 @@ export function ContainerActions({
         className="size-7 text-destructive hover:text-destructive"
         disabled={busy}
         onClick={() => removeM.mutate()}
-        title="Remove"
+        aria-label="Remove"
       >
         <TrashIcon size={14} />
       </Button>

@@ -34,9 +34,10 @@ import {
   SidebarMenuSubItem,
   useSidebar,
 } from "#/components/ui/sidebar"
-import { listStacks } from "#/lib/api"
+import { listStacks, type User } from "#/lib/api"
 import { useSession } from "#/lib/app-context/session"
 import { useSettings } from "#/lib/app-context/settings"
+import { cn } from "#/lib/utils"
 
 import {
   DropdownMenu,
@@ -199,7 +200,7 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel>Ressources</SidebarGroupLabel>
+          <SidebarGroupLabel>Resources</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {RESOURCES_LINKS.map((l, index) => (
@@ -230,6 +231,37 @@ export function AppSidebar() {
   )
 }
 
+function UserIdentity({
+  user,
+  initials,
+  size = "default",
+  truncate = false,
+}: {
+  user: Pick<User, "name" | "email" | "avatar">
+  initials: string
+  size?: "default" | "lg"
+  truncate?: boolean
+}) {
+  return (
+    <>
+      <Avatar size={size}>
+        {user.avatar ? <AvatarImage src={user.avatar} alt={user.name} /> : null}
+        <AvatarFallback>{initials}</AvatarFallback>
+      </Avatar>
+      <div>
+        <div
+          className={cn("text-sm font-medium text-foreground", truncate && "truncate text-start")}
+        >
+          {user.name}
+        </div>
+        <div className={cn("text-xs font-normal text-muted-foreground", truncate && "truncate")}>
+          {user.email}
+        </div>
+      </div>
+    </>
+  )
+}
+
 function UserButton() {
   const { session } = useSession()
   const { theme = "system", setTheme } = useTheme()
@@ -249,28 +281,14 @@ function UserButton() {
       <DropdownMenuTrigger
         render={
           <Button variant="ghost" className="w-full justify-start gap-2 py-6">
-            <Avatar>
-              {user.avatar ? <AvatarImage src={user.avatar} alt={user.name} /> : null}
-              <AvatarFallback>{initials}</AvatarFallback>
-            </Avatar>
-            <div>
-              <div className="truncate text-start text-sm font-medium">{user.name}</div>
-              <div className="truncate text-xs font-normal text-muted-foreground">{user.email}</div>
-            </div>
+            <UserIdentity user={user} initials={initials} truncate />
           </Button>
         }
       />
       <DropdownMenuContent align="center" className="w-60">
         <DropdownMenuGroup>
           <DropdownMenuLabel className="flex items-center gap-2">
-            <Avatar size="lg">
-              {user.avatar ? <AvatarImage src={user.avatar} alt={user.name} /> : null}
-              <AvatarFallback>{initials}</AvatarFallback>
-            </Avatar>
-            <div>
-              <div className="text-sm font-medium">{user.name}</div>
-              <div className="text-xs font-normal text-muted-foreground">{user.email}</div>
-            </div>
+            <UserIdentity user={user} initials={initials} size="lg" />
           </DropdownMenuLabel>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
@@ -278,7 +296,6 @@ function UserButton() {
           <UserCircleIcon className="size-4" />
           Settings
         </DropdownMenuItem>
-        <DropdownMenuSeparator />
         <DropdownMenuSub>
           <DropdownMenuSubTrigger>
             <SunIcon className="size-4" />

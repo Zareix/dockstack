@@ -26,7 +26,7 @@ export function ImageActions({ image }: { image: ImageInfo }) {
       className="size-7 text-destructive hover:text-destructive"
       disabled={removeM.isPending}
       onClick={() => removeM.mutate()}
-      title="Remove"
+      aria-label="Remove"
     >
       <TrashIcon size={14} />
     </Button>
