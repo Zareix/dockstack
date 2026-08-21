@@ -8,7 +8,7 @@ import { AppSidebar } from "#/components/app-sidebar.tsx"
 import { ErrorBoundary, ErrorFallback } from "#/components/error-boundary"
 import { Navbar } from "#/components/navbar.tsx"
 import { Providers } from "#/components/providers"
-import { useSettings } from "#/lib/app-context"
+import { useSettings } from "#/lib/app-context/settings"
 
 export const Route = createRootRoute({
   component: RootComponent,

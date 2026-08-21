@@ -2,7 +2,7 @@ import { useMutation } from "@tanstack/react-query"
 import { useNavigate } from "@tanstack/react-router"
 import { toast } from "sonner"
 
-import { useSession } from "#/lib/app-context"
+import { useSession } from "#/lib/app-context/session"
 
 import { Button } from "../ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card"

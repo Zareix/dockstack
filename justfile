@@ -1,16 +1,21 @@
+[group('dev')]
 dev-backend:
     go run ./cmd/dockstack
 
+[group('dev')]
 dev-frontend:
     bun run web:dev
 
+[group('dev')]
 [parallel]
 dev: dev-backend dev-frontend
 
+[group('build')]
 web-build:
     bun run web:build
     @if [ -d web/dist ]; then rm -rf internal/server/web-dist && cp -R web/dist internal/server/web-dist; else mkdir -p internal/server/web-dist; fi
 
+[group('build')]
 build: web-build
     go build -o bin/dockstack ./cmd/dockstack
 

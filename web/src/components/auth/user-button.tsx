@@ -2,7 +2,7 @@ import { DesktopIcon, MoonIcon, SignOutIcon, SunIcon, UserCircleIcon } from "@ph
 import { Link } from "@tanstack/react-router"
 import { useTheme } from "next-themes"
 
-import { useSession } from "#/lib/app-context"
+import { useSession } from "#/lib/app-context/session"
 
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
 import { Button } from "../ui/button"
@@ -38,7 +38,6 @@ export function UserButton() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        nativeButton={false}
         render={
           <Button variant="ghost" className="w-full justify-start gap-2 py-6">
             <Avatar>
@@ -54,9 +53,15 @@ export function UserButton() {
       />
       <DropdownMenuContent align="center" className="w-60">
         <DropdownMenuGroup>
-          <DropdownMenuLabel>
-            <div className="text-sm font-medium">{user.name}</div>
-            <div className="text-xs font-normal text-muted-foreground">{user.email}</div>
+          <DropdownMenuLabel className="flex items-center gap-2">
+            <Avatar size="lg">
+              {user.avatar ? <AvatarImage src={user.avatar} alt={user.name} /> : null}
+              <AvatarFallback>{initials}</AvatarFallback>
+            </Avatar>
+            <div>
+              <div className="text-sm font-medium">{user.name}</div>
+              <div className="text-xs font-normal text-muted-foreground">{user.email}</div>
+            </div>
           </DropdownMenuLabel>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
