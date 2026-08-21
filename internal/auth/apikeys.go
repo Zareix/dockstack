@@ -5,8 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"time"
-
-	"github.com/zareix/dockstack/internal/randid"
+	"uuid"
 )
 
 type APIKey struct {
@@ -54,7 +53,7 @@ type NewAPIKey struct {
 func (k *APIKeyStore) Create(ctx context.Context, in NewAPIKey) (*APIKey, error) {
 	now := time.Now().UnixMilli()
 	key := &APIKey{
-		ID:        randid.New(),
+		ID:        uuid.New().String(),
 		UserID:    in.UserID,
 		Name:      in.Name,
 		KeyHash:   in.KeyHash,

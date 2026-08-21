@@ -1,7 +1,39 @@
-import { createFileRoute } from "@tanstack/react-router"
+import { useMutation } from "@tanstack/react-query"
+import { createFileRoute, useNavigate } from "@tanstack/react-router"
+import { toast } from "sonner"
 
-import { SignOut } from "#/components/auth/sign-out"
+import { Button } from "#/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "#/components/ui/card"
+import { useSession } from "#/lib/app-context/session"
 
 export const Route = createFileRoute("/auth/sign-out")({
   component: SignOut,
 })
+
+function SignOut() {
+  const { logout } = useSession()
+  const navigate = useNavigate()
+
+  const mutation = useMutation({
+    mutationFn: logout,
+    onSuccess: () => {
+      toast.success("Signed out")
+      navigate({ to: "/auth/sign-in" })
+    },
+    onError: (e) => toast.error(e.message),
+  })
+
+  return (
+    <Card className="w-full max-w-sm">
+      <CardHeader className="text-center">
+        <CardTitle className="text-2xl">Sign out</CardTitle>
+        <CardDescription>Are you sure you want to sign out?</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Button onClick={() => mutation.mutate()} disabled={mutation.isPending} className="w-full">
+          Sign out
+        </Button>
+      </CardContent>
+    </Card>
+  )
+}

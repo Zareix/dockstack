@@ -8,11 +8,11 @@ import (
 	"net/http"
 	"strings"
 	"time"
+	"uuid"
 
 	"github.com/go-chi/chi/v5"
 
 	"github.com/zareix/dockstack/internal/auth"
-	"github.com/zareix/dockstack/internal/randid"
 )
 
 type authUserResponse struct {
@@ -468,7 +468,7 @@ func (s *Server) handleForgotPassword(w http.ResponseWriter, r *http.Request) {
 		}
 		if _, err := s.db.ExecContext(r.Context(),
 			`INSERT INTO reset_tokens (id, user_id, token_hash, expires_at, created_at) VALUES (?, ?, ?, ?, ?)`,
-			randid.New(), user.ID, auth.HashToken(token), time.Now().Add(time.Hour).UnixMilli(),
+			uuid.New().String(), user.ID, auth.HashToken(token), time.Now().Add(time.Hour).UnixMilli(),
 			time.Now().UnixMilli()); err != nil {
 			s.logError(r, err)
 			writeError(w, http.StatusInternalServerError, "failed to create reset token")
