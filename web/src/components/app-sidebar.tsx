@@ -28,7 +28,8 @@ import {
   useSidebar,
 } from "#/components/ui/sidebar"
 import { listStacks } from "#/lib/api"
-import { useSession, useSettings } from "#/lib/app-context"
+import { useSession } from "#/lib/app-context/session"
+import { useSettings } from "#/lib/app-context/settings"
 
 import {
   DropdownMenu,

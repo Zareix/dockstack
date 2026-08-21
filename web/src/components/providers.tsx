@@ -4,7 +4,8 @@ import { ThemeProvider } from "next-themes"
 import type { ReactNode } from "react"
 
 import { ThemeHotkey } from "#/hooks/use-theme-hotkey"
-import { SessionProvider, SettingsProvider } from "#/lib/app-context"
+import { SessionProvider } from "#/lib/app-context/session"
+import { SettingsProvider } from "#/lib/app-context/settings"
 import { queryClient } from "#/lib/query-client"
 
 import { SidebarProvider } from "./ui/sidebar"
@@ -22,9 +23,9 @@ export function Providers({ children }: { children: ReactNode }) {
               }}
             >
               <SidebarProvider>{children}</SidebarProvider>
+              <ThemeHotkey />
+              <Toaster />
             </IconContext>
-            <ThemeHotkey />
-            <Toaster />
           </SessionProvider>
         </SettingsProvider>
       </ThemeProvider>

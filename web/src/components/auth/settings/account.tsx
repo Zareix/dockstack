@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 
 import { changeEmail, updateUser } from "#/lib/api"
-import { useSession } from "#/lib/app-context"
+import { useSession } from "#/lib/app-context/session"
 
 import { Button } from "../../ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../ui/card"

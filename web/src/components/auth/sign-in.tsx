@@ -13,7 +13,7 @@ import {
   signInEmail,
   signInUsername,
 } from "#/lib/api"
-import { useSession } from "#/lib/app-context"
+import { useSession } from "#/lib/app-context/session"
 
 import { Button } from "../ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card"

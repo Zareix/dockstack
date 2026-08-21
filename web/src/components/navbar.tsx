@@ -1,7 +1,8 @@
 import { Link } from "@tanstack/react-router"
 
 import { SidebarTrigger } from "#/components/ui/sidebar"
-import { useSession, useSettings } from "#/lib/app-context"
+import { useSession } from "#/lib/app-context/session"
+import { useSettings } from "#/lib/app-context/settings"
 
 export const Navbar = () => {
   const settings = useSettings()

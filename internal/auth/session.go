@@ -215,7 +215,7 @@ func (s *Store) GetUserByID(ctx context.Context, id string) (*User, error) {
 
 func (s *Store) UpdateUser(ctx context.Context, id, name, avatar string) error {
 	_, err := s.db.ExecContext(ctx,
-		`UPDATE users SET name = COALESCE(NULLIF(?, ''), name), avatar = COALESCE(NULLIF(?, ''), avatar),
+		`UPDATE users SET name = COALESCE(NULLIF(?, ''), name), avatar = ?,
 		 updated_at = ? WHERE id = ?`, name, avatar, time.Now().UnixMilli(), id)
 	return err
 }

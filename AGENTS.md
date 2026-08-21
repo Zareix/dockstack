@@ -79,8 +79,10 @@ first run (`internal/db/seed.go`).
 
 **Frontend** (`web/`): TanStack Router file-based routes in `web/src/routes/`. `_private/route.tsx`
 is a layout whose `beforeLoad` gates on a session fetch (`/api/auth/session`). `web/src/lib/api/`
-holds the typed fetch client, SSE helper, and auth client. `web/src/lib/app-context.tsx` provides
-settings and session React contexts. UI components in `web/src/components/ui` are shadcn-generated
+holds the typed fetch client, SSE helper, and auth client. `web/src/lib/app-context/` provides
+settings and session React contexts (split into `settings.tsx` and `session.tsx`). Do not create
+barrel (`index.ts`) files that re-export multiple other files — import from the specific file
+directly. UI components in `web/src/components/ui` are shadcn-generated
 (base-ui primitives + `class-variance-authority`); treat them as vendored, prefer composing over
 editing. Monaco (compose editor) and xterm (terminal) are client-only bundles.
 
