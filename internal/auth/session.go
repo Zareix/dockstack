@@ -10,8 +10,7 @@ import (
 	"fmt"
 	"strings"
 	"time"
-
-	"github.com/zareix/dockstack/internal/randid"
+	"uuid"
 )
 
 const CookieName = "dockstack_session"
@@ -89,7 +88,7 @@ func (s *Store) CreateSession(ctx context.Context, userID, ip, userAgent string)
 		return "", nil, err
 	}
 	sess := &Session{
-		ID:        randid.New(),
+		ID:        uuid.New().String(),
 		UserID:    userID,
 		ExpiresAt: time.Now().Add(s.sessionTTL).UnixMilli(),
 		IPAddress: ip,

@@ -5,9 +5,9 @@ import (
 	"database/sql"
 	"log/slog"
 	"time"
+	"uuid"
 
 	"github.com/zareix/dockstack/internal/auth"
-	"github.com/zareix/dockstack/internal/randid"
 )
 
 func Seed(ctx context.Context, sqlDB *sql.DB, adminEmail string) error {
@@ -22,7 +22,7 @@ func Seed(ctx context.Context, sqlDB *sql.DB, adminEmail string) error {
 	if err != nil {
 		return err
 	}
-	userID := randid.New()
+	userID := uuid.New().String()
 	now := time.Now().UnixMilli()
 	_, err = sqlDB.ExecContext(ctx, `
 		INSERT INTO users (id, name, email, email_verified, username, role, created_at, updated_at)

@@ -8,13 +8,13 @@ import (
 	"net/http"
 	"strings"
 	"time"
+	"uuid"
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/go-chi/chi/v5"
 	"golang.org/x/oauth2"
 
 	"github.com/zareix/dockstack/internal/auth"
-	"github.com/zareix/dockstack/internal/randid"
 )
 
 const oauthStateCookie = "dockstack_oauth_state"
@@ -42,7 +42,7 @@ func (s *Server) appURL() string {
 }
 
 func (s *Server) signOAuthState() (string, string) {
-	token := randid.New()
+	token := uuid.New().String()
 	mac := hmac.New(sha256.New, []byte(s.cfg.AuthSecret))
 	mac.Write([]byte(token))
 	sig := base64.RawURLEncoding.EncodeToString(mac.Sum(nil))
@@ -184,7 +184,7 @@ func (s *Server) findOrLinkOAuthUser(ctx context.Context, providerID, sub, email
 	}
 	if user == nil {
 		// Create a new user.
-		id := randid.New()
+		id := uuid.New().String()
 		now := time.Now().UnixMilli()
 		if _, err := s.db.ExecContext(ctx,
 			`INSERT INTO users (id, name, email, email_verified, created_at, updated_at)
@@ -200,7 +200,7 @@ func (s *Server) findOrLinkOAuthUser(ctx context.Context, providerID, sub, email
 	if _, err := s.db.ExecContext(ctx,
 		`INSERT INTO oauth_accounts (id, user_id, provider_id, provider_user_id, email, created_at)
 		 VALUES (?, ?, ?, ?, ?, ?)`,
-		randid.New(), user.ID, providerID, sub, email, time.Now().UnixMilli()); err != nil {
+		uuid.New().String(), user.ID, providerID, sub, email, time.Now().UnixMilli()); err != nil {
 		return nil, err
 	}
 	return user, nil

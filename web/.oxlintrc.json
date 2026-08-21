@@ -19,8 +19,7 @@
     "prettier.config.js",
     ".output",
     "src/components/editor/yaml.worker.js",
-    "src/components/ui",
-    "src/components/auth"
+    "src/components/ui"
   ],
   "rules": {},
   "overrides": [

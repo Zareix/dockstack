@@ -7,10 +7,10 @@ import (
 	"encoding/json"
 	"errors"
 	"time"
+	"uuid"
 
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
-	"github.com/zareix/dockstack/internal/randid"
 )
 
 type Passkey struct {
@@ -133,7 +133,7 @@ func (s *PasskeyService) FinishRegistration(ctx context.Context, userID, challen
 		return p, err
 	}
 	p = Passkey{
-		ID:           randid.New(),
+		ID:           uuid.New().String(),
 		UserID:       userID,
 		Name:         "Passkey",
 		CredentialID: string(cred.ID),
@@ -220,7 +220,7 @@ func (s *PasskeyService) Delete(ctx context.Context, userID, id string) error {
 }
 
 func (s *PasskeyService) saveChallenge(ctx context.Context, userID, kind string, session *webauthn.SessionData) (string, error) {
-	id := randid.New()
+	id := uuid.New().String()
 	raw, err := json.Marshal(session)
 	if err != nil {
 		return "", err
