@@ -1,4 +1,4 @@
-FROM oven/bun:1.3.14 AS builder
+FROM oven/bun:1.4.0 AS builder
 
 WORKDIR /app
 
@@ -18,7 +18,7 @@ RUN bun run build
 FROM docker:29.7.2-cli AS docker-cli
 
 
-FROM oven/bun:1.3.14-distroless AS runner
+FROM oven/bun:1.4.0-distroless AS runner
 
 WORKDIR /app
 

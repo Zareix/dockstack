@@ -1,11 +1,13 @@
-import { relations } from "drizzle-orm"
-import { sqliteTable, text, integer, index } from "drizzle-orm/sqlite-core"
+import { relations } from "drizzle-orm";
+import { sqliteTable, text, integer, index } from "drizzle-orm/sqlite-core";
 
 export const user = sqliteTable("user", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
-  emailVerified: integer("email_verified", { mode: "boolean" }).default(false).notNull(),
+  emailVerified: integer("email_verified", { mode: "boolean" })
+    .default(false)
+    .notNull(),
   image: text("image"),
   createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
   updatedAt: integer("updated_at", { mode: "timestamp_ms" })
@@ -17,7 +19,7 @@ export const user = sqliteTable("user", {
   banExpires: integer("ban_expires", { mode: "timestamp_ms" }),
   username: text("username").unique(),
   displayUsername: text("display_username"),
-})
+});
 
 export const session = sqliteTable(
   "session",
@@ -37,7 +39,7 @@ export const session = sqliteTable(
     impersonatedBy: text("impersonated_by"),
   },
   (table) => [index("session_userId_idx").on(table.userId)],
-)
+);
 
 export const account = sqliteTable(
   "account",
@@ -65,7 +67,7 @@ export const account = sqliteTable(
       .notNull(),
   },
   (table) => [index("account_userId_idx").on(table.userId)],
-)
+);
 
 export const verification = sqliteTable(
   "verification",
@@ -80,7 +82,7 @@ export const verification = sqliteTable(
       .notNull(),
   },
   (table) => [index("verification_identifier_idx").on(table.identifier)],
-)
+);
 
 export const passkey = sqliteTable(
   "passkey",
@@ -103,7 +105,7 @@ export const passkey = sqliteTable(
     index("passkey_userId_idx").on(table.userId),
     index("passkey_credentialID_idx").on(table.credentialID),
   ],
-)
+);
 
 export const apikey = sqliteTable(
   "apikey",
@@ -138,31 +140,31 @@ export const apikey = sqliteTable(
     index("apikey_referenceId_idx").on(table.referenceId),
     index("apikey_key_idx").on(table.key),
   ],
-)
+);
 
 export const userRelations = relations(user, ({ many }) => ({
   sessions: many(session),
   accounts: many(account),
   passkeys: many(passkey),
-}))
+}));
 
 export const sessionRelations = relations(session, ({ one }) => ({
   user: one(user, {
     fields: [session.userId],
     references: [user.id],
   }),
-}))
+}));
 
 export const accountRelations = relations(account, ({ one }) => ({
   user: one(user, {
     fields: [account.userId],
     references: [user.id],
   }),
-}))
+}));
 
 export const passkeyRelations = relations(passkey, ({ one }) => ({
   user: one(user, {
     fields: [passkey.userId],
     references: [user.id],
   }),
-}))
+}));
