@@ -2,7 +2,6 @@ package server
 
 import (
 	"database/sql"
-	"log/slog"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -11,9 +10,10 @@ import (
 	"github.com/zareix/dockstack/internal/auth"
 	"github.com/zareix/dockstack/internal/config"
 	dockerapi "github.com/zareix/dockstack/internal/docker"
+	"github.com/zareix/dockstack/internal/server/api"
+	apiauth "github.com/zareix/dockstack/internal/server/api/auth"
 )
 
-// App bundles the docker-facing domain services used by API handlers.
 type App struct {
 	cfg    *config.Config
 	docker *dockerapi.Client
@@ -46,70 +46,29 @@ func New(cfg *config.Config, db *sql.DB, store *auth.Store, keys *auth.APIKeySto
 	return &Server{cfg: cfg, db: db, store: store, keys: keys, passkeys: passkeys, app: app}
 }
 
+func (s *Server) deps() *api.Deps {
+	return &api.Deps{
+		Deps: &apiauth.Deps{
+			Cfg:      s.cfg,
+			DB:       s.db,
+			Store:    s.store,
+			Keys:     s.keys,
+			Passkeys: s.passkeys,
+		},
+		Docker: s.app.docker,
+		Stacks: s.app.stacks,
+	}
+}
+
 func (s *Server) Handler() http.Handler {
-	r := chi.NewRouter()
-	r.Use(middleware.RequestID)
-	r.Use(middleware.Recoverer)
-	r.Use(requestLogger)
+	router := chi.NewMux()
+	router.Use(middleware.RequestID)
+	router.Use(middleware.Recoverer)
+	router.Use(requestLogger)
 
-	r.Get("/api/health", s.handleHealth)
+	api.Mount(router, s.deps())
 
-	// Public settings + auth metadata
-	r.Get("/api/settings", s.handleSettings)
-	r.Get("/api/auth/providers", s.handleProviders)
+	s.spaHandler(router)
 
-	// Auth
-	r.Mount("/api/auth", s.authRoutes())
-
-	// Webhook (API key) — trailing-slash variant, matching the original route.
-	r.With(s.requireAPIKey).Get("/api/stacks/", s.handleStacksList)
-	r.With(s.requireAPIKey).Post("/api/stacks/redeploy", s.handleStacksRedeploy)
-
-	// Session-gated API
-	r.Group(func(r chi.Router) {
-		r.Use(s.requireSession)
-		r.Get("/api/stacks", s.handleStacksList)
-		r.Post("/api/stacks", s.handleStackCreate)
-		r.Get("/api/stacks/{name}", s.handleStackGet)
-		r.Get("/api/stacks/{name}/containers", s.handleStackContainers)
-		r.Get("/api/stacks/{name}/files", s.handleStackFilesGet)
-		r.Put("/api/stacks/{name}/files", s.handleStackFilesSave)
-		r.Post("/api/stacks/{name}/env", s.handleStackCreateEnv)
-		r.Delete("/api/stacks/{name}", s.handleStackDestroy)
-		for _, a := range stackActions {
-			action := a
-			r.Post("/api/stacks/{name}/"+action.path, func(w http.ResponseWriter, req *http.Request) {
-				s.handleStackAction(w, req, action.args)
-			})
-			r.Post("/api/stacks/{name}/"+action.path+"/stream", func(w http.ResponseWriter, req *http.Request) {
-				s.handleStackActionStream(w, req, action.args)
-			})
-		}
-		r.Route("/api/containers", s.containerRoutes())
-		r.Route("/api/images", s.imageRoutes())
-		r.Route("/api/volumes", s.volumeRoutes())
-		r.Route("/api/networks", s.networkRoutes())
-	})
-
-	// WebSockets (session or API key)
-	r.HandleFunc("/api/ws/exec", s.handleWSAuth(s.handleExecWS))
-	r.HandleFunc("/api/ws/logs", s.handleWSAuth(s.handleLogsWS))
-
-	// SPA
-	s.spaHandler(r)
-
-	return r
-}
-
-// @Summary Health check
-// @Description Returns 200 when the server is up.
-// @Produce json
-// @Success 200 {object} map[string]string
-// @Router /api/health [get]
-func (s *Server) handleHealth(w http.ResponseWriter, r *http.Request) {
-	writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
-}
-
-func (s *Server) logError(r *http.Request, err error) {
-	slog.Error("request failed", "method", r.Method, "path", r.URL.Path, "error", err)
+	return router
 }

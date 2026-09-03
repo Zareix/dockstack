@@ -31,7 +31,6 @@ Backend (Go):
 - `go test ./...` — run Go tests
 - `go vet ./...` — static checks
 - `just build` — build SPA into `internal/server/web-dist`, then compile the binary
-- `just openapi` — regenerate `wiki/openapi.yaml` from swag annotations on the Go handlers
 - `just dev` — run backend + frontend dev servers in parallel
 
 Frontend (run from repo root with bun, or from `web/`):
@@ -50,23 +49,33 @@ done; for `web/**` use oxlint/oxfmt as CI expects.
 
 ## Architecture
 
-**Routing (Go)**: `internal/server/` mounts a chi router. Public endpoints: `/api/health`,
-`/api/settings`, `/api/auth/providers`. Auth endpoints under `/api/auth/*` (sign-in, sessions,
-passkeys, OAuth, API keys). Session-gated resource API: `/api/stacks`, `/api/containers`,
-`/api/images`, `/api/volumes`, `/api/networks`. Webhook (Bearer API key): `GET /api/stacks/` and
-`POST /api/stacks/redeploy`. WebSockets (session cookie or `?token=` API key): `/api/ws/exec`
-(container terminal, Docker exec hijack) and `/api/ws/logs` (live stack logs). SPA assets are
-served from the embedded `web-dist`, with a fallback to `index.html` for client routes.
+**Routing (Go)**: `internal/server/` assembles a chi mux; the HTTP API itself lives in
+`internal/server/api/` and is built with Huma (`github.com/danielgtaylor/huma/v2` + humachi
+adapter). `api.Mount(router, deps)` registers everything; an OpenAPI 3.1 spec (with docs UI) is
+generated at runtime and served publicly at `/api/openapi.json` / `/api/docs`. Public endpoints:
+`/api/health`, `/api/settings`, `/api/auth/providers`. Auth endpoints under `/api/auth/*`
+(sign-in, sessions, passkeys, OAuth, API keys). Session-gated resource API: `/api/stacks`,
+`/api/containers`, `/api/images`, `/api/volumes`, `/api/networks`. Webhook (Bearer API key):
+`GET /api/stacks/` and `POST /api/stacks/redeploy`. Stack actions also stream via SSE at
+`/api/stacks/{name}/{action}/stream` (session-gated raw chi routes, not Huma ops). WebSockets
+(session cookie or `?token=` API key): `/api/ws/exec` (container terminal, Docker exec hijack)
+and `/api/ws/logs` (live stack logs). SPA assets are served from the embedded `web-dist`, with a
+fallback to `index.html` for client routes.
 
 **Docker layer** (`internal/docker/`): the engine client wrapper (`Client`), the Compose runner
 (`Stacks` — `docker compose` subprocesses with env scrubbing and merged output streaming), logs
 streaming, and the domain models (ContainerInfo, ImageInfo, VolumeInfo, NetworkInfo, StackStatus).
 This is the only place that talks to the Docker socket or shells out to `docker compose`.
 
-**API layer** (`internal/server/`): one file per domain (stacks, resources/containers+images+volumes
-+networks, auth, passkeys, oauth, ws). Handlers are thin — they validate input, call the docker
-layer, and return JSON/SSE/WS. Middleware (`middleware.go`) handles session (`dockstack_session`
-cookie, HMAC-signed) and API-key auth.
+**API layer** (`internal/server/api/`): handlers receive an `api.Deps` struct (config, DB, auth
+stores, docker clients) built by the server package. One file per domain
+(auth, apikeys, passkeys, oauth, settings, stacks, resources, ws/exec/logs), each exposing its
+own `registerXxx` route registration next to its handlers, so Huma operation metadata (summaries,
+descriptions, tags) lives with the domain code. Auth is enforced per-operation via
+`sessionMW`/`apiKeyMW` (Huma operation middlewares); raw chi routes (SSE, WS, OAuth redirects)
+use conventional chi middleware. Response bodies are struct outputs with a `Body` field (Huma
+requirement); errors keep the legacy `{"error": msg}` shape via a custom `huma.NewError`
+override. `api.Version` is set from `cmd/dockstack/main.go` (`const Version`).
 
 **Auth** (`internal/auth/`): sessions (signed cookies + token-hash rows), passwords (argon2id),
 passkeys (`github.com/go-webauthn/webauthn`), API keys (SHA-256 stored, 100 req/min rate limit),
@@ -92,3 +101,5 @@ editing. Monaco (compose editor) and xterm (terminal) are client-only bundles.
 - Stack names are validated against `^[a-zA-Z0-9_-]+$` before filesystem access.
 - WebSocket endpoints require a session cookie or a Bearer API key (`?token=` query param).
 - `/api/health`, `/api/settings`, and `/api/auth/providers` are intentionally public (pre-auth UI).
+- The OpenAPI spec/docs (`/api/openapi.json`, `/api/docs`) are also public by design — they
+  describe the API surface but grant no access.

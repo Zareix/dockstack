@@ -1,4 +1,4 @@
-package server
+package api
 
 import (
 	"context"
@@ -11,7 +11,7 @@ import (
 	"github.com/zareix/dockstack/internal/docker"
 )
 
-func (s *Server) handleLogsWS(w http.ResponseWriter, r *http.Request) {
+func (d *Deps) handleLogsWS(w http.ResponseWriter, r *http.Request) {
 	conn, err := acceptWS(w, r)
 	if err != nil {
 		return
@@ -63,7 +63,7 @@ func (s *Server) handleLogsWS(w http.ResponseWriter, r *http.Request) {
 			cancel = streamCancel
 			mu.Unlock()
 
-			go s.streamStackLogsToWS(streamCtx, conn, msg.StackName)
+			go d.streamStackLogsToWS(streamCtx, conn, msg.StackName)
 		case "close":
 			mu.Lock()
 			if cancel != nil {
@@ -75,8 +75,8 @@ func (s *Server) handleLogsWS(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (s *Server) streamStackLogsToWS(ctx context.Context, conn *websocket.Conn, stackName string) {
-	entries, err := s.app.stacks.StreamStackLogs(ctx, stackName)
+func (d *Deps) streamStackLogsToWS(ctx context.Context, conn *websocket.Conn, stackName string) {
+	entries, err := d.Stacks.StreamStackLogs(ctx, stackName)
 	if err != nil {
 		_ = sendWSJSON(conn, map[string]string{"type": "error", "message": err.Error()})
 		return

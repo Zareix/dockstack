@@ -19,9 +19,13 @@ import (
 	"github.com/zareix/dockstack/internal/config"
 	"github.com/zareix/dockstack/internal/db"
 	"github.com/zareix/dockstack/internal/server"
+	"github.com/zareix/dockstack/internal/server/api"
 )
 
+const Version = "0.20.1"
+
 func main() {
+	api.Version = Version
 	if err := config.LoadDotEnv(); err != nil {
 		fatal("dotenv", err)
 	}
