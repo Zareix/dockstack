@@ -1,4 +1,4 @@
-package server
+package api
 
 import (
 	"context"
@@ -19,7 +19,7 @@ var authorizedShells = map[string]bool{
 	"/bin/fish": true,
 }
 
-func (s *Server) handleExecWS(w http.ResponseWriter, r *http.Request) {
+func (d *Deps) handleExecWS(w http.ResponseWriter, r *http.Request) {
 	conn, err := acceptWS(w, r)
 	if err != nil {
 		return
@@ -97,7 +97,7 @@ func (s *Server) handleExecWS(w http.ResponseWriter, r *http.Request) {
 				}
 				execCtx, execCancel := context.WithCancel(ctx)
 				cancel = execCancel
-				hj, exec, err := s.startExec(execCtx, init.ContainerID, init.Shell, cols, rows)
+				hj, exec, err := d.startExec(execCtx, init.ContainerID, init.Shell, cols, rows)
 				if err != nil {
 					_ = sendWSJSON(conn, map[string]string{"type": "error", "message": err.Error()})
 					execCancel()
@@ -108,7 +108,7 @@ func (s *Server) handleExecWS(w http.ResponseWriter, r *http.Request) {
 				execID = exec
 				started = true
 				mu.Unlock()
-				go s.pumpExec(conn, hj, ctx)
+				go d.pumpExec(conn, hj, ctx)
 			case "resize":
 				if !started {
 					continue
@@ -122,7 +122,7 @@ func (s *Server) handleExecWS(w http.ResponseWriter, r *http.Request) {
 					continue
 				}
 				if resize.Cols > 0 && resize.Rows > 0 {
-					_ = s.app.docker.ResizeExec(ctx, execID, resize.Rows, resize.Cols)
+					_ = d.Docker.ResizeExec(ctx, execID, resize.Rows, resize.Cols)
 				}
 			case "close":
 				mu.Lock()
@@ -147,7 +147,7 @@ func (s *Server) handleExecWS(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (s *Server) pumpExec(conn *websocket.Conn, hijack net.Conn, ctx context.Context) {
+func (d *Deps) pumpExec(conn *websocket.Conn, hijack net.Conn, ctx context.Context) {
 	buf := make([]byte, 32*1024)
 	for {
 		n, err := hijack.Read(buf)
@@ -163,13 +163,13 @@ func (s *Server) pumpExec(conn *websocket.Conn, hijack net.Conn, ctx context.Con
 	}
 }
 
-func (s *Server) startExec(ctx context.Context, containerID, shell string, cols, rows int) (net.Conn, string, error) {
+func (d *Deps) startExec(ctx context.Context, containerID, shell string, cols, rows int) (net.Conn, string, error) {
 	env := []string{
 		"TERM=xterm-256color",
 		"COLUMNS=" + strconv.Itoa(cols),
 		"LINES=" + strconv.Itoa(rows),
 	}
-	createResp, err := s.app.docker.CreateExec(ctx, containerID, container.ExecOptions{
+	createResp, err := d.Docker.CreateExec(ctx, containerID, container.ExecOptions{
 		Cmd:          []string{shell},
 		AttachStdin:  true,
 		AttachStdout: true,
@@ -181,10 +181,10 @@ func (s *Server) startExec(ctx context.Context, containerID, shell string, cols,
 		return nil, "", err
 	}
 	execID := createResp.ID
-	hj, err := s.app.docker.AttachExec(ctx, execID)
+	hj, err := d.Docker.AttachExec(ctx, execID)
 	if err != nil {
 		return nil, "", err
 	}
-	_ = s.app.docker.ResizeExec(ctx, execID, rows, cols)
+	_ = d.Docker.ResizeExec(ctx, execID, rows, cols)
 	return hj, execID, nil
 }

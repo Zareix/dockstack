@@ -102,7 +102,6 @@ func TestSessionGating(t *testing.T) {
 	srv, _ := newTestServer(t)
 	h := srv.Handler()
 
-	// Unauthenticated requests are rejected.
 	if rr := doJSON(t, h, http.MethodGet, "/api/stacks", nil, nil); rr.Code != http.StatusUnauthorized {
 		t.Fatalf("stacks without auth: %d", rr.Code)
 	}
@@ -110,13 +109,11 @@ func TestSessionGating(t *testing.T) {
 		t.Fatalf("session without auth: %d", rr.Code)
 	}
 
-	// Sign in, then the same endpoints work.
 	cookies := signInAsAdmin(t, h)
 	if rr := doJSON(t, h, http.MethodGet, "/api/auth/session", nil, cookies); rr.Code != http.StatusOK {
 		t.Fatalf("session with auth: %d %s", rr.Code, rr.Body.String())
 	}
-	// /api/stacks will hit docker (unavailable in tests) — verify it's gated, not 401.
-	// Docker is unreachable so we expect a 500 rather than 401.
+
 	rr := doJSON(t, h, http.MethodGet, "/api/stacks", nil, cookies)
 	if rr.Code == http.StatusUnauthorized {
 		t.Fatalf("stacks still 401 with auth: %s", rr.Body.String())
@@ -153,12 +150,11 @@ func TestAPIKeyAuth(t *testing.T) {
 	req.Header.Set("Authorization", "Bearer "+created.Key)
 	rr = httptest.NewRecorder()
 	h.ServeHTTP(rr, req)
-	// Authenticated as API key — expect 500 (docker unreachable), not 401.
+
 	if rr.Code == http.StatusUnauthorized {
 		t.Fatalf("api key rejected: %s", rr.Body.String())
 	}
 
-	// No key -> 401.
 	req = httptest.NewRequest(http.MethodGet, "/api/stacks/", nil)
 	rr = httptest.NewRecorder()
 	h.ServeHTTP(rr, req)
@@ -177,5 +173,25 @@ func TestSignOutRevokesSession(t *testing.T) {
 	}
 	if rr := doJSON(t, h, http.MethodGet, "/api/auth/session", nil, cookies); rr.Code != http.StatusUnauthorized {
 		t.Fatalf("session after sign out: %d", rr.Code)
+	}
+}
+
+func TestStackStreamGated(t *testing.T) {
+	srv, _ := newTestServer(t)
+	h := srv.Handler()
+
+	if rr := doJSON(t, h, http.MethodPost, "/api/stacks/foo/up/stream", nil, nil); rr.Code != http.StatusUnauthorized {
+		t.Fatalf("stream without auth: %d", rr.Code)
+	}
+
+	cookies := signInAsAdmin(t, h)
+	req := httptest.NewRequest(http.MethodPost, "/api/stacks/foo/up/stream", nil)
+	for _, c := range cookies {
+		req.AddCookie(c)
+	}
+	rr := httptest.NewRecorder()
+	h.ServeHTTP(rr, req)
+	if rr.Code == http.StatusUnauthorized {
+		t.Fatalf("stream with auth rejected: %s", rr.Body.String())
 	}
 }

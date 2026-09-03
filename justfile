@@ -34,10 +34,5 @@ lint:
     golangci-lint run 2>/dev/null || go vet ./...
     bun run --filter dockstack-web lint
 
-openapi:
-    swag init -g internal/server/server.go -o wiki --parseDependency --parseInternal
-    mv -f wiki/swagger.yaml wiki/openapi.yaml
-    rm -f wiki/docs.go wiki/swagger.json
-
 clean:
     rm -rf bin internal/server/web-dist
