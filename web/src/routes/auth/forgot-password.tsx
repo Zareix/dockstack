@@ -1,5 +1,4 @@
 import { useForm } from "@tanstack/react-form"
-import { useMutation } from "@tanstack/react-query"
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { toast } from "sonner"
 
@@ -7,24 +6,25 @@ import { Button } from "#/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "#/components/ui/card"
 import { Input } from "#/components/ui/input"
 import { Label } from "#/components/ui/label"
-import { forgotPassword } from "#/lib/api"
+import { usePostAuthForgotPassword } from "#/lib/api/generated/default/default.ts"
 
 export const Route = createFileRoute("/auth/forgot-password")({
   component: ForgotPassword,
 })
 
 function ForgotPassword() {
-  const mutation = useMutation({
-    mutationFn: (email: string) => forgotPassword(email),
-    onSuccess: () => {
-      toast.success("If that email exists, a reset token has been generated.")
+  const mutation = usePostAuthForgotPassword({
+    mutation: {
+      onSuccess: () => {
+        toast.success("If that email exists, a reset token has been generated.")
+      },
+      onError: (e) => toast.error(e.message),
     },
-    onError: (e) => toast.error(e.message),
   })
 
   const form = useForm({
     defaultValues: { email: "" },
-    onSubmit: ({ value }) => mutation.mutate(value.email),
+    onSubmit: ({ value }) => mutation.mutate({ data: value }),
   })
 
   return (

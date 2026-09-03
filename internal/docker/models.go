@@ -47,21 +47,44 @@ type ImageInfo struct {
 	Created     int64    `json:"created"`
 }
 
+type StaleStatus string
+
+const (
+	StaleOutdated StaleStatus = "outdated"
+	StaleUpToDate StaleStatus = "up-to-date"
+	StaleUnknown  StaleStatus = "unknown"
+)
+
+type VolumeStatus string
+
+const (
+	VolumeInUse VolumeStatus = "in-use"
+	VolumeFree  VolumeStatus = "unused"
+)
+
 type VolumeInfo struct {
-	Name    string `json:"name"`
-	Driver  string `json:"driver"`
-	Created string `json:"created"`
-	Size    int64  `json:"size"`
-	InUse   bool   `json:"inUse"`
-	Status  string `json:"status"`
+	Name    string       `json:"name"`
+	Driver  string       `json:"driver"`
+	Created string       `json:"created"`
+	Size    int64        `json:"size"`
+	InUse   bool         `json:"inUse"`
+	Status  VolumeStatus `json:"status"`
 }
 
+type NetworkStatus string
+
+const (
+	NetworkSystem NetworkStatus = "system"
+	NetworkInUse  NetworkStatus = "in-use"
+	NetworkUnused NetworkStatus = "unused"
+)
+
 type NetworkInfo struct {
-	ID     string `json:"id"`
-	Name   string `json:"name"`
-	Driver string `json:"driver"`
-	Scope  string `json:"scope"`
-	Status string `json:"status"`
+	ID     string        `json:"id"`
+	Name   string        `json:"name"`
+	Driver string        `json:"driver"`
+	Scope  string        `json:"scope"`
+	Status NetworkStatus `json:"status"`
 }
 
 type LogEntry struct {

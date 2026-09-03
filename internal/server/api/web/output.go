@@ -19,3 +19,7 @@ type ListOutput[T any] struct {
 type MapOutput[V any] struct {
 	Body map[string]V
 }
+
+type DataOutput[T any] struct {
+	Body T
+}

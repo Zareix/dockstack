@@ -2,7 +2,7 @@ import { ArrowRightIcon, KeyIcon } from "@phosphor-icons/react"
 import { startAuthentication } from "@simplewebauthn/browser"
 import type { PublicKeyCredentialRequestOptionsJSON } from "@simplewebauthn/browser"
 import { useForm } from "@tanstack/react-form"
-import { useMutation, useQuery } from "@tanstack/react-query"
+import { useMutation } from "@tanstack/react-query"
 import { createFileRoute, Link, Navigate, useNavigate, useSearch } from "@tanstack/react-router"
 import { toast } from "sonner"
 import * as v from "valibot"
@@ -13,12 +13,12 @@ import { Input } from "#/components/ui/input"
 import { Label } from "#/components/ui/label"
 import { Spinner } from "#/components/ui/spinner"
 import {
-  getSocialProviders,
-  passkeyAuthBegin,
-  passkeyAuthFinish,
-  signInEmail,
-  signInUsername,
-} from "#/lib/api"
+  postAuthPasskeyAuthBegin,
+  postAuthPasskeyAuthFinish,
+  postAuthSignInEmail,
+  postAuthSignInUsername,
+  useGetAuthProviders,
+} from "#/lib/api/generated/default/default"
 import { useSession } from "#/lib/app-context/session"
 
 const authSearchSchema = v.object({
@@ -35,17 +35,14 @@ function SignIn() {
   const { redirectTo } = useSearch({ from: "/auth/sign-in" })
   const { isAuthenticated } = useSession()
 
-  const providersQuery = useQuery({
-    queryKey: ["social-providers"],
-    queryFn: getSocialProviders,
-  })
+  const providersQuery = useGetAuthProviders()
 
   const signInMutation = useMutation({
     mutationFn: async ({ identifier, password }: { identifier: string; password: string }) => {
       if (identifier.includes("@")) {
-        return signInEmail(identifier, password)
+        return postAuthSignInEmail({ email: identifier, password })
       }
-      return signInUsername(identifier, password)
+      return postAuthSignInUsername({ username: identifier, password })
     },
     onError: (e) => toast.error(e.message),
     onSuccess: () => {
@@ -56,11 +53,11 @@ function SignIn() {
 
   const passkeyMutation = useMutation({
     mutationFn: async () => {
-      const { options } = await passkeyAuthBegin()
+      const { options } = await postAuthPasskeyAuthBegin()
       const credential = await startAuthentication({
         optionsJSON: options as PublicKeyCredentialRequestOptionsJSON,
       })
-      return passkeyAuthFinish(credential)
+      return postAuthPasskeyAuthFinish({ credential })
     },
     onError: (e) => toast.error(e.message),
     onSuccess: () => {

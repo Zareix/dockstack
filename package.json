@@ -1,19 +1,19 @@
 {
   "name": "dockstack",
-  "version": "0.20.1",
   "private": true,
   "workspaces": [
     "web",
     "wiki"
   ],
   "scripts": {
-    "dev": "bun run --filter dockstack-web dev",
-    "build": "bun run --filter dockstack-web build",
-    "web:dev": "bun run --filter dockstack-web dev",
-    "web:build": "bun run --filter dockstack-web build",
-    "web:typecheck": "bun run --filter dockstack-web typecheck",
-    "wiki:dev": "bun run --filter wiki dev",
-    "wiki:build": "bun run --filter wiki build"
+    "dev": "bun run --filter dockstack-web --elide-lines=0 dev",
+    "build": "bun run --filter dockstack-web --elide-lines=0 build",
+    "web:dev": "bun run --filter dockstack-web --elide-lines=0 dev",
+    "web:api-gen": "bun run --filter dockstack-web --elide-lines=0 api:generate",
+    "web:build": "bun run --filter dockstack-web --elide-lines=0 build",
+    "web:lint": "bun run --filter dockstack-web --elide-lines=0 lint",
+    "wiki:dev": "bun run --filter wiki --elide-lines=0 dev",
+    "wiki:build": "bun run --filter wiki --elide-lines=0 build"
   },
   "devDependencies": {
     "@types/react": "^19.2.18",

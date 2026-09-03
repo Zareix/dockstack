@@ -1,7 +1,6 @@
 import { ArrowSquareOutIcon, LinkIcon } from "@phosphor-icons/react"
-import { useQuery } from "@tanstack/react-query"
 
-import { getStackContainers } from "#/lib/api"
+import { useGetStacksNameContainers } from "#/lib/api/generated/default/default.ts"
 
 import { Button } from "../ui/button"
 import {
@@ -12,13 +11,10 @@ import {
 } from "../ui/dropdown-menu"
 
 export function StackServiceLinks({ stackName }: { stackName: string }) {
-  const query = useQuery({
-    queryKey: ["stacks", stackName, "services"],
-    queryFn: () => getStackContainers(stackName),
-  })
+  const query = useGetStacksNameContainers(stackName)
 
   const links = (query.data ?? []).flatMap((container) =>
-    container.urls.map((url) => ({
+    (container.urls ?? []).map((url) => ({
       key: `${container.id}-${url}`,
       service: container.serviceName ?? container.name,
       label: url.replace(/^https?:\/\//, ""),

@@ -1,4 +1,3 @@
-import { useQuery } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
 import type { ColumnDef } from "@tanstack/react-table"
 
@@ -12,8 +11,8 @@ import {
   SortableHeader,
 } from "#/components/ui/data-table"
 import { Spinner } from "#/components/ui/spinner"
-import type { ImageInfo, StaleStatus } from "#/lib/api"
-import { checkImagesStale, listImages } from "#/lib/api"
+import { useGetImages, useGetImagesStale } from "#/lib/api/generated/default/default.ts"
+import type { GetImagesStale200, ImageInfo } from "#/lib/api/generated/model"
 export const Route = createFileRoute("/_private/images")({
   component: ImagesPage,
 })
@@ -29,7 +28,7 @@ function StaleCell({
   isLoading,
 }: {
   imageId: string
-  staleData: Record<string, StaleStatus> | undefined
+  staleData: GetImagesStale200 | undefined
   isLoading: boolean
 }) {
   if (isLoading) return <Spinner className="size-3" />
@@ -40,16 +39,10 @@ function StaleCell({
 }
 
 function ImagesPage() {
-  const imagesQuery = useQuery({
-    queryKey: ["images"],
-    queryFn: listImages,
-  })
+  const imagesQuery = useGetImages()
 
-  const staleQuery = useQuery({
-    queryKey: ["images-stale"],
-    queryFn: checkImagesStale,
-    enabled: !!imagesQuery.data,
-    staleTime: 60_000,
+  const staleQuery = useGetImagesStale({
+    query: { enabled: !!imagesQuery.data, staleTime: 60_000 },
   })
 
   const columns: ColumnDef<DataTableFeatures, ImageInfo>[] = [
@@ -63,8 +56,8 @@ function ImagesPage() {
         )
       },
       sortFn: (a, b) => {
-        const tagA = a.original.tags[0] ?? ""
-        const tagB = b.original.tags[0] ?? ""
+        const tagA = a.original.tags?.[0] ?? ""
+        const tagB = b.original.tags?.[0] ?? ""
         return tagA.localeCompare(tagB)
       },
     },
@@ -93,7 +86,7 @@ function ImagesPage() {
       cell: ({ row }) => (
         <StaleCell
           imageId={row.original.id}
-          staleData={staleQuery.data}
+          staleData={staleQuery.data ?? {}}
           isLoading={staleQuery.isLoading}
         />
       ),

@@ -5,7 +5,7 @@ import {
   ArrowsClockwiseIcon,
   SquareIcon,
 } from "@phosphor-icons/react"
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useQueryClient } from "@tanstack/react-query"
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import type { ColumnDef } from "@tanstack/react-table"
 import { toast } from "sonner"
@@ -20,8 +20,16 @@ import {
   SortableHeader,
 } from "#/components/ui/data-table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "#/components/ui/tooltip"
-import { listStacks, stackDown, stackPull, stackRestart, stackStop, stackUp } from "#/lib/api"
-import type { Stack } from "#/lib/api"
+import {
+  getGetStacksQueryKey,
+  useGetStacks,
+  usePostStackActionDown,
+  usePostStackActionPull,
+  usePostStackActionRestart,
+  usePostStackActionStop,
+  usePostStackActionUp,
+} from "#/lib/api/generated/default/default"
+import type { Stack } from "#/lib/api/generated/model"
 
 export const Route = createFileRoute("/_private/")({
   component: Home,
@@ -29,46 +37,51 @@ export const Route = createFileRoute("/_private/")({
 
 function StackActions({ name }: { name: string }) {
   const queryClient = useQueryClient()
-  const invalidate = () => queryClient.invalidateQueries({ queryKey: ["stacks"] })
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: getGetStacksQueryKey() })
 
-  const upMutation = useMutation({
-    mutationFn: () => stackUp(name),
-    onError: (e) => toast.error(e.message),
-    onSuccess: () => {
-      toast.success(`"${name}" started`)
-      invalidate()
+  const upMutation = usePostStackActionUp({
+    mutation: {
+      onError: (e) => toast.error(e.message),
+      onSuccess: () => {
+        toast.success(`"${name}" started`)
+        invalidate()
+      },
     },
   })
-  const stopMutation = useMutation({
-    mutationFn: () => stackStop(name),
-    onError: (e) => toast.error(e.message),
-    onSuccess: () => {
-      toast.success(`"${name}" stopped`)
-      invalidate()
+  const stopMutation = usePostStackActionStop({
+    mutation: {
+      onError: (e) => toast.error(e.message),
+      onSuccess: () => {
+        toast.success(`"${name}" stopped`)
+        invalidate()
+      },
     },
   })
-  const downMutation = useMutation({
-    mutationFn: () => stackDown(name),
-    onError: (e) => toast.error(e.message),
-    onSuccess: () => {
-      toast.success(`"${name}" down`)
-      invalidate()
+  const downMutation = usePostStackActionDown({
+    mutation: {
+      onError: (e) => toast.error(e.message),
+      onSuccess: () => {
+        toast.success(`"${name}" down`)
+        invalidate()
+      },
     },
   })
-  const restartMutation = useMutation({
-    mutationFn: () => stackRestart(name),
-    onError: (e) => toast.error(e.message),
-    onSuccess: () => {
-      toast.success(`"${name}" restarted`)
-      invalidate()
+  const restartMutation = usePostStackActionRestart({
+    mutation: {
+      onError: (e) => toast.error(e.message),
+      onSuccess: () => {
+        toast.success(`"${name}" restarted`)
+        invalidate()
+      },
     },
   })
-  const pullMutation = useMutation({
-    mutationFn: () => stackPull(name),
-    onError: (e) => toast.error(e.message),
-    onSuccess: () => {
-      toast.success(`"${name}" pulled`)
-      invalidate()
+  const pullMutation = usePostStackActionPull({
+    mutation: {
+      onError: (e) => toast.error(e.message),
+      onSuccess: () => {
+        toast.success(`"${name}" pulled`)
+        invalidate()
+      },
     },
   })
 
@@ -80,11 +93,11 @@ function StackActions({ name }: { name: string }) {
     pullMutation.isPending
 
   const actions = [
-    { label: "Pull", icon: DownloadIcon, onClick: () => pullMutation.mutate() },
-    { label: "Restart", icon: ArrowsClockwiseIcon, onClick: () => restartMutation.mutate() },
-    { label: "Stop", icon: PauseIcon, onClick: () => stopMutation.mutate() },
-    { label: "Down", icon: SquareIcon, onClick: () => downMutation.mutate() },
-    { label: "Up", icon: PlayIcon, onClick: () => upMutation.mutate() },
+    { label: "Pull", icon: DownloadIcon, onClick: () => pullMutation.mutate({ name }) },
+    { label: "Restart", icon: ArrowsClockwiseIcon, onClick: () => restartMutation.mutate({ name }) },
+    { label: "Stop", icon: PauseIcon, onClick: () => stopMutation.mutate({ name }) },
+    { label: "Down", icon: SquareIcon, onClick: () => downMutation.mutate({ name }) },
+    { label: "Up", icon: PlayIcon, onClick: () => upMutation.mutate({ name }) },
   ]
 
   return (
@@ -114,10 +127,8 @@ function StackActions({ name }: { name: string }) {
 
 function Home() {
   const navigate = useNavigate()
-  const stacksQuery = useQuery({
-    queryKey: ["stacks"],
-    queryFn: listStacks,
-    refetchInterval: 5000,
+  const stacksQuery = useGetStacks({
+    query: { refetchInterval: 5000 },
   })
 
   const columns: ColumnDef<DataTableFeatures, Stack>[] = [

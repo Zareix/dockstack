@@ -1,22 +1,23 @@
 import { TrashIcon } from "@phosphor-icons/react"
-import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 
 import { Button } from "#/components/ui/button"
-import type { ImageInfo } from "#/lib/api"
-import { imageRemove } from "#/lib/api"
+import { getGetImagesQueryKey, useDeleteImagesId } from "#/lib/api/generated/default/default"
+import type { ImageInfo } from "#/lib/api/generated/model"
 
 export function ImageActions({ image }: { image: ImageInfo }) {
   const queryClient = useQueryClient()
-  const label = image.tags[0] ?? image.id
+  const label = image.tags?.[0] ?? image.id
 
-  const removeM = useMutation({
-    mutationFn: () => imageRemove(image.id),
-    onSuccess: () => {
-      toast.success(`${label} removed`)
-      queryClient.invalidateQueries({ queryKey: ["images"] })
+  const removeM = useDeleteImagesId({
+    mutation: {
+      onSuccess: () => {
+        toast.success(`${label} removed`)
+        queryClient.invalidateQueries({ queryKey: getGetImagesQueryKey() })
+      },
+      onError: (e) => toast.error(e.message),
     },
-    onError: (e) => toast.error(e.message),
   })
 
   return (
@@ -25,7 +26,7 @@ export function ImageActions({ image }: { image: ImageInfo }) {
       variant="ghost"
       className="size-7 text-destructive hover:text-destructive"
       disabled={removeM.isPending}
-      onClick={() => removeM.mutate()}
+      onClick={() => removeM.mutate({ id: image.id })}
       aria-label="Remove"
     >
       <TrashIcon size={14} />

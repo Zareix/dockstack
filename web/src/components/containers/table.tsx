@@ -2,7 +2,7 @@ import { ArrowSquareOutIcon } from "@phosphor-icons/react/dist/ssr/ArrowSquareOu
 import { Link } from "@tanstack/react-router"
 import type { ColumnDef } from "@tanstack/react-table"
 
-import type { ContainerInfo } from "#/lib/api"
+import type { ContainerInfo } from "#/lib/api/generated/model"
 
 import { StatusBadge } from "../status-badge"
 import {

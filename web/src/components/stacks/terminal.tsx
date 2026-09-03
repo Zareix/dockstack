@@ -1,5 +1,4 @@
 import { TerminalIcon } from "@phosphor-icons/react"
-import { useQuery } from "@tanstack/react-query"
 import { lazy, Suspense, useState } from "react"
 
 import {
@@ -10,7 +9,7 @@ import {
   SelectValue,
 } from "#/components/ui/select"
 import { Spinner } from "#/components/ui/spinner"
-import { getStackContainers } from "#/lib/api"
+import { useGetStacksNameContainers } from "#/lib/api/generated/default/default.ts"
 
 const ContainerTerminal = lazy(() =>
   import("#/components/terminal/container-terminal").then((m) => ({
@@ -24,9 +23,10 @@ export function StackTerminal({ stackName }: { stackName: string }) {
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [shell, setShell] = useState("/bin/sh")
 
-  const query = useQuery({
-    queryKey: ["stacks", stackName, "services"],
-    queryFn: () => getStackContainers(stackName),
+  const query = useGetStacksNameContainers(stackName, {
+    query: {
+      refetchInterval: 1000,
+    },
   })
 
   if (query.isLoading) return <Spinner />

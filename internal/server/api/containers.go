@@ -21,13 +21,13 @@ func (d *Deps) handleContainersList(ctx context.Context, _ *struct{}) (*web.List
 	return &web.ListOutput[dockerapi.ContainerInfo]{Body: containers}, nil
 }
 
-func (d *Deps) handleContainersPrune(ctx context.Context, _ *struct{}) (*dockerapi.PruneResult, error) {
+func (d *Deps) handleContainersPrune(ctx context.Context, _ *struct{}) (*web.DataOutput[dockerapi.PruneResult], error) {
 	res, err := d.Docker.ContainerPrune(ctx)
 	if err != nil {
 		web.LogError(web.RequestFrom(ctx), err)
 		return nil, huma.Error500InternalServerError("failed to prune containers")
 	}
-	return &res, nil
+	return &web.DataOutput[dockerapi.PruneResult]{Body: res}, nil
 }
 
 var containerIDRe = regexp.MustCompile(`^[a-f0-9]{1,64}$`)

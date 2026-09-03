@@ -1,19 +1,16 @@
-import { useQuery } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
 
 import { PruneContainersButton } from "#/components/containers/prune-containers-button"
 import { ContainersTable } from "#/components/containers/table.tsx"
-import { listAllContainers } from "#/lib/api"
+import { useGetContainers } from "#/lib/api/generated/default/default.ts"
 
 export const Route = createFileRoute("/_private/containers")({
   component: ContainersPage,
 })
 
 function ContainersPage() {
-  const query = useQuery({
-    queryKey: ["containers"],
-    queryFn: listAllContainers,
-    refetchInterval: 5000,
+  const query = useGetContainers({
+    query: { refetchInterval: 5000 },
   })
 
   return (

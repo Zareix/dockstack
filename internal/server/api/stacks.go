@@ -57,8 +57,8 @@ func (d *Deps) handleStacksList(ctx context.Context, _ *struct{}) (*web.ListOutp
 
 type stackGetResponse struct {
 	Body struct {
-		Name   string `json:"name"`
-		Status string `json:"status"`
+		Name   string                `json:"name"`
+		Status dockerapi.StackStatus `json:"status"`
 	}
 }
 
@@ -77,7 +77,7 @@ func (d *Deps) handleStackGet(ctx context.Context, in *nameInput) (*stackGetResp
 	}
 	resp := &stackGetResponse{}
 	resp.Body.Name = in.Name
-	resp.Body.Status = string(status)
+	resp.Body.Status = status
 	return resp, nil
 }
 
@@ -287,9 +287,14 @@ func (d *Deps) registerStacks(api huma.API, router chi.Router) {
 	huma.Delete(api, "/api/stacks/{name}", d.handleStackDestroy, d.SessionMW)
 	for _, a := range stackActions {
 		action := a
-		huma.Post(api, "/api/stacks/{name}/"+action.path, func(ctx context.Context, in *nameInput) (*web.OKResponse, error) {
+		huma.Register(api, huma.Operation{
+			Method:      "POST",
+			Path:        "/api/stacks/{name}/" + action.path,
+			OperationID: "post-stack-action-" + action.path,
+			Middlewares: huma.Middlewares{d.HumaRequireSession},
+		}, func(ctx context.Context, in *nameInput) (*web.OKResponse, error) {
 			return d.handleStackAction(ctx, in, action.args)
-		}, d.SessionMW)
+		})
 	}
 	router.Group(func(gr chi.Router) {
 		gr.Use(d.RequireSession)

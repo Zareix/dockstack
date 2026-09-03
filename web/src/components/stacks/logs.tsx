@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "#/components/ui/select"
 import { Switch } from "#/components/ui/switch"
-import type { LogEntry } from "#/lib/api"
+import type { LogEntry } from "#/lib/api/ws.ts"
 import { cn } from "#/lib/utils"
 
 type ParsedLog =
