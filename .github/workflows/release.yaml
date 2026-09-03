@@ -10,7 +10,9 @@ jobs:
     name: Get version
     uses: zareix/gh-actions/.github/workflows/get-version.yml@main
     with:
-      type: node
+      type: regex
+      file: cmd/dockstack/main.go
+      regex: 'const Version = "(\K[^"]+)'
 
   docker:
     name: Docker

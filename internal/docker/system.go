@@ -72,7 +72,7 @@ func (c *Client) ListVolumesInfo(ctx context.Context) ([]VolumeInfo, error) {
 			Created: v.CreatedAt,
 			Size:    size,
 			InUse:   inUse,
-			Status:  status,
+			Status:  VolumeStatus(status),
 		})
 	}
 	sort.Slice(out, func(i, j int) bool { return out[i].Name < out[j].Name })
@@ -111,7 +111,7 @@ func (c *Client) ListNetworksInfo(ctx context.Context) ([]NetworkInfo, error) {
 			Name:   n.Name,
 			Driver: n.Driver,
 			Scope:  n.Scope,
-			Status: status,
+			Status: NetworkStatus(status),
 		})
 	}
 	sort.Slice(out, func(i, j int) bool { return out[i].Name < out[j].Name })
@@ -139,32 +139,32 @@ func (c *Client) ListImagesInfo(ctx context.Context) ([]ImageInfo, error) {
 
 // CheckImagesStale queries the registry distribution endpoint for each tagged
 // image and compares the remote digest to the local repo digests.
-func (c *Client) CheckImagesStale(ctx context.Context) map[string]string {
+func (c *Client) CheckImagesStale(ctx context.Context) map[string]StaleStatus {
 	images, err := c.ListImagesInfo(ctx)
 	if err != nil {
-		return map[string]string{}
+		return map[string]StaleStatus{}
 	}
-	results := make(map[string]string, len(images))
+	results := make(map[string]StaleStatus, len(images))
 	var mu sync.Mutex
 	var wg sync.WaitGroup
 	for _, img := range images {
 		if len(img.Tags) == 0 || len(img.RepoDigests) == 0 {
-			results[img.ID] = "unknown"
+			results[img.ID] = StaleUnknown
 			continue
 		}
 		wg.Add(1)
 		go func(img ImageInfo) {
 			defer wg.Done()
-			status := "unknown"
+			status := StaleUnknown
 			if digest, ok := c.RemoteDigest(ctx, img.Tags[0]); ok {
 				for _, d := range img.RepoDigests {
 					if strings.Contains(d, digest) {
-						status = "up-to-date"
+						status = StaleUpToDate
 						break
 					}
 				}
-				if status != "up-to-date" {
-					status = "outdated"
+				if status != StaleUpToDate {
+					status = StaleOutdated
 				}
 			}
 			mu.Lock()

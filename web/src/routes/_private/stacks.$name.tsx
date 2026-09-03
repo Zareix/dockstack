@@ -6,7 +6,7 @@ import {
   SquareIcon,
   TrashIcon,
 } from "@phosphor-icons/react"
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useQueryClient } from "@tanstack/react-query"
 import { ClientOnly, createFileRoute, useRouter } from "@tanstack/react-router"
 import { useCallback, useEffect } from "react"
 import { toast } from "sonner"
@@ -33,12 +33,15 @@ import { Button } from "#/components/ui/button"
 import { Spinner } from "#/components/ui/spinner.tsx"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/components/ui/tabs"
 import {
-  createStack,
-  getStackStatus,
-  stackDestroy,
-  stackExists,
-  streamStackAction,
-} from "#/lib/api"
+  getGetStacksNameContainersQueryKey,
+  getGetStacksNameQueryKey,
+  getGetStacksQueryKey,
+  getStacksName,
+  useDeleteStacksName,
+  useGetStacksName,
+  usePostStacks,
+} from "#/lib/api/generated/default/default.ts"
+import { streamStackAction } from "#/lib/api/sse.ts"
 
 const tabSchema = v.object({
   tab: v.optional(v.picklist(["services", "files", "logs", "terminal"]), "files"),
@@ -48,7 +51,10 @@ export const Route = createFileRoute("/_private/stacks/$name")({
   validateSearch: tabSchema,
   async beforeLoad({ params: { name } }) {
     return {
-      stackExists: await stackExists(name),
+      stackExists: await getStacksName(name).then(
+        () => true,
+        () => false,
+      ),
     }
   },
   pendingComponent: () => <Spinner />,
@@ -70,13 +76,14 @@ function StackNotFound({ name }: { name: string }) {
   const router = useRouter()
   const queryClient = useQueryClient()
 
-  const createMutation = useMutation({
-    mutationFn: () => createStack(name),
-    onError: (error) => toast.error(error.message),
-    onSuccess: () => {
-      toast.success(`Stack ${name} created`)
-      router.invalidate()
-      queryClient.invalidateQueries({ queryKey: ["stacks"] })
+  const createMutation = usePostStacks({
+    mutation: {
+      onError: (error) => toast.error(error.message),
+      onSuccess: () => {
+        toast.success(`Stack ${name} created`)
+        router.invalidate()
+        queryClient.invalidateQueries({ queryKey: getGetStacksQueryKey() })
+      },
     },
   })
 
@@ -84,7 +91,14 @@ function StackNotFound({ name }: { name: string }) {
     <div className="flex flex-col items-center justify-center gap-4 py-24 text-center">
       <h2 className="text-xl font-semibold">Stack "{name}" doesn't exist</h2>
       <p className="text-muted-foreground">Want to create it?</p>
-      <Button onClick={() => createMutation.mutate()} disabled={createMutation.isPending}>
+      <Button
+        onClick={() =>
+          createMutation.mutate({
+            data: { name },
+          })
+        }
+        disabled={createMutation.isPending}
+      >
         {createMutation.isPending ? "Creating..." : `Create "${name}"`}
       </Button>
     </div>
@@ -96,24 +110,23 @@ function StackDetails({ name }: { name: string }) {
   const queryClient = useQueryClient()
   const navigate = Route.useNavigate()
 
-  const statusQuery = useQuery({
-    queryKey: ["stacks", name, "status"],
-    queryFn: () => getStackStatus(name),
-    refetchInterval: 1000,
+  const statusQuery = useGetStacksName(name, {
+    query: { refetchInterval: 1000, select: (data) => data.status },
   })
 
   const invalidateStatus = useCallback(() => {
-    queryClient.invalidateQueries({ queryKey: ["stacks", name, "status"] })
-    queryClient.invalidateQueries({ queryKey: ["stacks", name, "services"] })
+    queryClient.invalidateQueries({ queryKey: getGetStacksNameQueryKey(name) })
+    queryClient.invalidateQueries({ queryKey: getGetStacksNameContainersQueryKey(name) })
   }, [queryClient, name])
 
-  const destroyMutation = useMutation({
-    mutationFn: () => stackDestroy(name),
-    onError: (error) => toast.error(error.message),
-    onSuccess: () => {
-      toast.success(`Stack ${name} destroyed`)
-      queryClient.invalidateQueries({ queryKey: ["stacks"] })
-      navigate({ to: "/" })
+  const destroyMutation = useDeleteStacksName({
+    mutation: {
+      onError: (error) => toast.error(error.message),
+      onSuccess: () => {
+        toast.success(`Stack ${name} destroyed`)
+        queryClient.invalidateQueries({ queryKey: getGetStacksQueryKey() })
+        navigate({ to: "/" })
+      },
     },
   })
 
@@ -152,7 +165,14 @@ function StackDetails({ name }: { name: string }) {
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogCancel variant="destructive" onClick={() => destroyMutation.mutate()}>
+                <AlertDialogCancel
+                  variant="destructive"
+                  onClick={() =>
+                    destroyMutation.mutate({
+                      name,
+                    })
+                  }
+                >
                   Destroy
                 </AlertDialogCancel>
               </AlertDialogFooter>

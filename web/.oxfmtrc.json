@@ -8,5 +8,5 @@
     "functions": ["clsx", "cn"],
     "preserveWhitespace": true
   },
-  "ignorePatterns": ["bun.lock", "src/routeTree.gen.ts"]
+  "ignorePatterns": ["bun.lock", "src/routeTree.gen.ts", "src/lib/api/generated"]
 }

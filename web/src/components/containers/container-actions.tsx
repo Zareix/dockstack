@@ -1,10 +1,19 @@
 import { PlayIcon, ArrowsClockwiseIcon, SquareIcon, TrashIcon } from "@phosphor-icons/react"
-import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 
 import { Button } from "#/components/ui/button"
-import type { ContainerInfo } from "#/lib/api"
-import { containerRemove, containerRestart, containerStart, containerStop } from "#/lib/api"
+import {
+  getGetContainersQueryKey,
+  getGetStacksNameContainersQueryKey,
+  getGetStacksNameQueryKey,
+  getGetStacksQueryKey,
+  useDeleteContainersId,
+  usePostContainersIdRestart,
+  usePostContainersIdStart,
+  usePostContainersIdStop,
+} from "#/lib/api/generated/default/default"
+import type { ContainerInfo } from "#/lib/api/generated/model"
 
 export function ContainerActions({
   container,
@@ -16,46 +25,50 @@ export function ContainerActions({
   const queryClient = useQueryClient()
 
   const invalidate = () => {
-    queryClient.invalidateQueries({ queryKey: ["containers"] })
+    queryClient.invalidateQueries({ queryKey: getGetContainersQueryKey() })
     queryClient.invalidateQueries({
-      queryKey: stackName ? ["stacks", stackName, "status"] : ["stacks"],
+      queryKey: stackName ? getGetStacksNameQueryKey(stackName) : getGetStacksQueryKey(),
     })
     queryClient.invalidateQueries({
-      queryKey: stackName ? ["stacks", stackName, "services"] : ["stacks"],
+      queryKey: stackName ? getGetStacksNameContainersQueryKey(stackName) : getGetStacksQueryKey(),
     })
   }
 
-  const startM = useMutation({
-    mutationFn: () => containerStart(container.id),
-    onSuccess: () => {
-      toast.success(`${container.name} started`)
-      invalidate()
+  const startM = usePostContainersIdStart({
+    mutation: {
+      onSuccess: () => {
+        toast.success(`${container.name} started`)
+        invalidate()
+      },
+      onError: (e) => toast.error(e.message),
     },
-    onError: (e) => toast.error(e.message),
   })
-  const stopM = useMutation({
-    mutationFn: () => containerStop(container.id),
-    onSuccess: () => {
-      toast.success(`${container.name} stopped`)
-      invalidate()
+  const stopM = usePostContainersIdStop({
+    mutation: {
+      onSuccess: () => {
+        toast.success(`${container.name} stopped`)
+        invalidate()
+      },
+      onError: (e) => toast.error(e.message),
     },
-    onError: (e) => toast.error(e.message),
   })
-  const restartM = useMutation({
-    mutationFn: () => containerRestart(container.id),
-    onSuccess: () => {
-      toast.success(`${container.name} restarted`)
-      invalidate()
+  const restartM = usePostContainersIdRestart({
+    mutation: {
+      onSuccess: () => {
+        toast.success(`${container.name} restarted`)
+        invalidate()
+      },
+      onError: (e) => toast.error(e.message),
     },
-    onError: (e) => toast.error(e.message),
   })
-  const removeM = useMutation({
-    mutationFn: () => containerRemove(container.id),
-    onSuccess: () => {
-      toast.success(`${container.name} removed`)
-      invalidate()
+  const removeM = useDeleteContainersId({
+    mutation: {
+      onSuccess: () => {
+        toast.success(`${container.name} removed`)
+        invalidate()
+      },
+      onError: (e) => toast.error(e.message),
     },
-    onError: (e) => toast.error(e.message),
   })
 
   const busy = startM.isPending || stopM.isPending || restartM.isPending || removeM.isPending
@@ -71,7 +84,7 @@ export function ContainerActions({
           variant="ghost"
           className="size-7"
           disabled={busy}
-          onClick={() => stopM.mutate()}
+          onClick={() => stopM.mutate({ id: container.id })}
           aria-label="Stop"
         >
           <SquareIcon size={14} />
@@ -82,7 +95,7 @@ export function ContainerActions({
           variant="ghost"
           className="size-7"
           disabled={busy}
-          onClick={() => startM.mutate()}
+          onClick={() => startM.mutate({ id: container.id })}
           aria-label="Start"
         >
           <PlayIcon size={14} />
@@ -93,7 +106,7 @@ export function ContainerActions({
         variant="ghost"
         className="size-7"
         disabled={busy || !running}
-        onClick={() => restartM.mutate()}
+        onClick={() => restartM.mutate({ id: container.id })}
         aria-label="Restart"
       >
         <ArrowsClockwiseIcon size={14} />
@@ -103,7 +116,7 @@ export function ContainerActions({
         variant="ghost"
         className="size-7 text-destructive hover:text-destructive"
         disabled={busy}
-        onClick={() => removeM.mutate()}
+        onClick={() => removeM.mutate({ id: container.id })}
         aria-label="Remove"
       >
         <TrashIcon size={14} />

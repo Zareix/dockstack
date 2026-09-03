@@ -1,8 +1,8 @@
+import { CopyIcon } from "@phosphor-icons/react"
 import { startRegistration } from "@simplewebauthn/browser"
 import type { PublicKeyCredentialCreationOptionsJSON } from "@simplewebauthn/browser"
-import { CopyIcon } from "@phosphor-icons/react"
 import { useForm } from "@tanstack/react-form"
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
 import { useState } from "react"
 import { toast } from "sonner"
@@ -30,18 +30,21 @@ import {
 import { Input } from "#/components/ui/input"
 import { Label } from "#/components/ui/label"
 import {
-  changePassword,
-  createApiKey,
-  deleteApiKey,
-  deletePasskey,
-  listApiKeys,
-  listPasskeys,
-  listSessions,
-  passkeyRegisterBegin,
-  passkeyRegisterFinish,
-  revokeOtherSessions,
-  revokeSession,
-} from "#/lib/api"
+  getGetAuthApiKeysQueryKey,
+  getGetAuthPasskeysQueryKey,
+  getGetAuthSessionsQueryKey,
+  postAuthPasskeyAuthBegin,
+  postAuthPasskeyAuthFinish,
+  useDeleteAuthApiKeysId,
+  useDeleteAuthPasskeyId,
+  useGetAuthApiKeys,
+  useGetAuthPasskeys,
+  useGetAuthSessions,
+  usePostAuthApiKeys,
+  usePostAuthChangePassword,
+  usePostAuthSessionsIdRevoke,
+  usePostAuthSessionsRevokeOthers,
+} from "#/lib/api/generated/default/default.ts"
 
 export const Route = createFileRoute("/_private/settings/security")({
   component: SecuritySettings,
@@ -59,23 +62,21 @@ function SecuritySettings() {
 }
 
 function ChangePassword() {
-  const mutation = useMutation({
-    mutationFn: ({
-      currentPassword,
-      newPassword,
-    }: {
-      currentPassword: string
-      newPassword: string
-    }) => changePassword(currentPassword, newPassword),
-    onSuccess: () => {
-      toast.success("Password changed")
-      form.reset()
+  const mutation = usePostAuthChangePassword({
+    mutation: {
+      onSuccess: () => {
+        toast.success("Password changed")
+        form.reset()
+      },
+      onError: (e) => toast.error(e.message),
     },
-    onError: (e) => toast.error(e.message),
   })
   const form = useForm({
     defaultValues: { currentPassword: "", newPassword: "" },
-    onSubmit: ({ value }) => mutation.mutate(value),
+    onSubmit: ({ value }) =>
+      mutation.mutate({
+        data: value,
+      }),
   })
   return (
     <Card>
@@ -130,18 +131,20 @@ function ChangePassword() {
 
 function SessionsSection() {
   const queryClient = useQueryClient()
-  const sessionsQuery = useQuery({ queryKey: ["sessions"], queryFn: listSessions })
+  const sessionsQuery = useGetAuthSessions()
 
-  const revoke = useMutation({
-    mutationFn: (id: string) => revokeSession(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["sessions"] }),
-    onError: (e) => toast.error(e.message),
+  const revoke = usePostAuthSessionsIdRevoke({
+    mutation: {
+      onSuccess: () => queryClient.invalidateQueries({ queryKey: getGetAuthSessionsQueryKey() }),
+      onError: (e) => toast.error(e.message),
+    },
   })
 
-  const revokeOthers = useMutation({
-    mutationFn: () => revokeOtherSessions(),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["sessions"] }),
-    onError: (e) => toast.error(e.message),
+  const revokeOthers = usePostAuthSessionsRevokeOthers({
+    mutation: {
+      onSuccess: () => queryClient.invalidateQueries({ queryKey: getGetAuthSessionsQueryKey() }),
+      onError: (e) => toast.error(e.message),
+    },
   })
 
   return (
@@ -165,7 +168,7 @@ function SessionsSection() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => revoke.mutate(s.id)}
+                onClick={() => revoke.mutate({ id: s.id })}
                 disabled={revoke.isPending}
               >
                 Revoke
@@ -191,27 +194,29 @@ function SessionsSection() {
 
 function ApiKeysSection() {
   const queryClient = useQueryClient()
-  const keysQuery = useQuery({ queryKey: ["api-keys"], queryFn: listApiKeys })
+  const keysQuery = useGetAuthApiKeys()
   const [createdKey, setCreatedKey] = useState<{ name: string; key: string } | null>(null)
 
-  const create = useMutation({
-    mutationFn: (name: string) => createApiKey(name),
-    onSuccess: (result, name) => {
-      setCreatedKey({ name, key: result.key })
-      queryClient.invalidateQueries({ queryKey: ["api-keys"] })
-      form.reset()
+  const create = usePostAuthApiKeys({
+    mutation: {
+      onSuccess: (result, variables) => {
+        setCreatedKey({ name: variables.data.name ?? "", key: result.key })
+        queryClient.invalidateQueries({ queryKey: getGetAuthApiKeysQueryKey() })
+        form.reset()
+      },
+      onError: (e) => toast.error(e.message),
     },
-    onError: (e) => toast.error(e.message),
   })
-  const remove = useMutation({
-    mutationFn: (id: string) => deleteApiKey(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["api-keys"] }),
-    onError: (e) => toast.error(e.message),
+  const remove = useDeleteAuthApiKeysId({
+    mutation: {
+      onSuccess: () => queryClient.invalidateQueries({ queryKey: getGetAuthApiKeysQueryKey() }),
+      onError: (e) => toast.error(e.message),
+    },
   })
 
   const form = useForm({
     defaultValues: { name: "" },
-    onSubmit: ({ value }) => create.mutate(value.name),
+    onSubmit: ({ value }) => create.mutate({ data: { name: value.name } }),
   })
 
   const copyKey = async () => {
@@ -280,7 +285,10 @@ function ApiKeysSection() {
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogCancel variant="destructive" onClick={() => remove.mutate(key.id)}>
+                  <AlertDialogCancel
+                    variant="destructive"
+                    onClick={() => remove.mutate({ id: key.id })}
+                  >
                     Delete
                   </AlertDialogCancel>
                 </AlertDialogFooter>
@@ -316,27 +324,28 @@ function ApiKeysSection() {
 
 function PasskeysSection() {
   const queryClient = useQueryClient()
-  const passkeysQuery = useQuery({ queryKey: ["passkeys"], queryFn: listPasskeys })
+  const passkeysQuery = useGetAuthPasskeys()
 
   const addPasskey = useMutation({
     mutationFn: async () => {
-      const { options } = await passkeyRegisterBegin()
+      const { options } = await postAuthPasskeyAuthBegin()
       const credential = await startRegistration({
         optionsJSON: options as PublicKeyCredentialCreationOptionsJSON,
       })
-      return passkeyRegisterFinish(credential)
+      return postAuthPasskeyAuthFinish({ credential })
     },
     onSuccess: () => {
       toast.success("Passkey added")
-      queryClient.invalidateQueries({ queryKey: ["passkeys"] })
+      queryClient.invalidateQueries({ queryKey: getGetAuthPasskeysQueryKey() })
     },
     onError: (e) => toast.error(e.message),
   })
 
-  const remove = useMutation({
-    mutationFn: (id: string) => deletePasskey(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["passkeys"] }),
-    onError: (e) => toast.error(e.message),
+  const remove = useDeleteAuthPasskeyId({
+    mutation: {
+      onSuccess: () => queryClient.invalidateQueries({ queryKey: getGetAuthPasskeysQueryKey() }),
+      onError: (e) => toast.error(e.message),
+    },
   })
 
   return (
@@ -360,7 +369,7 @@ function PasskeysSection() {
             className="flex items-center justify-between rounded-md border px-3 py-2 text-sm"
           >
             <span className="font-mono">{passkey.name}</span>
-            <Button variant="ghost" size="sm" onClick={() => remove.mutate(passkey.id)}>
+            <Button variant="ghost" size="sm" onClick={() => remove.mutate({ id: passkey.id })}>
               Delete
             </Button>
           </div>

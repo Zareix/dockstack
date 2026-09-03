@@ -22,13 +22,13 @@ func (d *Deps) handleVolumesList(ctx context.Context, _ *struct{}) (*web.ListOut
 	return &web.ListOutput[dockerapi.VolumeInfo]{Body: volumes}, nil
 }
 
-func (d *Deps) handleVolumesPrune(ctx context.Context, _ *struct{}) (*dockerapi.PruneResult, error) {
+func (d *Deps) handleVolumesPrune(ctx context.Context, _ *struct{}) (*web.DataOutput[dockerapi.PruneResult], error) {
 	res, err := d.Docker.VolumePrune(ctx)
 	if err != nil {
 		web.LogError(web.RequestFrom(ctx), err)
 		return nil, huma.Error500InternalServerError("failed to prune volumes")
 	}
-	return &res, nil
+	return &web.DataOutput[dockerapi.PruneResult]{Body: res}, nil
 }
 
 type volumeNameInput struct {

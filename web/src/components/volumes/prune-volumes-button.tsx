@@ -1,5 +1,5 @@
 import { BroomIcon } from "@phosphor-icons/react"
-import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
 import { toast } from "sonner"
 
@@ -15,21 +15,22 @@ import {
   AlertDialogTrigger,
 } from "#/components/ui/alert-dialog"
 import { Button } from "#/components/ui/button"
-import { volumePrune } from "#/lib/api"
+import { getGetVolumesQueryKey, usePostVolumesPrune } from "#/lib/api/generated/default/default"
 
 export function PruneVolumesButton() {
   const [open, setOpen] = useState(false)
   const queryClient = useQueryClient()
 
-  const pruneM = useMutation({
-    mutationFn: () => volumePrune(),
-    onSuccess: (result) => {
-      const count = result.deleted.length
-      const mb = (result.spaceReclaimed / 1e6).toFixed(1)
-      toast.success(`Pruned ${count} volume${count !== 1 ? "s" : ""}, freed ${mb} MB`)
-      queryClient.invalidateQueries({ queryKey: ["volumes"] })
+  const pruneM = usePostVolumesPrune({
+    mutation: {
+      onSuccess: (result) => {
+        const count = result.deleted?.length ?? 0
+        const mb = (result.spaceReclaimed / 1e6).toFixed(1)
+        toast.success(`Pruned ${count} volume${count !== 1 ? "s" : ""}, freed ${mb} MB`)
+        queryClient.invalidateQueries({ queryKey: getGetVolumesQueryKey() })
+      },
+      onError: (e) => toast.error(e.message),
     },
-    onError: (e) => toast.error(e.message),
   })
 
   return (

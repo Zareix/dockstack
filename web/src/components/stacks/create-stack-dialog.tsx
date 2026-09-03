@@ -1,6 +1,6 @@
 import { PlusIcon } from "@phosphor-icons/react"
 import { useForm } from "@tanstack/react-form"
-import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useQueryClient } from "@tanstack/react-query"
 import { useNavigate } from "@tanstack/react-router"
 import { useState } from "react"
 import { toast } from "sonner"
@@ -18,7 +18,11 @@ import {
 import { FieldError } from "#/components/ui/field"
 import { Input } from "#/components/ui/input"
 import { Label } from "#/components/ui/label"
-import { createStack, stackExists } from "#/lib/api"
+import {
+  getGetStacksQueryKey,
+  getStacksName,
+  usePostStacks,
+} from "#/lib/api/generated/default/default.ts"
 
 const schema = v.object({
   name: v.pipe(
@@ -33,27 +37,28 @@ export function CreateStackButton() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
 
-  const mutation = useMutation({
-    mutationFn: (stackName: string) => createStack(stackName),
-    onSuccess: (_, stackName) => {
-      toast.success(`Stack "${stackName}" created`)
-      queryClient.invalidateQueries({ queryKey: ["stacks"] })
-      setOpen(false)
-      form.reset()
-      navigate({
-        to: `/stacks/${stackName}`,
-        search: {
-          tab: "files",
-        },
-      })
+  const mutation = usePostStacks({
+    mutation: {
+      onSuccess: (_, stack) => {
+        toast.success(`Stack "${stack.data.name}" created`)
+        queryClient.invalidateQueries({ queryKey: getGetStacksQueryKey() })
+        setOpen(false)
+        form.reset()
+        navigate({
+          to: `/stacks/${stack.data.name}`,
+          search: {
+            tab: "files",
+          },
+        })
+      },
+      onError: (e) => toast.error(e.message),
     },
-    onError: (e) => toast.error(e.message),
   })
 
   const form = useForm({
     defaultValues: { name: "" },
     validators: { onSubmit: schema },
-    onSubmit: ({ value }) => mutation.mutate(value.name),
+    onSubmit: ({ value }) => mutation.mutate({ data: { name: value.name } }),
   })
 
   return (
@@ -82,7 +87,10 @@ export function CreateStackButton() {
               validators={{
                 onChangeAsync: async ({ value }) => {
                   if (!v.safeParse(schema.entries.name, value).success) return undefined
-                  const exists = await stackExists(value)
+                  const exists = await getStacksName(value).then(
+                    () => true,
+                    () => false,
+                  )
                   return exists ? `A stack named "${value}" already exists` : undefined
                 },
                 onChangeAsyncDebounceMs: 300,

@@ -30,18 +30,18 @@ func publicAPIConfig() huma.Config {
 
 func init() {
 	huma.GenerateOperationID = func(method, path string, _ any) string {
-		id := casing.Kebab(method + "-" + strings.TrimSuffix(path, "/"))
+		p := strings.TrimPrefix(strings.TrimSuffix(path, "/"), "/api")
 		if strings.HasSuffix(path, "/") {
-			id += "-slash"
+			p += "-slash"
 		}
-		return id
+		return casing.Kebab(method + "-" + p)
 	}
 	huma.GenerateSummary = func(method, path string, _ any) string {
 		return method + " " + path
 	}
 }
 
-func Mount(router chi.Router, d *Deps) {
+func Mount(router chi.Router, d *Deps) huma.API {
 	api := humachi.New(router, publicAPIConfig())
 	api.UseMiddleware(d.requestMiddleware)
 
@@ -53,4 +53,6 @@ func Mount(router chi.Router, d *Deps) {
 	d.registerVolumes(api)
 	d.registerNetworks(api)
 	d.registerWS(router)
+
+	return api
 }

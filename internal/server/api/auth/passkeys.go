@@ -158,4 +158,6 @@ func (d *Deps) registerPasskeys(api huma.API) {
 	huma.Post(api, "/api/auth/passkey/register/finish", d.handlePasskeyRegisterFinish, d.SessionMW)
 	huma.Post(api, "/api/auth/passkey/auth/begin", d.handlePasskeyAuthBegin, d.SessionMW)
 	huma.Post(api, "/api/auth/passkey/auth/finish", d.handlePasskeyAuthFinish, d.SessionMW)
+	huma.Get(api, "/api/auth/passkeys", d.handleListPasskeys, d.SessionMW)
+	huma.Delete(api, "/api/auth/passkey/{id}", d.handleDeletePasskey, d.SessionMW)
 }

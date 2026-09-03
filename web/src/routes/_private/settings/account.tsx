@@ -1,5 +1,5 @@
 import { useForm } from "@tanstack/react-form"
-import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useQueryClient } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
 import { toast } from "sonner"
 
@@ -7,7 +7,11 @@ import { Button } from "#/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "#/components/ui/card"
 import { Input } from "#/components/ui/input"
 import { Label } from "#/components/ui/label"
-import { changeEmail, updateUser } from "#/lib/api"
+import {
+  getGetAuthSessionQueryKey,
+  usePatchAuthUser,
+  usePostAuthChangeEmail,
+} from "#/lib/api/generated/default/default.ts"
 import { useSession } from "#/lib/app-context/session"
 
 export const Route = createFileRoute("/_private/settings/account")({
@@ -20,13 +24,14 @@ function AccountSettings() {
 
   const user = session?.user
 
-  const updateProfile = useMutation({
-    mutationFn: (values: { name: string; avatar: string }) => updateUser(values),
-    onSuccess: () => {
-      toast.success("Profile updated")
-      queryClient.invalidateQueries({ queryKey: ["session"] })
+  const updateProfile = usePatchAuthUser({
+    mutation: {
+      onSuccess: () => {
+        toast.success("Profile updated")
+        queryClient.invalidateQueries({ queryKey: getGetAuthSessionQueryKey() })
+      },
+      onError: (e) => toast.error(e.message),
     },
-    onError: (e) => toast.error(e.message),
   })
 
   const profileForm = useForm({
@@ -34,21 +39,25 @@ function AccountSettings() {
       name: user?.name ?? "",
       avatar: user?.avatar ?? "",
     },
-    onSubmit: ({ value }) => updateProfile.mutate(value),
+    onSubmit: ({ value }) =>
+      updateProfile.mutate({
+        data: value,
+      }),
   })
 
-  const emailMutation = useMutation({
-    mutationFn: (email: string) => changeEmail(email),
-    onSuccess: () => {
-      toast.success("Email updated")
-      queryClient.invalidateQueries({ queryKey: ["session"] })
+  const emailMutation = usePostAuthChangeEmail({
+    mutation: {
+      onSuccess: () => {
+        toast.success("Email updated")
+        queryClient.invalidateQueries({ queryKey: getGetAuthSessionQueryKey() })
+      },
+      onError: (e) => toast.error(e.message),
     },
-    onError: (e) => toast.error(e.message),
   })
 
   const emailForm = useForm({
     defaultValues: { email: user?.email ?? "" },
-    onSubmit: ({ value }) => emailMutation.mutate(value.email),
+    onSubmit: ({ value }) => emailMutation.mutate({ data: { email: value.email } }),
   })
 
   return (

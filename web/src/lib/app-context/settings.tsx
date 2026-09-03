@@ -1,22 +1,19 @@
-import { useQuery } from "@tanstack/react-query"
 import { createContext, useContext } from "react"
 import type { ReactNode } from "react"
 
-import { getSettings } from "#/lib/api"
-import type { Settings } from "#/lib/api"
+import { useGetSettings } from "../api/generated/default/default"
+import type { SettingsResponseBody } from "../api/generated/model"
 
-const SettingsContext = createContext<Settings | null | undefined>(undefined)
+const SettingsContext = createContext<SettingsResponseBody | null | undefined>(undefined)
 
 export function SettingsProvider({ children }: { children: ReactNode }) {
-  const query = useQuery({
-    queryKey: ["settings"],
-    queryFn: getSettings,
-    staleTime: Infinity,
+  const query = useGetSettings({
+    query: { staleTime: Infinity },
   })
   return <SettingsContext.Provider value={query.data ?? null}>{children}</SettingsContext.Provider>
 }
 
-export function useSettings(): Settings | null {
+export function useSettings() {
   const ctx = useContext(SettingsContext)
   if (ctx === undefined) {
     throw new Error("useSettings must be used within SettingsProvider")

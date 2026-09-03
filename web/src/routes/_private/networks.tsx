@@ -1,25 +1,23 @@
-import { useQuery } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
 import type { ColumnDef } from "@tanstack/react-table"
 
-import { StatusBadge } from "#/components/status-badge.tsx"
+import { StatusBadge } from "#/components/status-badge"
 import {
   DataTable,
   type DataTableFeatures,
   FilterableHeader,
   SortableHeader,
 } from "#/components/ui/data-table"
-import type { NetworkInfo } from "#/lib/api"
-import { listNetworks } from "#/lib/api"
+import { Spinner } from "#/components/ui/spinner"
+import { useGetNetworks } from "#/lib/api/generated/default/default"
+import type { NetworkInfo } from "#/lib/api/generated/model"
+
 export const Route = createFileRoute("/_private/networks")({
   component: NetworksPage,
 })
 
 function NetworksPage() {
-  const query = useQuery({
-    queryKey: ["networks"],
-    queryFn: listNetworks,
-  })
+  const query = useGetNetworks()
 
   const columns: ColumnDef<DataTableFeatures, NetworkInfo>[] = [
     {
@@ -63,7 +61,13 @@ function NetworksPage() {
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-3xl font-bold">Networks</h1>
       </div>
-      <DataTable columns={columns} data={query.data ?? []} isLoading={query.isLoading} />
+      {query.isLoading ? (
+        <Spinner />
+      ) : query.isError ? (
+        <div>{query.error.message}</div>
+      ) : (
+        <DataTable columns={columns} data={query.data ?? []} isLoading={query.isLoading} />
+      )}
     </>
   )
 }

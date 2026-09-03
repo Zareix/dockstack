@@ -10,7 +10,6 @@ import {
   SunIcon,
   UserCircleIcon,
 } from "@phosphor-icons/react"
-import { useQuery } from "@tanstack/react-query"
 import { Link, useLocation } from "@tanstack/react-router"
 import type { ValidateLinkOptions } from "@tanstack/react-router"
 import { useTheme } from "next-themes"
@@ -34,11 +33,12 @@ import {
   SidebarMenuSubItem,
   useSidebar,
 } from "#/components/ui/sidebar"
-import { listStacks, type User } from "#/lib/api"
+import { useGetStacks } from "#/lib/api/generated/default/default.ts"
 import { useSession } from "#/lib/app-context/session"
 import { useSettings } from "#/lib/app-context/settings"
 import { cn } from "#/lib/utils"
 
+import type { AuthUserResponse } from "../lib/api/generated/model"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -91,10 +91,7 @@ export function AppSidebar() {
   const { pathname, search } = useLocation()
   const { isAuthenticated } = useSession()
   const { isMobile, toggleSidebar } = useSidebar()
-  const stacksQuery = useQuery({
-    queryKey: ["stacks"],
-    queryFn: listStacks,
-  })
+  const stacksQuery = useGetStacks()
 
   const toggleSidebarOnMobile = () => (isMobile ? toggleSidebar() : null)
   const otherInstancePathname = pathname.includes("/stacks") ? "/" : pathname
@@ -104,11 +101,12 @@ export function AppSidebar() {
   }
 
   const { appTitle, instanceName, instances } = settings
+  const otherInstances = instances ?? []
 
   return (
     <Sidebar mobileSide="right">
       <SidebarHeader className="p-4">
-        {instances.length > 1 ? (
+        {otherInstances.length > 1 ? (
           <DropdownMenu>
             <DropdownMenuTrigger
               nativeButton={false}
@@ -120,7 +118,7 @@ export function AppSidebar() {
             <DropdownMenuContent>
               <DropdownMenuGroup>
                 <DropdownMenuLabel>Other Instances</DropdownMenuLabel>
-                {instances
+                {otherInstances
                   .filter((instance) => !instance.isCurrent)
                   .map((instance, index) => (
                     <DropdownMenuItem
@@ -237,7 +235,7 @@ function UserIdentity({
   size = "default",
   truncate = false,
 }: {
-  user: Pick<User, "name" | "email" | "avatar">
+  user: Pick<AuthUserResponse, "name" | "email" | "avatar">
   initials: string
   size?: "default" | "lg"
   truncate?: boolean

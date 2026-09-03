@@ -20,17 +20,17 @@ func (d *Deps) handleImagesList(ctx context.Context, _ *struct{}) (*web.ListOutp
 	return &web.ListOutput[dockerapi.ImageInfo]{Body: images}, nil
 }
 
-func (d *Deps) handleImagesStale(ctx context.Context, _ *struct{}) (*web.MapOutput[string], error) {
-	return &web.MapOutput[string]{Body: d.Docker.CheckImagesStale(ctx)}, nil
+func (d *Deps) handleImagesStale(ctx context.Context, _ *struct{}) (*web.MapOutput[dockerapi.StaleStatus], error) {
+	return &web.MapOutput[dockerapi.StaleStatus]{Body: d.Docker.CheckImagesStale(ctx)}, nil
 }
 
-func (d *Deps) handleImagesPrune(ctx context.Context, _ *struct{}) (*dockerapi.PruneResult, error) {
+func (d *Deps) handleImagesPrune(ctx context.Context, _ *struct{}) (*web.DataOutput[dockerapi.PruneResult], error) {
 	res, err := d.Docker.ImagePrune(ctx)
 	if err != nil {
 		web.LogError(web.RequestFrom(ctx), err)
 		return nil, huma.Error500InternalServerError("failed to prune images")
 	}
-	return &res, nil
+	return &web.DataOutput[dockerapi.PruneResult]{Body: res}, nil
 }
 
 var imageIDRe = regexp.MustCompile(`^[a-zA-Z0-9._:/-]+$`)

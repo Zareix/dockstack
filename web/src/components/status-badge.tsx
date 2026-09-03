@@ -1,5 +1,11 @@
 import { Badge } from "#/components/ui/badge"
-import type { NetworkInfo, StackStatus, StaleStatus, VolumeInfo } from "#/lib/api"
+
+import type {
+  GetImagesStale200,
+  NetworkInfo,
+  StackGetResponseBodyStatus,
+  VolumeInfo,
+} from "../lib/api/generated/model"
 
 type StatusVariant = {
   variant: "default" | "secondary" | "destructive" | "outline" | "warning"
@@ -7,7 +13,13 @@ type StatusVariant = {
   label: string
 }
 
-type Status = VolumeInfo["status"] | StackStatus | StaleStatus | NetworkInfo["status"]
+type StaleStatus = GetImagesStale200[string]
+
+type Status =
+  | VolumeInfo["status"]
+  | StackGetResponseBodyStatus
+  | StaleStatus
+  | NetworkInfo["status"]
 
 const statusMap: Partial<Record<Status, StatusVariant>> = {
   running: {

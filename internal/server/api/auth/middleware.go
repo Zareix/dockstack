@@ -11,10 +11,10 @@ import (
 )
 
 func (d *Deps) SessionMW(o *huma.Operation) {
-	o.Middlewares = append(o.Middlewares, d.humaRequireSession)
+	o.Middlewares = append(o.Middlewares, d.HumaRequireSession)
 }
 
-func (d *Deps) humaRequireSession(ctx huma.Context, next func(huma.Context)) {
+func (d *Deps) HumaRequireSession(ctx huma.Context, next func(huma.Context)) {
 	r, w := humachi.Unwrap(ctx)
 	cookie, err := r.Cookie(coreauth.CookieName)
 	if err != nil {

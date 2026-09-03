@@ -24,6 +24,10 @@ build: web-build
 run: build
     ./bin/dockstack
 
+[group('wiki')]
+openapi:
+    go run ./cmd/openapi-gen wiki/openapi.yaml
+
 test:
     go test ./...
 
@@ -32,7 +36,7 @@ vet:
 
 lint:
     golangci-lint run 2>/dev/null || go vet ./...
-    bun run --filter dockstack-web lint
+    bun run web:lint
 
 clean:
     rm -rf bin internal/server/web-dist

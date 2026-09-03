@@ -1,5 +1,4 @@
 import { useForm } from "@tanstack/react-form"
-import { useMutation } from "@tanstack/react-query"
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { toast } from "sonner"
 
@@ -7,7 +6,7 @@ import { Button } from "#/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "#/components/ui/card"
 import { Input } from "#/components/ui/input"
 import { Label } from "#/components/ui/label"
-import { resetPassword } from "#/lib/api"
+import { usePostAuthResetPassword } from "#/lib/api/generated/default/default.ts"
 
 export const Route = createFileRoute("/auth/reset-password")({
   component: ResetPassword,
@@ -16,14 +15,14 @@ export const Route = createFileRoute("/auth/reset-password")({
 function ResetPassword() {
   const navigate = useNavigate()
 
-  const mutation = useMutation({
-    mutationFn: ({ token, newPassword }: { token: string; newPassword: string }) =>
-      resetPassword(token, newPassword),
-    onSuccess: () => {
-      toast.success("Password reset. You can now sign in.")
-      navigate({ to: "/auth/sign-in" })
+  const mutation = usePostAuthResetPassword({
+    mutation: {
+      onSuccess: () => {
+        toast.success("Password reset. You can now sign in.")
+        navigate({ to: "/auth/sign-in" })
+      },
+      onError: (e) => toast.error(e.message),
     },
-    onError: (e) => toast.error(e.message),
   })
 
   const form = useForm({
@@ -33,7 +32,7 @@ function ResetPassword() {
         toast.error("Passwords do not match")
         return
       }
-      mutation.mutate({ token: value.token, newPassword: value.newPassword })
+      mutation.mutate({ data: { token: value.token, newPassword: value.newPassword } })
     },
   })
 

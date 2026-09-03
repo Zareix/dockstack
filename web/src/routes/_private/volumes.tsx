@@ -1,4 +1,3 @@
-import { useQuery } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
 import type { ColumnDef } from "@tanstack/react-table"
 
@@ -9,19 +8,17 @@ import {
   FilterableHeader,
   SortableHeader,
 } from "#/components/ui/data-table"
+import { Spinner } from "#/components/ui/spinner.tsx"
 import { PruneVolumesButton } from "#/components/volumes/prune-volumes-button"
 import { VolumeActions } from "#/components/volumes/volume-actions"
-import type { VolumeInfo } from "#/lib/api"
-import { listVolumes } from "#/lib/api"
+import { useGetVolumes } from "#/lib/api/generated/default/default"
+import type { VolumeInfo } from "#/lib/api/generated/model"
 export const Route = createFileRoute("/_private/volumes")({
   component: VolumesPage,
 })
 
 function VolumesPage() {
-  const query = useQuery({
-    queryKey: ["volumes"],
-    queryFn: listVolumes,
-  })
+  const volumesQuery = useGetVolumes()
 
   const columns: ColumnDef<DataTableFeatures, VolumeInfo>[] = [
     {
@@ -39,7 +36,7 @@ function VolumesPage() {
             { label: "Unused", value: "unused" },
           ]}
           column={column}
-          disabled={query.isLoading}
+          disabled={volumesQuery.isLoading}
         />
       ),
       cell: ({ row }) => <StatusBadge status={row.getValue("status")} />,
@@ -93,7 +90,17 @@ function VolumesPage() {
         <h1 className="text-3xl font-bold">Volumes</h1>
         <PruneVolumesButton />
       </div>
-      <DataTable columns={columns} data={query.data ?? []} isLoading={query.isLoading} />
+      {volumesQuery.isLoading ? (
+        <Spinner />
+      ) : volumesQuery.isError ? (
+        <div>Error: {volumesQuery.error.message}</div>
+      ) : (
+        <DataTable
+          columns={columns}
+          data={volumesQuery.data ?? []}
+          isLoading={volumesQuery.isLoading}
+        />
+      )}
     </>
   )
 }

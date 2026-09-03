@@ -1,14 +1,14 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router"
 
-import { getSession } from "#/lib/api"
+import { getAuthSession, getGetAuthSessionQueryKey } from "#/lib/api/generated/default/default.ts"
 import { queryClient } from "#/lib/query-client"
 
 export const Route = createFileRoute("/_private")({
   async beforeLoad({ location }) {
     const session = await queryClient
       .ensureQueryData({
-        queryKey: ["session"],
-        queryFn: getSession,
+        queryKey: getGetAuthSessionQueryKey(),
+        queryFn: getAuthSession,
         retry: false,
       })
       .catch(() => null)
