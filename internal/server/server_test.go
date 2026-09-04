@@ -145,7 +145,7 @@ func TestAPIKeyAuth(t *testing.T) {
 		t.Fatalf("parse key: %v %s", err, rr.Body.String())
 	}
 
-	req := httptest.NewRequest(http.MethodGet, "/api/stacks/", nil)
+	req := httptest.NewRequest(http.MethodGet, "/api/stacks", nil)
 	req.Header.Set("Authorization", "Bearer "+created.Key)
 	rr = httptest.NewRecorder()
 	h.ServeHTTP(rr, req)
@@ -154,7 +154,7 @@ func TestAPIKeyAuth(t *testing.T) {
 		t.Fatalf("api key rejected: %s", rr.Body.String())
 	}
 
-	req = httptest.NewRequest(http.MethodGet, "/api/stacks/", nil)
+	req = httptest.NewRequest(http.MethodGet, "/api/stacks", nil)
 	rr = httptest.NewRecorder()
 	h.ServeHTTP(rr, req)
 	if rr.Code != http.StatusUnauthorized {

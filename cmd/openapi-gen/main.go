@@ -44,7 +44,12 @@ func main() {
 			fmt.Fprintln(os.Stderr, "create file:", err)
 			os.Exit(1)
 		}
-		defer f.Close()
+		defer func() {
+			if err := f.Close(); err != nil {
+				fmt.Fprintln(os.Stderr, "close file:", err)
+				os.Exit(1)
+			}
+		}()
 		out = f
 	}
 

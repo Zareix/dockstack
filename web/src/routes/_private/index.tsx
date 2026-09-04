@@ -94,7 +94,11 @@ function StackActions({ name }: { name: string }) {
 
   const actions = [
     { label: "Pull", icon: DownloadIcon, onClick: () => pullMutation.mutate({ name }) },
-    { label: "Restart", icon: ArrowsClockwiseIcon, onClick: () => restartMutation.mutate({ name }) },
+    {
+      label: "Restart",
+      icon: ArrowsClockwiseIcon,
+      onClick: () => restartMutation.mutate({ name }),
+    },
     { label: "Stop", icon: PauseIcon, onClick: () => stopMutation.mutate({ name }) },
     { label: "Down", icon: SquareIcon, onClick: () => downMutation.mutate({ name }) },
     { label: "Up", icon: PlayIcon, onClick: () => upMutation.mutate({ name }) },

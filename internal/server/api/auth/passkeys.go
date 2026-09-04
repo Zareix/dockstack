@@ -154,10 +154,11 @@ func (d *Deps) handleDeletePasskey(ctx context.Context, in *idInput) (*web.OKRes
 }
 
 func (d *Deps) registerPasskeys(api huma.API) {
-	huma.Post(api, "/api/auth/passkey/register/begin", d.handlePasskeyRegisterBegin, d.SessionMW)
-	huma.Post(api, "/api/auth/passkey/register/finish", d.handlePasskeyRegisterFinish, d.SessionMW)
-	huma.Post(api, "/api/auth/passkey/auth/begin", d.handlePasskeyAuthBegin, d.SessionMW)
-	huma.Post(api, "/api/auth/passkey/auth/finish", d.handlePasskeyAuthFinish, d.SessionMW)
-	huma.Get(api, "/api/auth/passkeys", d.handleListPasskeys, d.SessionMW)
-	huma.Delete(api, "/api/auth/passkey/{id}", d.handleDeletePasskey, d.SessionMW)
+	huma.Post(api, "/api/auth/passkey/auth/begin", d.handlePasskeyAuthBegin)
+	huma.Post(api, "/api/auth/passkey/auth/finish", d.handlePasskeyAuthFinish)
+
+	huma.Post(api, "/api/auth/passkey/register/begin", d.handlePasskeyRegisterBegin, d.AuthMW)
+	huma.Post(api, "/api/auth/passkey/register/finish", d.handlePasskeyRegisterFinish, d.AuthMW)
+	huma.Get(api, "/api/auth/passkeys", d.handleListPasskeys, d.AuthMW)
+	huma.Delete(api, "/api/auth/passkey/{id}", d.handleDeletePasskey, d.AuthMW)
 }

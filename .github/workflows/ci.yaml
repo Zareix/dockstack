@@ -13,7 +13,7 @@ jobs:
       - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
-      - run: bun run lint
+      - run: bun run web:lint
 
   format:
     name: Format
@@ -22,7 +22,7 @@ jobs:
       - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
-      - run: bun run format:check
+      - run: bun run web:format
 
   build:
     name: Build
@@ -31,7 +31,7 @@ jobs:
       - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
-      - run: bun run build
+      - run: bun run web:build
 
   wiki:
     name: Wiki build

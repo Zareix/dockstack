@@ -6,18 +6,17 @@
     "wiki"
   ],
   "scripts": {
-    "dev": "bun run --filter dockstack-web --elide-lines=0 dev",
-    "build": "bun run --filter dockstack-web --elide-lines=0 build",
     "web:dev": "bun run --filter dockstack-web --elide-lines=0 dev",
     "web:api-gen": "bun run --filter dockstack-web --elide-lines=0 api:generate",
     "web:build": "bun run --filter dockstack-web --elide-lines=0 build",
-    "web:lint": "bun run --filter dockstack-web --elide-lines=0 lint",
+    "web:format": "bun run --filter dockstack-web --elide-lines=0 format",
+    "web:lint": "bun run --filter dockstack-web --elide-lines=0 lint:fix",
     "wiki:dev": "bun run --filter wiki --elide-lines=0 dev",
     "wiki:build": "bun run --filter wiki --elide-lines=0 build"
   },
   "devDependencies": {
     "@types/react": "^19.2.18",
-    "@types/react-dom": "^19.2.4",
+    "@types/react-dom": "^19.2.5",
     "typescript": "^7.0.2"
   }
 }
