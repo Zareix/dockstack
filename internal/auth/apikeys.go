@@ -35,14 +35,6 @@ func (k *APIKey) RateLimitWindow() int64 {
 	return k.rateLimitWindow
 }
 
-type APIKeyStore struct {
-	db *sql.DB
-}
-
-func NewAPIKeyStore(db *sql.DB) *APIKeyStore {
-	return &APIKeyStore{db: db}
-}
-
 type NewAPIKey struct {
 	UserID    string
 	Name      string
@@ -50,7 +42,7 @@ type NewAPIKey struct {
 	ExpiresAt *int64
 }
 
-func (k *APIKeyStore) Create(ctx context.Context, in NewAPIKey) (*APIKey, error) {
+func (s *Store) CreateAPIKey(ctx context.Context, in NewAPIKey) (*APIKey, error) {
 	now := time.Now().UnixMilli()
 	key := &APIKey{
 		ID:        uuid.New().String(),
@@ -61,7 +53,7 @@ func (k *APIKeyStore) Create(ctx context.Context, in NewAPIKey) (*APIKey, error)
 		ExpiresAt: in.ExpiresAt,
 		CreatedAt: now,
 	}
-	_, err := k.db.ExecContext(ctx,
+	_, err := s.db.ExecContext(ctx,
 		`INSERT INTO api_keys (id, user_id, name, key_hash, enabled, expires_at, created_at, updated_at)
 		 VALUES (?, ?, ?, ?, 1, ?, ?, ?)`,
 		key.ID, key.UserID, key.Name, key.KeyHash, key.ExpiresAt, now, now)
@@ -71,8 +63,8 @@ func (k *APIKeyStore) Create(ctx context.Context, in NewAPIKey) (*APIKey, error)
 	return key, nil
 }
 
-func (k *APIKeyStore) List(ctx context.Context, userID string) ([]APIKey, error) {
-	rows, err := k.db.QueryContext(ctx,
+func (s *Store) ListAPIKeys(ctx context.Context, userID string) ([]APIKey, error) {
+	rows, err := s.db.QueryContext(ctx,
 		`SELECT id, user_id, name, key_hash, enabled, expires_at, created_at,
 		        rate_limit_max, rate_limit_window
 		 FROM api_keys WHERE user_id = ? ORDER BY created_at DESC`, userID)
@@ -96,14 +88,14 @@ func (k *APIKeyStore) List(ctx context.Context, userID string) ([]APIKey, error)
 	return keys, rows.Err()
 }
 
-func (k *APIKeyStore) Delete(ctx context.Context, userID, id string) error {
-	_, err := k.db.ExecContext(ctx, `DELETE FROM api_keys WHERE id = ? AND user_id = ?`, id, userID)
+func (s *Store) DeleteAPIKey(ctx context.Context, userID, id string) error {
+	_, err := s.db.ExecContext(ctx, `DELETE FROM api_keys WHERE id = ? AND user_id = ?`, id, userID)
 	return err
 }
 
-func (k *APIKeyStore) VerifyKey(ctx context.Context, rawKey string) (*APIKey, error) {
+func (s *Store) VerifyKey(ctx context.Context, rawKey string) (*APIKey, error) {
 	hash := HashToken(rawKey)
-	row := k.db.QueryRowContext(ctx,
+	row := s.db.QueryRowContext(ctx,
 		`SELECT id, user_id, name, key_hash, enabled, expires_at, created_at,
 		        rate_limit_max, rate_limit_window
 		 FROM api_keys WHERE key_hash = ?`, hash)
@@ -128,9 +120,9 @@ func (k *APIKeyStore) VerifyKey(ctx context.Context, rawKey string) (*APIKey, er
 	return &key, nil
 }
 
-func (k *APIKeyStore) RateLimit(ctx context.Context, keyID string, max int, windowMs int64) (bool, error) {
+func (s *Store) RateLimit(ctx context.Context, keyID string, max int, windowMs int64) (bool, error) {
 	now := time.Now().UnixMilli()
-	res, err := k.db.ExecContext(ctx,
+	res, err := s.db.ExecContext(ctx,
 		`UPDATE api_keys
 		 SET request_count = CASE
 		     WHEN last_request_at IS NULL OR last_request_at < ? THEN 1

@@ -1,4 +1,4 @@
-package api
+package ws
 
 import (
 	"context"
@@ -8,8 +8,12 @@ import (
 
 	"github.com/coder/websocket"
 
+	"regexp"
+
 	"github.com/zareix/dockstack/internal/docker"
 )
+
+var stackNameRe = regexp.MustCompile(`^[a-zA-Z0-9_-]+$`)
 
 func (d *Deps) handleLogsWS(w http.ResponseWriter, r *http.Request) {
 	conn, err := acceptWS(w, r)

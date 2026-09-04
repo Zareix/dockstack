@@ -8,9 +8,14 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"net/url"
 	"strings"
 	"time"
 	"uuid"
+
+	"github.com/go-webauthn/webauthn/webauthn"
+
+	"github.com/zareix/dockstack/internal/config"
 )
 
 const CookieName = "dockstack_session"
@@ -44,15 +49,37 @@ type Store struct {
 	secret     []byte
 	secure     bool
 	sessionTTL time.Duration
+	wa         *webauthn.WebAuthn
 }
 
-func NewStore(db *sql.DB, secret string, secure bool) *Store {
+func NewStore(cfg *config.Config, db *sql.DB) (*Store, error) {
+	secure := strings.HasPrefix(strings.ToLower(cfg.AppURL), "https://")
+	rpID, origin := webauthnParams(cfg)
+	wa, err := webauthn.New(&webauthn.Config{
+		RPDisplayName: cfg.AppTitle,
+		RPID:          rpID,
+		RPOrigins:     []string{origin},
+	})
+	if err != nil {
+		return nil, err
+	}
 	return &Store{
 		db:         db,
-		secret:     []byte(secret),
+		secret:     []byte(cfg.AuthSecret),
 		secure:     secure,
 		sessionTTL: 7 * 24 * time.Hour,
+		wa:         wa,
+	}, nil
+}
+
+func webauthnParams(cfg *config.Config) (string, string) {
+	if cfg.AppURL != "" {
+		u, err := url.Parse(cfg.AppURL)
+		if err == nil {
+			return u.Hostname(), strings.TrimSuffix(cfg.AppURL, "/")
+		}
 	}
+	return "localhost", "http://localhost:3000"
 }
 
 func (s *Store) Secure() bool { return s.secure }

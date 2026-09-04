@@ -10,6 +10,7 @@ import (
 	dockerapi "github.com/zareix/dockstack/internal/docker"
 
 	"github.com/zareix/dockstack/internal/server/api/auth"
+	"github.com/zareix/dockstack/internal/server/api/ws"
 )
 
 var Version = "dev"
@@ -52,7 +53,7 @@ func Mount(router chi.Router, d *Deps) huma.API {
 	d.registerImages(api)
 	d.registerVolumes(api)
 	d.registerNetworks(api)
-	d.registerWS(router)
+	ws.Mount(router, &ws.Deps{Store: d.Store, Docker: d.Docker, Stacks: d.Stacks})
 
 	return api
 }

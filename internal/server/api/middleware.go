@@ -51,12 +51,12 @@ func (d *Deps) humaRequireAPIKey(ctx huma.Context, next func(huma.Context)) {
 		web.WriteError(w, 401, "No API key provided, provide one via the Authorization header")
 		return
 	}
-	key, err := d.Keys.VerifyKey(ctx.Context(), strings.TrimSpace(token))
+	key, err := d.Store.VerifyKey(ctx.Context(), strings.TrimSpace(token))
 	if err != nil {
 		web.WriteError(w, 401, err.Error())
 		return
 	}
-	if ok, err := d.Keys.RateLimit(ctx.Context(), key.ID, key.RateLimitMax(), key.RateLimitWindow()); err != nil || !ok {
+	if ok, err := d.Store.RateLimit(ctx.Context(), key.ID, key.RateLimitMax(), key.RateLimitWindow()); err != nil || !ok {
 		if err != nil {
 			web.WriteError(w, 500, "rate limit error")
 			return

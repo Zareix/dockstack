@@ -1,16 +1,30 @@
-package api
+package ws
 
 import (
 	"context"
 	"encoding/json"
-	"github.com/zareix/dockstack/internal/server/api/web"
 	"net/http"
 
 	"github.com/coder/websocket"
 	"github.com/go-chi/chi/v5"
 
 	"github.com/zareix/dockstack/internal/auth"
+	dockerapi "github.com/zareix/dockstack/internal/docker"
+	"github.com/zareix/dockstack/internal/server/api/web"
 )
+
+// Deps carries what the WebSocket endpoints need from the server.
+type Deps struct {
+	Store  *auth.Store
+	Docker *dockerapi.Client
+	Stacks *dockerapi.Stacks
+}
+
+// Mount registers the WebSocket routes on the router.
+func Mount(router chi.Router, d *Deps) {
+	router.HandleFunc("/api/ws/exec", d.handleWSAuth(d.handleExecWS))
+	router.HandleFunc("/api/ws/logs", d.handleWSAuth(d.handleLogsWS))
+}
 
 func (d *Deps) handleWSAuth(inner http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -22,7 +36,7 @@ func (d *Deps) handleWSAuth(inner http.HandlerFunc) http.HandlerFunc {
 			}
 		}
 		if token := r.URL.Query().Get("token"); token != "" {
-			key, err := d.Keys.VerifyKey(r.Context(), token)
+			key, err := d.Store.VerifyKey(r.Context(), token)
 			if err == nil {
 				user, err := d.Store.GetUserByID(r.Context(), key.UserID)
 				if err == nil {
@@ -48,9 +62,4 @@ func sendWSJSON(conn *websocket.Conn, v any) error {
 		return err
 	}
 	return conn.Write(context.Background(), websocket.MessageText, data)
-}
-
-func (d *Deps) registerWS(router chi.Router) {
-	router.HandleFunc("/api/ws/exec", d.handleWSAuth(d.handleExecWS))
-	router.HandleFunc("/api/ws/logs", d.handleWSAuth(d.handleLogsWS))
 }

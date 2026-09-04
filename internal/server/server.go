@@ -20,40 +20,33 @@ type App struct {
 	stacks *dockerapi.Stacks
 }
 
-func NewApp(cfg *config.Config) (*App, error) {
-	dockerClient, err := dockerapi.NewClient(cfg.DockerHost, cfg.DockerConfigDir)
-	if err != nil {
-		return nil, err
-	}
-	stacks := dockerapi.NewStacks(dockerClient, cfg.StacksDir, cfg.DockerConfigDir, cfg.ServerHost, cfg.AutodetectURLBaseDomain)
-	return &App{cfg: cfg, docker: dockerClient, stacks: stacks}, nil
-}
-
 func (a *App) Docker() *dockerapi.Client { return a.docker }
 
 func (a *App) Stacks() *dockerapi.Stacks { return a.stacks }
 
 type Server struct {
-	cfg      *config.Config
-	db       *sql.DB
-	store    *auth.Store
-	keys     *auth.APIKeyStore
-	passkeys *auth.PasskeyService
-	app      *App
+	cfg   *config.Config
+	db    *sql.DB
+	store *auth.Store
+	app   *App
 }
 
-func New(cfg *config.Config, db *sql.DB, store *auth.Store, keys *auth.APIKeyStore, passkeys *auth.PasskeyService, app *App) *Server {
-	return &Server{cfg: cfg, db: db, store: store, keys: keys, passkeys: passkeys, app: app}
+func New(cfg *config.Config, db *sql.DB, store *auth.Store) (*Server, *App, error) {
+	dockerClient, err := dockerapi.NewClient(cfg.DockerHost, cfg.DockerConfigDir)
+	if err != nil {
+		return nil, nil, err
+	}
+	stacks := dockerapi.NewStacks(dockerClient, cfg.StacksDir, cfg.DockerConfigDir, cfg.ServerHost, cfg.AutodetectURLBaseDomain)
+	app := &App{cfg: cfg, docker: dockerClient, stacks: stacks}
+	return &Server{cfg: cfg, db: db, store: store, app: app}, app, nil
 }
 
 func (s *Server) deps() *api.Deps {
 	return &api.Deps{
 		Deps: &apiauth.Deps{
-			Cfg:      s.cfg,
-			DB:       s.db,
-			Store:    s.store,
-			Keys:     s.keys,
-			Passkeys: s.passkeys,
+			Cfg:   s.cfg,
+			DB:    s.db,
+			Store: s.store,
 		},
 		Docker: s.app.docker,
 		Stacks: s.app.stacks,
