@@ -25,7 +25,6 @@ func GenerateSessionToken() (string, error) {
 }
 
 func GenerateAPIKey() (string, error) {
-	// 64-char [a-zA-Z] key, matching better-auth's format.
 	return randomString(64)
 }
 

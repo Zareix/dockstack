@@ -38,7 +38,6 @@ func NewPasskeyService(db *sql.DB, rpID, rpName, origin string) (*PasskeyService
 	return &PasskeyService{db: db, wa: wa}, nil
 }
 
-// passkeyUser adapts our DB user to the webauthn.User interface.
 type passkeyUser struct {
 	id    string
 	name  string
@@ -84,7 +83,6 @@ func (s *PasskeyService) userFor(userID string) (*passkeyUser, error) {
 	return &passkeyUser{id: userID, name: name, creds: creds}, nil
 }
 
-// BeginRegistration starts a WebAuthn registration ceremony for the current user.
 func (s *PasskeyService) BeginRegistration(ctx context.Context, userID string) (any, string, error) {
 	user, err := s.userFor(userID)
 	if err != nil {
@@ -108,7 +106,6 @@ func (s *PasskeyService) BeginRegistration(ctx context.Context, userID string) (
 	return options.Response, challengeID, nil
 }
 
-// FinishRegistration validates the attestation response and stores the credential.
 func (s *PasskeyService) FinishRegistration(ctx context.Context, userID, challengeID string, response []byte) (Passkey, error) {
 	var p Passkey
 	session, err := s.loadChallenge(ctx, challengeID, "registration", userID)
@@ -150,7 +147,6 @@ func (s *PasskeyService) FinishRegistration(ctx context.Context, userID, challen
 	return p, nil
 }
 
-// BeginAuthentication starts a discoverable-login ceremony.
 func (s *PasskeyService) BeginAuthentication(ctx context.Context) (any, string, error) {
 	options, session, err := s.wa.BeginDiscoverableLogin()
 	if err != nil {
@@ -163,7 +159,6 @@ func (s *PasskeyService) BeginAuthentication(ctx context.Context) (any, string, 
 	return options.Response, challengeID, nil
 }
 
-// FinishAuthentication validates the assertion and returns the user ID.
 func (s *PasskeyService) FinishAuthentication(ctx context.Context, challengeID string, response []byte) (string, error) {
 	session, err := s.loadChallenge(ctx, challengeID, "authentication", "")
 	if err != nil {
@@ -187,7 +182,6 @@ func (s *PasskeyService) FinishAuthentication(ctx context.Context, challengeID s
 		return "", err
 	}
 	userID := string(user.WebAuthnID())
-	// Update the stored counter.
 	if _, err := s.db.ExecContext(ctx,
 		`UPDATE passkeys SET counter = ? WHERE user_id = ? AND credential_id = ?`,
 		cred.Authenticator.SignCount, userID, string(cred.ID)); err != nil {

@@ -18,8 +18,6 @@ func (c *Client) ResizeExec(ctx context.Context, execID string, height, width in
 	})
 }
 
-// AttachExec starts the exec (Detach:false, Tty passthrough) and returns the
-// raw hijacked connection for bidirectional terminal I/O.
 func (c *Client) AttachExec(ctx context.Context, execID string) (net.Conn, error) {
 	hj, err := c.api.ContainerExecAttach(ctx, execID, container.ExecAttachOptions{
 		Detach: false,

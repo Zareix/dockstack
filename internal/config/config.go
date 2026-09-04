@@ -116,7 +116,6 @@ func Load() (*Config, error) {
 		}
 	}
 
-	// OAuth is enabled only when all required vars are set (parity with TS behavior).
 	if id, cid, secret, disc :=
 		os.Getenv("OAUTH_PROVIDER_ID"),
 		os.Getenv("OAUTH_CLIENT_ID"),
@@ -130,7 +129,6 @@ func Load() (*Config, error) {
 		}
 	}
 
-	// REDEPLOY_SKIP: comma-separated list
 	if v := os.Getenv("REDEPLOY_SKIP"); v != "" {
 		for _, s := range strings.Split(v, ",") {
 			if s = strings.TrimSpace(s); s != "" {

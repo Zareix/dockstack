@@ -57,14 +57,12 @@ func NewStore(db *sql.DB, secret string, secure bool) *Store {
 
 func (s *Store) Secure() bool { return s.secure }
 
-// SignToken returns "<token>.<base64url(hmac-sha256(secret, token))>".
 func (s *Store) SignToken(token string) string {
 	mac := hmac.New(sha256.New, s.secret)
 	mac.Write([]byte(token))
 	return token + "." + base64.RawURLEncoding.EncodeToString(mac.Sum(nil))
 }
 
-// UnsafeParseToken extracts the raw token from a signed value without verifying.
 func (s *Store) UnsafeParseToken(signed string) (string, error) {
 	idx := strings.LastIndex(signed, ".")
 	if idx < 0 {

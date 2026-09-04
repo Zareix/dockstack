@@ -102,8 +102,6 @@ func (s *Stacks) StackExists(ctx context.Context, name string) (bool, error) {
 	return false, nil
 }
 
-// getDockerEnv returns the environment for child processes, stripping
-// app-specific variables so they don't leak into compose.
 func getDockerEnv() []string {
 	deny := map[string]bool{
 		"APP_URL": true, "ADMIN_EMAIL": true, "APP_TITLE": true, "INSTANCE_NAME": true,
@@ -138,8 +136,6 @@ func (s *Stacks) composeCommand(stackName string, args ...string) ([]string, err
 		return nil, err
 	}
 	cmd := []string{}
-	// --config is only meaningful when a config.json exists; some compose
-	// builds (e.g. OrbStack's plugin) reject the flag entirely otherwise.
 	if s.hasConfigFile() {
 		cmd = append(cmd, "--config", s.configDir)
 	}
@@ -151,8 +147,6 @@ func (s *Stacks) composeCommand(stackName string, args ...string) ([]string, err
 	return cmd, nil
 }
 
-// StreamCompose runs a docker compose command and yields its merged stdout+stderr
-// as lines (with a heartbeat every 5s of silence), preceded by the echoed command.
 func (s *Stacks) StreamCompose(ctx context.Context, stackName string, args ...string) (<-chan string, error) {
 	cmdArgs, err := s.composeCommand(stackName, args...)
 	if err != nil {
@@ -218,7 +212,6 @@ func (s *Stacks) StreamCompose(ctx context.Context, stackName string, args ...st
 	return out, nil
 }
 
-// RunCompose runs a compose command synchronously and drains all output.
 func (s *Stacks) RunCompose(ctx context.Context, stackName string, args ...string) error {
 	ch, err := s.StreamCompose(ctx, stackName, args...)
 	if err != nil {
@@ -229,8 +222,6 @@ func (s *Stacks) RunCompose(ctx context.Context, stackName string, args ...strin
 	return nil
 }
 
-// UpServices runs `docker compose up -d <services>`, matching the redeploy
-// path in the original app.
 func (s *Stacks) UpServices(ctx context.Context, stackName string, services []string) error {
 	composePath, err := s.FindComposePath(stackName)
 	if err != nil {
@@ -346,7 +337,6 @@ func (s *Stacks) GetStackContainers(ctx context.Context, stackName string) ([]Co
 		out = append(out, mapContainer(c, s.serverHost, s.baseDomain))
 	}
 
-	// Merge in compose-file services that have no running container as "missing".
 	known := map[string]bool{}
 	for _, c := range containers {
 		if svc, ok := c.Labels["com.docker.compose.service"]; ok {
@@ -438,8 +428,6 @@ func (s *Stacks) RedeployAllRunning(ctx context.Context, skipList []string) []Re
 	return results
 }
 
-// RedeployStack is used by the webhook redeploy for a specific stack (matches
-// TS getRunningServices + stackUpServices flow per stack).
 func (s *Stacks) RedeployStack(ctx context.Context, name string, skipList []string) RedeployResult {
 	for _, s := range skipList {
 		if s == name {

@@ -78,7 +78,6 @@ func TestSessionLifecycle(t *testing.T) {
 		t.Fatal("tampered cookie accepted")
 	}
 
-	// Revoking invalidates the session.
 	if err := s.RevokeSession(ctx, "u1", sess.ID); err != nil {
 		t.Fatal(err)
 	}

@@ -12,8 +12,6 @@ import (
 	apiauth "github.com/zareix/dockstack/internal/server/api/auth"
 )
 
-// Generates the OpenAPI spec without starting the server or connecting to
-// Docker / the database. Usage: go run ./cmd/openapi-gen [output-path]
 func main() {
 	cfg := &config.Config{
 		AppTitle:        "Dockstack API",

@@ -94,8 +94,6 @@ func main() {
 	_ = httpServer.Shutdown(ctx)
 }
 
-// setupLogging configures the default slog logger. LOG_FORMAT=json switches to
-// JSON output; LOG_LEVEL (debug|info|warn|error) sets the level, default info.
 func setupLogging() {
 	var level slog.Level
 	switch strings.ToLower(os.Getenv("LOG_LEVEL")) {
@@ -119,13 +117,11 @@ func setupLogging() {
 	slog.SetDefault(slog.New(handler))
 }
 
-// fatal logs an error with a context string and exits.
 func fatal(context string, err error) {
 	slog.Error(context, "error", err)
 	os.Exit(1)
 }
 
-// webauthnParams derives the relying-party ID and origin from APP_URL.
 func webauthnParams(cfg *config.Config) (string, string) {
 	if cfg.AppURL != "" {
 		u, err := url.Parse(cfg.AppURL)
@@ -136,8 +132,6 @@ func webauthnParams(cfg *config.Config) (string, string) {
 	return "localhost", "http://localhost:3000"
 }
 
-// portFromHost extracts the port from a SERVER_HOST value like "localhost" or
-// "0.0.0.0:8080", defaulting to :3000.
 func portFromHost(host string) string {
 	if strings.Contains(host, ":") {
 		_, port, err := net.SplitHostPort(host)
