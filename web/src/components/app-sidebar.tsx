@@ -103,7 +103,7 @@ export function AppSidebar() {
   const otherInstances = instances ?? []
 
   return (
-    <Sidebar mobileSide="right">
+    <Sidebar mobileSide="right" variant="floating">
       <SidebarHeader className="p-4">
         {otherInstances.length > 1 ? (
           <DropdownMenu>
