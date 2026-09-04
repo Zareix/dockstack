@@ -47,8 +47,8 @@ func (d *Deps) handleImageRemove(ctx context.Context, in *idInput) (*web.OKRespo
 }
 
 func (d *Deps) registerImages(api huma.API) {
-	huma.Get(api, "/api/images", d.handleImagesList, d.SessionMW)
-	huma.Get(api, "/api/images/stale", d.handleImagesStale, d.SessionMW)
-	huma.Post(api, "/api/images/prune", d.handleImagesPrune, d.SessionMW)
-	huma.Delete(api, "/api/images/{id}", d.handleImageRemove, d.SessionMW)
+	huma.Get(api, "/api/images", d.handleImagesList, d.AuthMW)
+	huma.Get(api, "/api/images/stale", d.handleImagesStale, d.AuthMW)
+	huma.Post(api, "/api/images/prune", d.handleImagesPrune, d.AuthMW)
+	huma.Delete(api, "/api/images/{id}", d.handleImageRemove, d.AuthMW)
 }

@@ -100,7 +100,7 @@ func (d *Deps) handleDeleteAPIKey(ctx context.Context, in *idInput) (*web.OKResp
 }
 
 func (d *Deps) registerAPIKeys(api huma.API) {
-	huma.Post(api, "/api/auth/api-keys", d.handleCreateAPIKey, d.SessionMW)
-	huma.Get(api, "/api/auth/api-keys", d.handleListAPIKeys, d.SessionMW)
-	huma.Delete(api, "/api/auth/api-keys/{id}", d.handleDeleteAPIKey, d.SessionMW)
+	huma.Post(api, "/api/auth/api-keys", d.handleCreateAPIKey, d.AuthMW)
+	huma.Get(api, "/api/auth/api-keys", d.handleListAPIKeys, d.AuthMW)
+	huma.Delete(api, "/api/auth/api-keys/{id}", d.handleDeleteAPIKey, d.AuthMW)
 }

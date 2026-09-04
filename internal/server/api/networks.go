@@ -20,5 +20,5 @@ func (d *Deps) handleNetworksList(ctx context.Context, _ *struct{}) (*web.ListOu
 }
 
 func (d *Deps) registerNetworks(api huma.API) {
-	huma.Get(api, "/api/networks", d.handleNetworksList, d.SessionMW)
+	huma.Get(api, "/api/networks", d.handleNetworksList, d.AuthMW)
 }

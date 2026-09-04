@@ -38,38 +38,3 @@ func (d *Deps) requestMiddleware(ctx huma.Context, next func(huma.Context)) {
 	}
 	next(ctx)
 }
-
-func (d *Deps) apiKeyMW(o *huma.Operation) {
-	o.Middlewares = append(o.Middlewares, d.humaRequireAPIKey)
-}
-
-func (d *Deps) humaRequireAPIKey(ctx huma.Context, next func(huma.Context)) {
-	r, w := humachi.Unwrap(ctx)
-	authHeader := r.Header.Get("Authorization")
-	token, ok := strings.CutPrefix(authHeader, "Bearer ")
-	if !ok || strings.TrimSpace(token) == "" {
-		web.WriteError(w, 401, "No API key provided, provide one via the Authorization header")
-		return
-	}
-	key, err := d.Store.VerifyKey(ctx.Context(), strings.TrimSpace(token))
-	if err != nil {
-		web.WriteError(w, 401, err.Error())
-		return
-	}
-	if ok, err := d.Store.RateLimit(ctx.Context(), key.ID, key.RateLimitMax(), key.RateLimitWindow()); err != nil || !ok {
-		if err != nil {
-			web.WriteError(w, 500, "rate limit error")
-			return
-		}
-		web.WriteError(w, 429, "Rate limit exceeded")
-		return
-	}
-	user, err := d.Store.GetUserByID(ctx.Context(), key.UserID)
-	if err != nil {
-		web.WriteError(w, 401, "Unauthorized")
-		return
-	}
-	ctx = huma.WithValue(ctx, web.CtxUser, user)
-	ctx = huma.WithValue(ctx, web.CtxAPIKey, key)
-	next(ctx)
-}

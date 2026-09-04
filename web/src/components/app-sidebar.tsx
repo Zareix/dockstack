@@ -86,7 +86,11 @@ export function AppSidebar() {
   const { pathname, search } = useLocation()
   const { isAuthenticated } = useSession()
   const { isMobile, toggleSidebar } = useSidebar()
-  const stacksQuery = useGetStacks()
+  const stacksQuery = useGetStacks({
+    query: {
+      enabled: !!isAuthenticated,
+    },
+  })
 
   const toggleSidebarOnMobile = () => (isMobile ? toggleSidebar() : null)
   const otherInstancePathname = pathname.includes("/stacks") ? "/" : pathname

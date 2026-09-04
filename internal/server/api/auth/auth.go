@@ -414,11 +414,11 @@ func (d *Deps) registerAuth(api huma.API) {
 	huma.Post(api, "/api/auth/forgot-password", d.handleForgotPassword)
 	huma.Post(api, "/api/auth/reset-password", d.handleResetPassword)
 
-	huma.Get(api, "/api/auth/session", d.handleGetSession, d.SessionMW)
-	huma.Get(api, "/api/auth/sessions", d.handleListSessions, d.SessionMW)
-	huma.Post(api, "/api/auth/sessions/{id}/revoke", d.handleRevokeSession, d.SessionMW)
-	huma.Post(api, "/api/auth/sessions/revoke-others", d.handleRevokeOthers, d.SessionMW)
-	huma.Post(api, "/api/auth/change-password", d.handleChangePassword, d.SessionMW)
-	huma.Post(api, "/api/auth/change-email", d.handleChangeEmail, d.SessionMW)
-	huma.Patch(api, "/api/auth/user", d.handleUpdateUser, d.SessionMW)
+	huma.Get(api, "/api/auth/session", d.handleGetSession, d.AuthMW)
+	huma.Get(api, "/api/auth/sessions", d.handleListSessions, d.AuthMW)
+	huma.Post(api, "/api/auth/sessions/{id}/revoke", d.handleRevokeSession, d.AuthMW)
+	huma.Post(api, "/api/auth/sessions/revoke-others", d.handleRevokeOthers, d.AuthMW)
+	huma.Post(api, "/api/auth/change-password", d.handleChangePassword, d.AuthMW)
+	huma.Post(api, "/api/auth/change-email", d.handleChangeEmail, d.AuthMW)
+	huma.Patch(api, "/api/auth/user", d.handleUpdateUser, d.AuthMW)
 }

@@ -33,8 +33,8 @@ import {
   getGetAuthApiKeysQueryKey,
   getGetAuthPasskeysQueryKey,
   getGetAuthSessionsQueryKey,
-  postAuthPasskeyAuthBegin,
-  postAuthPasskeyAuthFinish,
+  postAuthPasskeyRegisterBegin,
+  postAuthPasskeyRegisterFinish,
   useDeleteAuthApiKeysId,
   useDeleteAuthPasskeyId,
   useGetAuthApiKeys,
@@ -328,11 +328,11 @@ function PasskeysSection() {
 
   const addPasskey = useMutation({
     mutationFn: async () => {
-      const { options } = await postAuthPasskeyAuthBegin()
+      const { options } = await postAuthPasskeyRegisterBegin()
       const credential = await startRegistration({
         optionsJSON: options as PublicKeyCredentialCreationOptionsJSON,
       })
-      return postAuthPasskeyAuthFinish({ credential })
+      return postAuthPasskeyRegisterFinish({ credential })
     },
     onSuccess: () => {
       toast.success("Passkey added")

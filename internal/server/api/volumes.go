@@ -47,7 +47,7 @@ func (d *Deps) handleVolumeRemove(ctx context.Context, in *volumeNameInput) (*we
 }
 
 func (d *Deps) registerVolumes(api huma.API) {
-	huma.Get(api, "/api/volumes", d.handleVolumesList, d.SessionMW)
-	huma.Post(api, "/api/volumes/prune", d.handleVolumesPrune, d.SessionMW)
-	huma.Delete(api, "/api/volumes/{name}", d.handleVolumeRemove, d.SessionMW)
+	huma.Get(api, "/api/volumes", d.handleVolumesList, d.AuthMW)
+	huma.Post(api, "/api/volumes/prune", d.handleVolumesPrune, d.AuthMW)
+	huma.Delete(api, "/api/volumes/{name}", d.handleVolumeRemove, d.AuthMW)
 }

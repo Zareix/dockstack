@@ -70,10 +70,10 @@ func (d *Deps) handleContainerRemove(ctx context.Context, in *idInput) (*web.OKR
 }
 
 func (d *Deps) registerContainers(api huma.API) {
-	huma.Get(api, "/api/containers", d.handleContainersList, d.SessionMW)
-	huma.Post(api, "/api/containers/prune", d.handleContainersPrune, d.SessionMW)
-	huma.Post(api, "/api/containers/{id}/start", d.containerAction("start"), d.SessionMW)
-	huma.Post(api, "/api/containers/{id}/stop", d.containerAction("stop"), d.SessionMW)
-	huma.Post(api, "/api/containers/{id}/restart", d.containerAction("restart"), d.SessionMW)
-	huma.Delete(api, "/api/containers/{id}", d.handleContainerRemove, d.SessionMW)
+	huma.Get(api, "/api/containers", d.handleContainersList, d.AuthMW)
+	huma.Post(api, "/api/containers/prune", d.handleContainersPrune, d.AuthMW)
+	huma.Post(api, "/api/containers/{id}/start", d.containerAction("start"), d.AuthMW)
+	huma.Post(api, "/api/containers/{id}/stop", d.containerAction("stop"), d.AuthMW)
+	huma.Post(api, "/api/containers/{id}/restart", d.containerAction("restart"), d.AuthMW)
+	huma.Delete(api, "/api/containers/{id}", d.handleContainerRemove, d.AuthMW)
 }

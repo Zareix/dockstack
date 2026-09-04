@@ -277,21 +277,21 @@ func (d *Deps) handleStackActionStream(w http.ResponseWriter, r *http.Request, a
 }
 
 func (d *Deps) registerStacks(api huma.API, router chi.Router) {
-	huma.Get(api, "/api/stacks", d.handleStacksList, d.SessionMW)
-	huma.Post(api, "/api/stacks", d.handleStackCreate, d.SessionMW)
-	huma.Get(api, "/api/stacks/{name}", d.handleStackGet, d.SessionMW)
-	huma.Get(api, "/api/stacks/{name}/containers", d.handleStackContainers, d.SessionMW)
-	huma.Get(api, "/api/stacks/{name}/files", d.handleStackFilesGet, d.SessionMW)
-	huma.Put(api, "/api/stacks/{name}/files", d.handleStackFilesSave, d.SessionMW)
-	huma.Post(api, "/api/stacks/{name}/env", d.handleStackCreateEnv, d.SessionMW)
-	huma.Delete(api, "/api/stacks/{name}", d.handleStackDestroy, d.SessionMW)
+	huma.Get(api, "/api/stacks", d.handleStacksList, d.AuthMW)
+	huma.Post(api, "/api/stacks", d.handleStackCreate, d.AuthMW)
+	huma.Get(api, "/api/stacks/{name}", d.handleStackGet, d.AuthMW)
+	huma.Get(api, "/api/stacks/{name}/containers", d.handleStackContainers, d.AuthMW)
+	huma.Get(api, "/api/stacks/{name}/files", d.handleStackFilesGet, d.AuthMW)
+	huma.Put(api, "/api/stacks/{name}/files", d.handleStackFilesSave, d.AuthMW)
+	huma.Post(api, "/api/stacks/{name}/env", d.handleStackCreateEnv, d.AuthMW)
+	huma.Delete(api, "/api/stacks/{name}", d.handleStackDestroy, d.AuthMW)
 	for _, a := range stackActions {
 		action := a
 		huma.Register(api, huma.Operation{
 			Method:      "POST",
 			Path:        "/api/stacks/{name}/" + action.path,
 			OperationID: "post-stack-action-" + action.path,
-			Middlewares: huma.Middlewares{d.HumaRequireSession},
+			Middlewares: huma.Middlewares{d.HumaRequireAuth},
 		}, func(ctx context.Context, in *nameInput) (*web.OKResponse, error) {
 			return d.handleStackAction(ctx, in, action.args)
 		})
@@ -306,6 +306,5 @@ func (d *Deps) registerStacks(api huma.API, router chi.Router) {
 		}
 	})
 
-	huma.Get(api, "/api/stacks/", d.handleStacksList, d.apiKeyMW)
-	huma.Post(api, "/api/stacks/redeploy", d.handleStacksRedeploy, d.apiKeyMW)
+	huma.Post(api, "/api/stacks/redeploy", d.handleStacksRedeploy, d.AuthMW)
 }

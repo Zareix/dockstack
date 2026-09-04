@@ -19,10 +19,30 @@ func (c *Client) ImageRemove(ctx context.Context, id string) error {
 func (c *Client) ImagePrune(ctx context.Context) (PruneResult, error) {
 	f := filters.NewArgs()
 	f.Add("dangling", "false")
+
+	before, err := c.api.ImageList(ctx, image.ListOptions{})
+	if err != nil {
+		return PruneResult{}, err
+	}
 	report, err := c.api.ImagesPrune(ctx, f)
 	if err != nil {
 		return PruneResult{}, err
 	}
+	after, err := c.api.ImageList(ctx, image.ListOptions{})
+	if err != nil {
+		return PruneResult{}, err
+	}
+	afterIDs := make(map[string]bool, len(after))
+	for _, img := range after {
+		afterIDs[img.ID] = true
+	}
+	var reclaimed int64
+	for _, img := range before {
+		if !afterIDs[img.ID] {
+			reclaimed += img.Size
+		}
+	}
+
 	pruned := make([]string, 0, len(report.ImagesDeleted))
 	for _, d := range report.ImagesDeleted {
 		if d.Deleted != "" {
@@ -31,5 +51,8 @@ func (c *Client) ImagePrune(ctx context.Context) (PruneResult, error) {
 			pruned = append(pruned, d.Untagged)
 		}
 	}
-	return PruneResult{Deleted: pruned, SpaceReclaimed: int64(report.SpaceReclaimed)}, nil
+	if report.SpaceReclaimed > 0 {
+		reclaimed = int64(report.SpaceReclaimed)
+	}
+	return PruneResult{Deleted: pruned, SpaceReclaimed: reclaimed}, nil
 }

@@ -38,7 +38,11 @@ func main() {
 	if err != nil {
 		fatal("db", err)
 	}
-	defer sqlDB.Close()
+	defer func() {
+		if err := sqlDB.Close(); err != nil {
+			fatal("db", err)
+		}
+	}()
 
 	if err := db.Migrate(sqlDB); err != nil {
 		fatal("migrate", err)
