@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"testing"
 
+	"github.com/zareix/dockstack/internal/config"
+
 	_ "modernc.org/sqlite"
 )
 
@@ -56,7 +58,10 @@ func TestSessionLifecycle(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	s := NewStore(db, "secret", false)
+	s, err := NewStore(&config.Config{AuthSecret: "secret", AppURL: "http://localhost:3000"}, db)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	signed, sess, err := s.CreateSession(ctx, "u1", "127.0.0.1", "test-agent")
 	if err != nil {
@@ -93,7 +98,10 @@ func TestSessionUserByEmailAndUsername(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	s := NewStore(db, "secret", false)
+	s, err := NewStore(&config.Config{AuthSecret: "secret", AppURL: "http://localhost:3000"}, db)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	byEmail, err := s.UserByEmail(ctx, "a@b.c")
 	if err != nil || byEmail == nil {
@@ -120,7 +128,10 @@ func TestSetAndVerifyPassword(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	s := NewStore(db, "secret", false)
+	s, err := NewStore(&config.Config{AuthSecret: "secret", AppURL: "http://localhost:3000"}, db)
+	if err != nil {
+		t.Fatal(err)
+	}
 	if err := s.SetPassword(ctx, "u1", "hunter2"); err != nil {
 		t.Fatal(err)
 	}
@@ -135,7 +146,10 @@ func TestSetAndVerifyPassword(t *testing.T) {
 }
 
 func TestSignTokenRoundTrip(t *testing.T) {
-	s := NewStore(nil, "secret", false)
+	s, err := NewStore(&config.Config{AuthSecret: "secret", AppURL: "http://localhost:3000"}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
 	signed := s.SignToken("abc123")
 	token, ok := s.VerifySignature(signed)
 	if !ok || token != "abc123" {

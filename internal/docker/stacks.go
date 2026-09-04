@@ -183,6 +183,9 @@ func (s *Stacks) StreamCompose(ctx context.Context, stackName string, args ...st
 			for sc.Scan() {
 				out <- sc.Text()
 			}
+			if err := sc.Err(); err != nil {
+				out <- "log stream error: " + err.Error()
+			}
 		}
 		go emit(stdout)
 		go emit(stderr)

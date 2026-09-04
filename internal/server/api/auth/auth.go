@@ -21,11 +21,9 @@ import (
 )
 
 type Deps struct {
-	Cfg      *config.Config
-	DB       *sql.DB
-	Store    *coreauth.Store
-	Keys     *coreauth.APIKeyStore
-	Passkeys *coreauth.PasskeyService
+	Cfg   *config.Config
+	DB    *sql.DB
+	Store *coreauth.Store
 }
 
 type authUserResponse struct {

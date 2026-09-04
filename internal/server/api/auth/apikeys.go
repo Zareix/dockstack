@@ -54,7 +54,7 @@ func (d *Deps) handleCreateAPIKey(ctx context.Context, in *struct{ Body createAP
 		web.LogError(web.RequestFrom(ctx), err)
 		return nil, huma.Error500InternalServerError("failed to generate key")
 	}
-	created, err := d.Keys.Create(ctx, coreauth.NewAPIKey{
+	created, err := d.Store.CreateAPIKey(ctx, coreauth.NewAPIKey{
 		UserID:    user.ID,
 		Name:      in.Body.Name,
 		KeyHash:   coreauth.HashToken(key),
@@ -75,7 +75,7 @@ func (d *Deps) handleListAPIKeys(ctx context.Context, _ *struct{}) (*web.ListOut
 	if user == nil {
 		return nil, huma.Error401Unauthorized("Unauthorized")
 	}
-	keys, err := d.Keys.List(ctx, user.ID)
+	keys, err := d.Store.ListAPIKeys(ctx, user.ID)
 	if err != nil {
 		web.LogError(web.RequestFrom(ctx), err)
 		return nil, huma.Error500InternalServerError("failed to list API keys")
@@ -92,7 +92,7 @@ func (d *Deps) handleDeleteAPIKey(ctx context.Context, in *idInput) (*web.OKResp
 	if user == nil {
 		return nil, huma.Error401Unauthorized("Unauthorized")
 	}
-	if err := d.Keys.Delete(ctx, user.ID, in.ID); err != nil {
+	if err := d.Store.DeleteAPIKey(ctx, user.ID, in.ID); err != nil {
 		web.LogError(web.RequestFrom(ctx), err)
 		return nil, huma.Error500InternalServerError("failed to delete API key")
 	}

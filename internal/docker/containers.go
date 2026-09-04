@@ -9,9 +9,6 @@ import (
 
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
-	"github.com/docker/docker/api/types/image"
-	"github.com/docker/docker/api/types/network"
-	"github.com/docker/docker/api/types/volume"
 )
 
 func (c *Client) ListContainers(ctx context.Context, all bool, project string) ([]container.Summary, error) {
@@ -62,9 +59,9 @@ var hostRuleRe = regexp.MustCompile("^Host\\(`([^`]*)`\\)")
 
 func getContainerURLs(labels map[string]string, baseDomain string) []string {
 	if alias, ok := labels["proxy.aliases"]; ok && baseDomain != "" {
-		parts := strings.Split(alias, ",")
-		urls := make([]string, 0, len(parts))
-		for _, a := range parts {
+		parts := strings.SplitSeq(alias, ",")
+		urls := []string{}
+		for a := range parts {
 			a = strings.TrimSpace(a)
 			if a == "" {
 				continue
@@ -81,7 +78,7 @@ func getContainerURLs(labels map[string]string, baseDomain string) []string {
 	for label, value := range labels {
 		if traefikRuleRe.MatchString(label) {
 			urls := []string{}
-			for _, rule := range strings.Split(value, ",") {
+			for rule := range strings.SplitSeq(value, ",") {
 				rule = strings.TrimSpace(rule)
 				if !strings.HasPrefix(rule, "Host(") {
 					continue
@@ -98,8 +95,7 @@ func getContainerURLs(labels map[string]string, baseDomain string) []string {
 }
 
 func formatImageTag(tag string) string {
-	if strings.HasPrefix(tag, "sha256:") {
-		id := strings.TrimPrefix(tag, "sha256:")
+	if id, hasPrefix := strings.CutPrefix(tag, "sha256:"); hasPrefix {
 		if len(id) > 12 {
 			id = id[:12]
 		}
@@ -191,65 +187,4 @@ func (c *Client) ContainerPrune(ctx context.Context) (PruneResult, error) {
 		return PruneResult{}, err
 	}
 	return PruneResult{Deleted: report.ContainersDeleted, SpaceReclaimed: int64(report.SpaceReclaimed)}, nil
-}
-
-func (c *Client) ListImages(ctx context.Context) ([]image.Summary, error) {
-	return c.api.ImageList(ctx, image.ListOptions{})
-}
-
-func (c *Client) ImageRemove(ctx context.Context, id string) error {
-	_, err := c.api.ImageRemove(ctx, id, image.RemoveOptions{Force: true})
-	return err
-}
-
-func (c *Client) ImagePrune(ctx context.Context) (PruneResult, error) {
-	f := filters.NewArgs()
-	f.Add("dangling", "false")
-	report, err := c.api.ImagesPrune(ctx, f)
-	if err != nil {
-		return PruneResult{}, err
-	}
-	pruned := make([]string, 0, len(report.ImagesDeleted))
-	for _, d := range report.ImagesDeleted {
-		if d.Deleted != "" {
-			pruned = append(pruned, d.Deleted)
-		} else if d.Untagged != "" {
-			pruned = append(pruned, d.Untagged)
-		}
-	}
-	return PruneResult{Deleted: pruned, SpaceReclaimed: int64(report.SpaceReclaimed)}, nil
-}
-
-func (c *Client) ListVolumes(ctx context.Context) ([]*volume.Volume, error) {
-	res, err := c.api.VolumeList(ctx, volume.ListOptions{})
-	if err != nil {
-		return nil, err
-	}
-	return res.Volumes, nil
-}
-
-func (c *Client) VolumeRemove(ctx context.Context, name string) error {
-	return c.api.VolumeRemove(ctx, name, true)
-}
-
-func (c *Client) VolumePrune(ctx context.Context) (PruneResult, error) {
-	f := filters.NewArgs()
-	f.Add("all", "true")
-	report, err := c.api.VolumesPrune(ctx, f)
-	if err != nil {
-		return PruneResult{}, err
-	}
-	return PruneResult{Deleted: report.VolumesDeleted, SpaceReclaimed: int64(report.SpaceReclaimed)}, nil
-}
-
-func (c *Client) ListNetworks(ctx context.Context) ([]network.Summary, error) {
-	return c.api.NetworkList(ctx, network.ListOptions{})
-}
-
-func (c *Client) NetworkPrune(ctx context.Context) (PruneResult, error) {
-	report, err := c.api.NetworksPrune(ctx, filters.NewArgs())
-	if err != nil {
-		return PruneResult{}, err
-	}
-	return PruneResult{Deleted: report.NetworksDeleted}, nil
 }

@@ -59,17 +59,23 @@ func (s *Stacks) StreamStackLogs(ctx context.Context, stackName string) (<-chan 
 					}
 					entry := LogEntry{
 						ContainerName: cName,
-						Message:       line,
 						Stream:        stream,
 					}
-					if idx := strings.Index(line, " "); idx > -1 {
-						entry.Timestamp = line[:idx]
-						entry.Message = line[idx+1:]
+					entry.Timestamp, entry.Message, _ = strings.Cut(line, " ")
+					if entry.Message == "" {
+						entry.Message = entry.Timestamp
+						entry.Timestamp = ""
 					}
 					select {
 					case out <- entry:
 					case <-ctx.Done():
 						return
+					}
+				}
+				if err := sc.Err(); err != nil && ctx.Err() == nil {
+					select {
+					case out <- LogEntry{ContainerName: cName, Stream: stream, Message: "log stream error: " + err.Error()}:
+					case <-ctx.Done():
 					}
 				}
 			}

@@ -37,17 +37,16 @@ func newTestServer(t *testing.T) (*Server, *sql.DB) {
 		DockerHost: "unix:///nonexistent.sock",
 		AppURL:     "",
 	}
-	app, err := NewApp(cfg)
+	store, err := auth.NewStore(cfg, sqlDB)
 	if err != nil {
 		t.Fatal(err)
 	}
-	store := auth.NewStore(sqlDB, "test-secret", false)
-	keys := auth.NewAPIKeyStore(sqlDB)
-	passkeys, err := auth.NewPasskeyService(sqlDB, "localhost", "Test", "http://localhost:3000")
+	srv, app, err := New(cfg, sqlDB, store)
 	if err != nil {
 		t.Fatal(err)
 	}
-	return New(cfg, sqlDB, store, keys, passkeys, app), sqlDB
+	_ = app
+	return srv, sqlDB
 }
 
 func doJSON(t *testing.T, h http.Handler, method, path string, body any, cookies []*http.Cookie) *httptest.ResponseRecorder {

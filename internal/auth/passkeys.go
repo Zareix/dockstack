@@ -21,23 +21,6 @@ type Passkey struct {
 	CreatedAt    int64  `json:"createdAt"`
 }
 
-type PasskeyService struct {
-	db *sql.DB
-	wa *webauthn.WebAuthn
-}
-
-func NewPasskeyService(db *sql.DB, rpID, rpName, origin string) (*PasskeyService, error) {
-	wa, err := webauthn.New(&webauthn.Config{
-		RPDisplayName: rpName,
-		RPID:          rpID,
-		RPOrigins:     []string{origin},
-	})
-	if err != nil {
-		return nil, err
-	}
-	return &PasskeyService{db: db, wa: wa}, nil
-}
-
 type passkeyUser struct {
 	id    string
 	name  string
@@ -49,7 +32,7 @@ func (u *passkeyUser) WebAuthnName() string                       { return u.nam
 func (u *passkeyUser) WebAuthnDisplayName() string                { return u.name }
 func (u *passkeyUser) WebAuthnCredentials() []webauthn.Credential { return u.creds }
 
-func (s *PasskeyService) userCredentials(ctx context.Context, userID string) ([]webauthn.Credential, error) {
+func (s *Store) userCredentials(ctx context.Context, userID string) ([]webauthn.Credential, error) {
 	rows, err := s.db.QueryContext(ctx, `SELECT public_key FROM passkeys WHERE user_id = ?`, userID)
 	if err != nil {
 		return nil, err
@@ -70,7 +53,7 @@ func (s *PasskeyService) userCredentials(ctx context.Context, userID string) ([]
 	return creds, rows.Err()
 }
 
-func (s *PasskeyService) userFor(userID string) (*passkeyUser, error) {
+func (s *Store) userFor(userID string) (*passkeyUser, error) {
 	var name string
 	err := s.db.QueryRow(`SELECT name FROM users WHERE id = ?`, userID).Scan(&name)
 	if err != nil {
@@ -83,7 +66,7 @@ func (s *PasskeyService) userFor(userID string) (*passkeyUser, error) {
 	return &passkeyUser{id: userID, name: name, creds: creds}, nil
 }
 
-func (s *PasskeyService) BeginRegistration(ctx context.Context, userID string) (any, string, error) {
+func (s *Store) BeginRegistration(ctx context.Context, userID string) (any, string, error) {
 	user, err := s.userFor(userID)
 	if err != nil {
 		return nil, "", err
@@ -106,7 +89,7 @@ func (s *PasskeyService) BeginRegistration(ctx context.Context, userID string) (
 	return options.Response, challengeID, nil
 }
 
-func (s *PasskeyService) FinishRegistration(ctx context.Context, userID, challengeID string, response []byte) (Passkey, error) {
+func (s *Store) FinishRegistration(ctx context.Context, userID, challengeID string, response []byte) (Passkey, error) {
 	var p Passkey
 	session, err := s.loadChallenge(ctx, challengeID, "registration", userID)
 	if err != nil {
@@ -147,7 +130,7 @@ func (s *PasskeyService) FinishRegistration(ctx context.Context, userID, challen
 	return p, nil
 }
 
-func (s *PasskeyService) BeginAuthentication(ctx context.Context) (any, string, error) {
+func (s *Store) BeginAuthentication(ctx context.Context) (any, string, error) {
 	options, session, err := s.wa.BeginDiscoverableLogin()
 	if err != nil {
 		return nil, "", err
@@ -159,7 +142,7 @@ func (s *PasskeyService) BeginAuthentication(ctx context.Context) (any, string, 
 	return options.Response, challengeID, nil
 }
 
-func (s *PasskeyService) FinishAuthentication(ctx context.Context, challengeID string, response []byte) (string, error) {
+func (s *Store) FinishAuthentication(ctx context.Context, challengeID string, response []byte) (string, error) {
 	session, err := s.loadChallenge(ctx, challengeID, "authentication", "")
 	if err != nil {
 		return "", err
@@ -190,7 +173,7 @@ func (s *PasskeyService) FinishAuthentication(ctx context.Context, challengeID s
 	return userID, nil
 }
 
-func (s *PasskeyService) List(ctx context.Context, userID string) ([]Passkey, error) {
+func (s *Store) ListPasskeys(ctx context.Context, userID string) ([]Passkey, error) {
 	rows, err := s.db.QueryContext(ctx,
 		`SELECT id, user_id, name, credential_id, created_at FROM passkeys WHERE user_id = ?`, userID)
 	if err != nil {
@@ -208,12 +191,12 @@ func (s *PasskeyService) List(ctx context.Context, userID string) ([]Passkey, er
 	return out, rows.Err()
 }
 
-func (s *PasskeyService) Delete(ctx context.Context, userID, id string) error {
+func (s *Store) DeletePasskey(ctx context.Context, userID, id string) error {
 	_, err := s.db.ExecContext(ctx, `DELETE FROM passkeys WHERE id = ? AND user_id = ?`, id, userID)
 	return err
 }
 
-func (s *PasskeyService) saveChallenge(ctx context.Context, userID, kind string, session *webauthn.SessionData) (string, error) {
+func (s *Store) saveChallenge(ctx context.Context, userID, kind string, session *webauthn.SessionData) (string, error) {
 	id := uuid.New().String()
 	raw, err := json.Marshal(session)
 	if err != nil {
@@ -226,7 +209,7 @@ func (s *PasskeyService) saveChallenge(ctx context.Context, userID, kind string,
 	return id, err
 }
 
-func (s *PasskeyService) loadChallenge(ctx context.Context, id, kind, userID string) (webauthn.SessionData, error) {
+func (s *Store) loadChallenge(ctx context.Context, id, kind, userID string) (webauthn.SessionData, error) {
 	var session webauthn.SessionData
 	var raw string
 	var storedUser sql.NullString
@@ -246,7 +229,7 @@ func (s *PasskeyService) loadChallenge(ctx context.Context, id, kind, userID str
 	return session, nil
 }
 
-func (s *PasskeyService) deleteChallenge(ctx context.Context, id string) {
+func (s *Store) deleteChallenge(ctx context.Context, id string) {
 	_, _ = s.db.ExecContext(ctx, `DELETE FROM webauthn_challenges WHERE id = ?`, id)
 }
 

@@ -43,7 +43,7 @@ func (d *Deps) handlePasskeyRegisterBegin(ctx context.Context, _ *struct{}) (*pa
 	if user == nil {
 		return nil, huma.Error401Unauthorized("Unauthorized")
 	}
-	options, challengeID, err := d.Passkeys.BeginRegistration(ctx, user.ID)
+	options, challengeID, err := d.Store.BeginRegistration(ctx, user.ID)
 	if err != nil {
 		web.LogError(web.RequestFrom(ctx), err)
 		return nil, huma.Error500InternalServerError("failed to start registration")
@@ -76,7 +76,7 @@ func (d *Deps) handlePasskeyRegisterFinish(ctx context.Context, in *struct{ Body
 	if err != nil {
 		return nil, err
 	}
-	passkey, err := d.Passkeys.FinishRegistration(ctx, user.ID, challengeID, in.Body.Credential)
+	passkey, err := d.Store.FinishRegistration(ctx, user.ID, challengeID, in.Body.Credential)
 	if err != nil {
 		return nil, huma.Error400BadRequest("registration failed")
 	}
@@ -89,7 +89,7 @@ func (d *Deps) handlePasskeyRegisterFinish(ctx context.Context, in *struct{ Body
 type passkeyAuthBeginOutput = passkeyOptionsOutput
 
 func (d *Deps) handlePasskeyAuthBegin(ctx context.Context, _ *struct{}) (*passkeyAuthBeginOutput, error) {
-	options, challengeID, err := d.Passkeys.BeginAuthentication(ctx)
+	options, challengeID, err := d.Store.BeginAuthentication(ctx)
 	if err != nil {
 		web.LogError(web.RequestFrom(ctx), err)
 		return nil, huma.Error500InternalServerError("failed to start authentication")
@@ -110,7 +110,7 @@ func (d *Deps) handlePasskeyAuthFinish(ctx context.Context, in *struct{ Body pas
 	if err != nil {
 		return nil, err
 	}
-	userID, err := d.Passkeys.FinishAuthentication(ctx, challengeID, in.Body.Credential)
+	userID, err := d.Store.FinishAuthentication(ctx, challengeID, in.Body.Credential)
 	if err != nil {
 		return nil, huma.Error400BadRequest("authentication failed")
 	}
@@ -130,7 +130,7 @@ func (d *Deps) handleListPasskeys(ctx context.Context, _ *struct{}) (*web.ListOu
 	if user == nil {
 		return nil, huma.Error401Unauthorized("Unauthorized")
 	}
-	passkeys, err := d.Passkeys.List(ctx, user.ID)
+	passkeys, err := d.Store.ListPasskeys(ctx, user.ID)
 	if err != nil {
 		web.LogError(web.RequestFrom(ctx), err)
 		return nil, huma.Error500InternalServerError("failed to list passkeys")
@@ -146,7 +146,7 @@ func (d *Deps) handleDeletePasskey(ctx context.Context, in *idInput) (*web.OKRes
 	if user == nil {
 		return nil, huma.Error401Unauthorized("Unauthorized")
 	}
-	if err := d.Passkeys.Delete(ctx, user.ID, in.ID); err != nil {
+	if err := d.Store.DeletePasskey(ctx, user.ID, in.ID); err != nil {
 		web.LogError(web.RequestFrom(ctx), err)
 		return nil, huma.Error500InternalServerError("failed to delete passkey")
 	}
