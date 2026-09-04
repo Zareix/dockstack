@@ -9,9 +9,6 @@ import (
 	"sync"
 )
 
-// StreamStackLogs tails docker logs for every container in a stack and emits
-// parsed LogEntries on the returned channel. The channel is closed when all
-// log processes exit.
 func (s *Stacks) StreamStackLogs(ctx context.Context, stackName string) (<-chan LogEntry, error) {
 	containers, err := s.client.ListContainers(ctx, false, stackName)
 	if err != nil {

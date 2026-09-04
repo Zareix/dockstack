@@ -31,19 +31,14 @@ func NewClient(dockerHost, configDir string) (*Client, error) {
 		return nil, err
 	}
 
-	// Raw HTTP transport for endpoints the official SDK doesn't expose
-	// (e.g. the registry distribution endpoint used for staleness checks).
 	hc := &http.Client{Timeout: 30 * time.Second}
-	if strings.HasPrefix(dockerHost, "unix://") {
-		socketPath := strings.TrimPrefix(dockerHost, "unix://")
-		hc.Transport = &http.Transport{
-			DialContext: func(ctx context.Context, _, _ string) (net.Conn, error) {
-				var d net.Dialer
-				return d.DialContext(ctx, "unix", socketPath)
-			},
-		}
+	socketPath, _ := strings.CutPrefix(dockerHost, "unix://")
+	hc.Transport = &http.Transport{
+		DialContext: func(ctx context.Context, _, _ string) (net.Conn, error) {
+			var d net.Dialer
+			return d.DialContext(ctx, "unix", socketPath)
+		},
 	}
-
 	return &Client{api: cli, httpClient: hc, configDir: configDir}, nil
 }
 
@@ -93,7 +88,6 @@ func registryFromTag(tag string) string {
 	return "https://index.docker.io/v1/"
 }
 
-// RegistryAuth resolves credentials from the docker config.json for a given image tag.
 func (c *Client) RegistryAuth(tag string) (string, string, string, bool) {
 	configPath := filepath.Join(c.configDir, "config.json")
 	data, err := os.ReadFile(configPath)

@@ -137,8 +137,6 @@ func (c *Client) ListImagesInfo(ctx context.Context) ([]ImageInfo, error) {
 	return out, nil
 }
 
-// CheckImagesStale queries the registry distribution endpoint for each tagged
-// image and compares the remote digest to the local repo digests.
 func (c *Client) CheckImagesStale(ctx context.Context) map[string]StaleStatus {
 	images, err := c.ListImagesInfo(ctx)
 	if err != nil {

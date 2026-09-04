@@ -48,7 +48,6 @@ export function ContainerTerminal({ containerId, shell = "/bin/sh" }: Props) {
     term.loadAddon(new WebLinksAddon())
     term.open(containerRef.current)
 
-    // Defer fit so browser has finished laying out the container
     const rafId = requestAnimationFrame(() => fitAddon.fit())
 
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:"

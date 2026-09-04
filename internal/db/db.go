@@ -22,7 +22,6 @@ func Open(path string) (*sql.DB, error) {
 	if path == ":memory:" {
 		return sql.Open("sqlite", path)
 	}
-	// Ensure the parent directory exists so sqlite can create the file.
 	if dir := filepath.Dir(path); dir != "." && dir != "" {
 		if err := os.MkdirAll(dir, 0o755); err != nil {
 			return nil, fmt.Errorf("create db directory: %w", err)

@@ -59,11 +59,6 @@ const RESOURCES_LINKS: Array<{
   linkOptions: ValidateLinkOptions
   icon: React.ReactNode
 }> = [
-  // {
-  //   label: "Stacks",
-  //   linkOptions: { to: "/" },
-  //   icon: <StackIcon className="size-5" />,
-  // },
   {
     label: "Containers",
     linkOptions: { to: "/containers" },

@@ -101,8 +101,6 @@ func (k *APIKeyStore) Delete(ctx context.Context, userID, id string) error {
 	return err
 }
 
-// VerifyKey looks up a key by its raw value's hash and returns the owning user.
-// It enforces enabled state and expiry.
 func (k *APIKeyStore) VerifyKey(ctx context.Context, rawKey string) (*APIKey, error) {
 	hash := HashToken(rawKey)
 	row := k.db.QueryRowContext(ctx,
@@ -130,7 +128,6 @@ func (k *APIKeyStore) VerifyKey(ctx context.Context, rawKey string) (*APIKey, er
 	return &key, nil
 }
 
-// RateLimit checks and records a request against the key's 100 req/min window.
 func (k *APIKeyStore) RateLimit(ctx context.Context, keyID string, max int, windowMs int64) (bool, error) {
 	now := time.Now().UnixMilli()
 	res, err := k.db.ExecContext(ctx,

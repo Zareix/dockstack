@@ -9,8 +9,6 @@ import (
 	"github.com/zareix/dockstack/internal/server/api/web"
 )
 
-// apiError keeps the legacy {"error": "..."} response shape for all errors,
-// including Huma's request-validation (422) errors.
 type apiError struct {
 	status int
 	Err    string `json:"error"`
