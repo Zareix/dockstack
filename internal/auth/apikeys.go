@@ -6,6 +6,8 @@ import (
 	"errors"
 	"time"
 	"uuid"
+
+	"github.com/zareix/dockstack/internal/db/store"
 )
 
 type APIKey struct {
@@ -42,6 +44,21 @@ type NewAPIKey struct {
 	ExpiresAt *int64
 }
 
+func apiKeyFromRow(r store.ApiKey) APIKey {
+	key := APIKey{
+		ID:              r.ID,
+		UserID:          r.UserID,
+		Name:            r.Name,
+		KeyHash:         r.KeyHash,
+		Enabled:         r.Enabled,
+		ExpiresAt:       r.ExpiresAt,
+		CreatedAt:       r.CreatedAt,
+		rateLimitMax:    int(r.RateLimitMax),
+		rateLimitWindow: r.RateLimitWindow,
+	}
+	return key
+}
+
 func (s *Store) CreateAPIKey(ctx context.Context, in NewAPIKey) (*APIKey, error) {
 	now := time.Now().UnixMilli()
 	key := &APIKey{
@@ -53,10 +70,15 @@ func (s *Store) CreateAPIKey(ctx context.Context, in NewAPIKey) (*APIKey, error)
 		ExpiresAt: in.ExpiresAt,
 		CreatedAt: now,
 	}
-	_, err := s.db.ExecContext(ctx,
-		`INSERT INTO api_keys (id, user_id, name, key_hash, enabled, expires_at, created_at, updated_at)
-		 VALUES (?, ?, ?, ?, 1, ?, ?, ?)`,
-		key.ID, key.UserID, key.Name, key.KeyHash, key.ExpiresAt, now, now)
+	err := s.q.CreateAPIKey(ctx, store.CreateAPIKeyParams{
+		ID:        key.ID,
+		UserID:    key.UserID,
+		Name:      key.Name,
+		KeyHash:   key.KeyHash,
+		ExpiresAt: key.ExpiresAt,
+		CreatedAt: now,
+		UpdatedAt: now,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -64,53 +86,30 @@ func (s *Store) CreateAPIKey(ctx context.Context, in NewAPIKey) (*APIKey, error)
 }
 
 func (s *Store) ListAPIKeys(ctx context.Context, userID string) ([]APIKey, error) {
-	rows, err := s.db.QueryContext(ctx,
-		`SELECT id, user_id, name, key_hash, enabled, expires_at, created_at,
-		        rate_limit_max, rate_limit_window
-		 FROM api_keys WHERE user_id = ? ORDER BY created_at DESC`, userID)
+	rows, err := s.q.ListAPIKeysByUser(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
-	defer func() { _ = rows.Close() }()
-	var keys []APIKey
-	for rows.Next() {
-		var key APIKey
-		var exp sql.NullInt64
-		if err := rows.Scan(&key.ID, &key.UserID, &key.Name, &key.KeyHash, &key.Enabled, &exp,
-			&key.CreatedAt, &key.rateLimitMax, &key.rateLimitWindow); err != nil {
-			return nil, err
-		}
-		if exp.Valid {
-			key.ExpiresAt = &exp.Int64
-		}
-		keys = append(keys, key)
+	keys := make([]APIKey, 0, len(rows))
+	for _, r := range rows {
+		keys = append(keys, apiKeyFromRow(r))
 	}
-	return keys, rows.Err()
+	return keys, nil
 }
 
 func (s *Store) DeleteAPIKey(ctx context.Context, userID, id string) error {
-	_, err := s.db.ExecContext(ctx, `DELETE FROM api_keys WHERE id = ? AND user_id = ?`, id, userID)
-	return err
+	return s.q.DeleteAPIKey(ctx, store.DeleteAPIKeyParams{ID: id, UserID: userID})
 }
 
 func (s *Store) VerifyKey(ctx context.Context, rawKey string) (*APIKey, error) {
-	hash := HashToken(rawKey)
-	row := s.db.QueryRowContext(ctx,
-		`SELECT id, user_id, name, key_hash, enabled, expires_at, created_at,
-		        rate_limit_max, rate_limit_window
-		 FROM api_keys WHERE key_hash = ?`, hash)
-	var key APIKey
-	var exp sql.NullInt64
-	if err := row.Scan(&key.ID, &key.UserID, &key.Name, &key.KeyHash, &key.Enabled, &exp,
-		&key.CreatedAt, &key.rateLimitMax, &key.rateLimitWindow); err != nil {
+	row, err := s.q.GetAPIKeyByHash(ctx, HashToken(rawKey))
+	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, errors.New("invalid API key")
 		}
 		return nil, err
 	}
-	if exp.Valid {
-		key.ExpiresAt = &exp.Int64
-	}
+	key := apiKeyFromRow(row)
 	if !key.Enabled {
 		return nil, errors.New("API key is disabled")
 	}
@@ -122,22 +121,13 @@ func (s *Store) VerifyKey(ctx context.Context, rawKey string) (*APIKey, error) {
 
 func (s *Store) RateLimit(ctx context.Context, keyID string, max int, windowMs int64) (bool, error) {
 	now := time.Now().UnixMilli()
-	res, err := s.db.ExecContext(ctx,
-		`UPDATE api_keys
-		 SET request_count = CASE
-		     WHEN last_request_at IS NULL OR last_request_at < ? THEN 1
-		     ELSE request_count + 1
-		 END,
-		 last_request_at = ?
-		 WHERE id = ? AND (
-		   request_count < ? OR
-		   last_request_at IS NULL OR last_request_at < ?
-		 )`,
-		now-windowMs, now, keyID, max, now-windowMs)
-	if err != nil {
-		return false, err
-	}
-	n, err := res.RowsAffected()
+	windowStart := now - windowMs
+	n, err := s.q.UpdateAPIKeyRateLimit(ctx, store.UpdateAPIKeyRateLimitParams{
+		WindowStart: &windowStart,
+		Now:         &now,
+		ID:          keyID,
+		Max:         int64(max),
+	})
 	if err != nil {
 		return false, err
 	}

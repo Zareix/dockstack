@@ -56,7 +56,7 @@ func main() {
 		fatal("store", err)
 	}
 
-	srv, app, err := server.New(cfg, sqlDB, store)
+	srv, app, err := server.New(cfg, store)
 	if err != nil {
 		fatal("server", err)
 	}

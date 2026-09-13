@@ -8,11 +8,13 @@ import (
 	"uuid"
 
 	"github.com/zareix/dockstack/internal/auth"
+	"github.com/zareix/dockstack/internal/db/store"
 )
 
 func Seed(ctx context.Context, sqlDB *sql.DB, adminEmail string) error {
-	var count int
-	if err := sqlDB.QueryRowContext(ctx, `SELECT COUNT(*) FROM users`).Scan(&count); err != nil {
+	q := store.New(sqlDB)
+	count, err := q.CountUsers(ctx)
+	if err != nil {
 		return err
 	}
 	if count > 0 {
@@ -23,17 +25,26 @@ func Seed(ctx context.Context, sqlDB *sql.DB, adminEmail string) error {
 		return err
 	}
 	userID := uuid.New().String()
+	username := "admin"
 	now := time.Now().UnixMilli()
-	_, err = sqlDB.ExecContext(ctx, `
-		INSERT INTO users (id, name, email, email_verified, username, role, created_at, updated_at)
-		VALUES (?, 'Admin', ?, 1, 'admin', 'admin', ?, ?)`,
-		userID, adminEmail, now, now)
+	err = q.CreateUser(ctx, store.CreateUserParams{
+		ID:            userID,
+		Name:          "Admin",
+		Email:         adminEmail,
+		EmailVerified: true,
+		Username:      &username,
+		Role:          "admin",
+		CreatedAt:     now,
+		UpdatedAt:     now,
+	})
 	if err != nil {
 		return err
 	}
-	_, err = sqlDB.ExecContext(ctx, `
-		INSERT INTO credentials (user_id, password_hash, updated_at) VALUES (?, ?, ?)`,
-		userID, hash, now)
+	err = q.UpsertCredential(ctx, store.UpsertCredentialParams{
+		UserID:       userID,
+		PasswordHash: hash,
+		UpdatedAt:    now,
+	})
 	if err != nil {
 		return err
 	}

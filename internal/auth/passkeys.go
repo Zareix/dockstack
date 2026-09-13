@@ -1,9 +1,7 @@
 package auth
 
 import (
-	"bytes"
 	"context"
-	"database/sql"
 	"encoding/json"
 	"errors"
 	"time"
@@ -11,6 +9,8 @@ import (
 
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
+
+	"github.com/zareix/dockstack/internal/db/store"
 )
 
 type Passkey struct {
@@ -33,41 +33,35 @@ func (u *passkeyUser) WebAuthnDisplayName() string                { return u.nam
 func (u *passkeyUser) WebAuthnCredentials() []webauthn.Credential { return u.creds }
 
 func (s *Store) userCredentials(ctx context.Context, userID string) ([]webauthn.Credential, error) {
-	rows, err := s.db.QueryContext(ctx, `SELECT public_key FROM passkeys WHERE user_id = ?`, userID)
+	rows, err := s.q.ListPasskeyPublicKeys(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
-	defer func() { _ = rows.Close() }()
 	var creds []webauthn.Credential
-	for rows.Next() {
-		var raw []byte
-		if err := rows.Scan(&raw); err != nil {
-			return nil, err
-		}
+	for _, raw := range rows {
 		var c webauthn.Credential
 		if err := json.Unmarshal(raw, &c); err != nil {
 			continue
 		}
 		creds = append(creds, c)
 	}
-	return creds, rows.Err()
+	return creds, nil
 }
 
-func (s *Store) userFor(userID string) (*passkeyUser, error) {
-	var name string
-	err := s.db.QueryRow(`SELECT name FROM users WHERE id = ?`, userID).Scan(&name)
+func (s *Store) userFor(ctx context.Context, userID string) (*passkeyUser, error) {
+	row, err := s.q.GetUserByID(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
-	creds, err := s.userCredentials(context.Background(), userID)
+	creds, err := s.userCredentials(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
-	return &passkeyUser{id: userID, name: name, creds: creds}, nil
+	return &passkeyUser{id: userID, name: row.Name, creds: creds}, nil
 }
 
 func (s *Store) BeginRegistration(ctx context.Context, userID string) (any, string, error) {
-	user, err := s.userFor(userID)
+	user, err := s.userFor(ctx, userID)
 	if err != nil {
 		return nil, "", err
 	}
@@ -96,7 +90,7 @@ func (s *Store) FinishRegistration(ctx context.Context, userID, challengeID stri
 		return p, err
 	}
 	defer s.deleteChallenge(ctx, challengeID)
-	user, err := s.userFor(userID)
+	user, err := s.userFor(ctx, userID)
 	if err != nil {
 		return p, err
 	}
@@ -119,11 +113,17 @@ func (s *Store) FinishRegistration(ctx context.Context, userID, challengeID stri
 		CredentialID: string(cred.ID),
 		CreatedAt:    time.Now().UnixMilli(),
 	}
-	_, err = s.db.ExecContext(ctx,
-		`INSERT INTO passkeys (id, user_id, name, credential_id, public_key, counter, aaguid, transports, created_at)
-		 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-		p.ID, userID, p.Name, string(cred.ID), raw, cred.Authenticator.SignCount,
-		cred.Authenticator.AAGUID, string(mustJSON(cred.Transport)), p.CreatedAt)
+	err = s.q.InsertPasskey(ctx, store.InsertPasskeyParams{
+		ID:           p.ID,
+		UserID:       p.UserID,
+		Name:         p.Name,
+		CredentialID: p.CredentialID,
+		PublicKey:    raw,
+		Counter:      int64(cred.Authenticator.SignCount),
+		Aaguid:       cred.Authenticator.AAGUID,
+		Transports:   string(mustJSON(cred.Transport)),
+		CreatedAt:    p.CreatedAt,
+	})
 	if err != nil {
 		return p, err
 	}
@@ -155,7 +155,7 @@ func (s *Store) FinishAuthentication(ctx context.Context, challengeID string, re
 	}
 	user, cred, err := s.wa.ValidatePasskeyLogin(func(rawID, userHandle []byte) (webauthn.User, error) {
 		uid := string(userHandle)
-		user, err := s.userFor(uid)
+		user, err := s.userFor(ctx, uid)
 		if err != nil {
 			return nil, err
 		}
@@ -165,35 +165,37 @@ func (s *Store) FinishAuthentication(ctx context.Context, challengeID string, re
 		return "", err
 	}
 	userID := string(user.WebAuthnID())
-	if _, err := s.db.ExecContext(ctx,
-		`UPDATE passkeys SET counter = ? WHERE user_id = ? AND credential_id = ?`,
-		cred.Authenticator.SignCount, userID, string(cred.ID)); err != nil {
+	err = s.q.UpdatePasskeyCounter(ctx, store.UpdatePasskeyCounterParams{
+		Counter:      int64(cred.Authenticator.SignCount),
+		UserID:       userID,
+		CredentialID: string(cred.ID),
+	})
+	if err != nil {
 		return "", err
 	}
 	return userID, nil
 }
 
 func (s *Store) ListPasskeys(ctx context.Context, userID string) ([]Passkey, error) {
-	rows, err := s.db.QueryContext(ctx,
-		`SELECT id, user_id, name, credential_id, created_at FROM passkeys WHERE user_id = ?`, userID)
+	rows, err := s.q.ListPasskeysByUser(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
-	defer func() { _ = rows.Close() }()
-	var out []Passkey
-	for rows.Next() {
-		var p Passkey
-		if err := rows.Scan(&p.ID, &p.UserID, &p.Name, &p.CredentialID, &p.CreatedAt); err != nil {
-			return nil, err
-		}
-		out = append(out, p)
+	out := make([]Passkey, 0, len(rows))
+	for _, r := range rows {
+		out = append(out, Passkey{
+			ID:           r.ID,
+			UserID:       r.UserID,
+			Name:         r.Name,
+			CredentialID: r.CredentialID,
+			CreatedAt:    r.CreatedAt,
+		})
 	}
-	return out, rows.Err()
+	return out, nil
 }
 
 func (s *Store) DeletePasskey(ctx context.Context, userID, id string) error {
-	_, err := s.db.ExecContext(ctx, `DELETE FROM passkeys WHERE id = ? AND user_id = ?`, id, userID)
-	return err
+	return s.q.DeletePasskey(ctx, store.DeletePasskeyParams{ID: id, UserID: userID})
 }
 
 func (s *Store) saveChallenge(ctx context.Context, userID, kind string, session *webauthn.SessionData) (string, error) {
@@ -202,35 +204,43 @@ func (s *Store) saveChallenge(ctx context.Context, userID, kind string, session 
 	if err != nil {
 		return "", err
 	}
-	_, err = s.db.ExecContext(ctx,
-		`INSERT INTO webauthn_challenges (id, challenge, user_id, kind, expires_at, created_at)
-		 VALUES (?, ?, NULLIF(?, ''), ?, ?, ?)`,
-		id, string(raw), userID, kind, time.Now().Add(5*time.Minute).UnixMilli(), time.Now().UnixMilli())
+	var uid *string
+	if userID != "" {
+		uid = &userID
+	}
+	now := time.Now().UnixMilli()
+	err = s.q.InsertChallenge(ctx, store.InsertChallengeParams{
+		ID:        id,
+		Challenge: string(raw),
+		UserID:    uid,
+		Kind:      kind,
+		ExpiresAt: time.Now().Add(5 * time.Minute).UnixMilli(),
+		CreatedAt: now,
+	})
 	return id, err
 }
 
 func (s *Store) loadChallenge(ctx context.Context, id, kind, userID string) (webauthn.SessionData, error) {
 	var session webauthn.SessionData
-	var raw string
-	var storedUser sql.NullString
-	err := s.db.QueryRowContext(ctx,
-		`SELECT challenge, user_id FROM webauthn_challenges
-		 WHERE id = ? AND kind = ? AND expires_at > ?`,
-		id, kind, time.Now().UnixMilli()).Scan(&raw, &storedUser)
+	row, err := s.q.GetChallenge(ctx, store.GetChallengeParams{
+		ID:        id,
+		Kind:      kind,
+		ExpiresAt: time.Now().UnixMilli(),
+	})
 	if err != nil {
 		return session, errors.New("invalid or expired challenge")
 	}
-	if userID != "" && (!storedUser.Valid || storedUser.String != userID) {
+	if userID != "" && (row.UserID == nil || *row.UserID != userID) {
 		return session, errors.New("invalid challenge")
 	}
-	if err := json.Unmarshal([]byte(raw), &session); err != nil {
+	if err := json.Unmarshal([]byte(row.Challenge), &session); err != nil {
 		return session, errors.New("invalid challenge")
 	}
 	return session, nil
 }
 
 func (s *Store) deleteChallenge(ctx context.Context, id string) {
-	_, _ = s.db.ExecContext(ctx, `DELETE FROM webauthn_challenges WHERE id = ?`, id)
+	_ = s.q.DeleteChallenge(ctx, id)
 }
 
 func mustJSON(v any) []byte {
@@ -240,5 +250,3 @@ func mustJSON(v any) []byte {
 	}
 	return b
 }
-
-var _ = bytes.NewReader

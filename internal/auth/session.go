@@ -16,6 +16,7 @@ import (
 	"github.com/go-webauthn/webauthn/webauthn"
 
 	"github.com/zareix/dockstack/internal/config"
+	"github.com/zareix/dockstack/internal/db/store"
 )
 
 const CookieName = "dockstack_session"
@@ -45,7 +46,7 @@ type Session struct {
 }
 
 type Store struct {
-	db         *sql.DB
+	q          *store.Queries
 	secret     []byte
 	secure     bool
 	sessionTTL time.Duration
@@ -64,7 +65,7 @@ func NewStore(cfg *config.Config, db *sql.DB) (*Store, error) {
 		return nil, err
 	}
 	return &Store{
-		db:         db,
+		q:          store.New(db),
 		secret:     []byte(cfg.AuthSecret),
 		secure:     secure,
 		sessionTTL: 7 * 24 * time.Hour,
@@ -80,6 +81,23 @@ func webauthnParams(cfg *config.Config) (string, string) {
 		}
 	}
 	return "localhost", "http://localhost:3000"
+}
+
+func userFromRow(u store.User) *User {
+	user := &User{
+		ID:            u.ID,
+		Name:          u.Name,
+		Email:         u.Email,
+		EmailVerified: u.EmailVerified,
+		Avatar:        u.Avatar,
+		Role:          u.Role,
+		CreatedAt:     u.CreatedAt,
+		UpdatedAt:     u.UpdatedAt,
+	}
+	if u.Username != nil {
+		user.Username = *u.Username
+	}
+	return user
 }
 
 func (s *Store) Secure() bool { return s.secure }
@@ -120,11 +138,15 @@ func (s *Store) CreateSession(ctx context.Context, userID, ip, userAgent string)
 		UserAgent: userAgent,
 		CreatedAt: time.Now().UnixMilli(),
 	}
-	_, err = s.db.ExecContext(ctx,
-		`INSERT INTO sessions (id, user_id, token_hash, expires_at, ip_address, user_agent, created_at)
-		 VALUES (?, ?, ?, ?, ?, ?, ?)`,
-		sess.ID, sess.UserID, HashToken(token), sess.ExpiresAt, sess.IPAddress, sess.UserAgent, sess.CreatedAt,
-	)
+	err = s.q.CreateSession(ctx, store.CreateSessionParams{
+		ID:        sess.ID,
+		UserID:    sess.UserID,
+		TokenHash: HashToken(token),
+		ExpiresAt: sess.ExpiresAt,
+		IpAddress: sess.IPAddress,
+		UserAgent: sess.UserAgent,
+		CreatedAt: sess.CreatedAt,
+	})
 	if err != nil {
 		return "", nil, fmt.Errorf("insert session: %w", err)
 	}
@@ -140,114 +162,110 @@ func (s *Store) SessionUserFromCookie(ctx context.Context, signed string) (*Sess
 }
 
 func (s *Store) sessionUser(ctx context.Context, token string) (*Session, *User, error) {
-	row := s.db.QueryRowContext(ctx,
-		`SELECT s.id, s.user_id, s.expires_at, s.ip_address, s.user_agent, s.impersonated_by, s.created_at,
-		        u.id, u.name, u.email, u.email_verified, u.username, u.avatar, u.role, u.created_at, u.updated_at
-		 FROM sessions s JOIN users u ON u.id = s.user_id
-		 WHERE s.token_hash = ?`, HashToken(token))
-	var sess Session
-	var user User
-	var imp sql.NullString
-	var username sql.NullString
-	if err := row.Scan(&sess.ID, &sess.UserID, &sess.ExpiresAt, &sess.IPAddress, &sess.UserAgent,
-		&imp, &sess.CreatedAt,
-		&user.ID, &user.Name, &user.Email, &user.EmailVerified, &username, &user.Avatar, &user.Role,
-		&user.CreatedAt, &user.UpdatedAt); err != nil {
+	row, err := s.q.GetSessionWithUserByTokenHash(ctx, HashToken(token))
+	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil, ErrInvalidSession
 		}
 		return nil, nil, err
 	}
-	if imp.Valid {
-		sess.ImpersonatedBy = &imp.String
+	sess := &Session{
+		ID:        row.SessionID,
+		UserID:    row.SessionUserID,
+		ExpiresAt: row.ExpiresAt,
+		IPAddress: row.IpAddress,
+		UserAgent: row.UserAgent,
+		CreatedAt: row.SessionCreatedAt,
 	}
-	if username.Valid {
-		user.Username = username.String
+	if row.ImpersonatedBy != nil {
+		sess.ImpersonatedBy = row.ImpersonatedBy
+	}
+	user := &User{
+		ID:            row.UserID,
+		Name:          row.UserName,
+		Email:         row.UserEmail,
+		EmailVerified: row.UserEmailVerified,
+		Avatar:        row.UserAvatar,
+		Role:          row.UserRole,
+		CreatedAt:     row.UserCreatedAt,
+		UpdatedAt:     row.UserUpdatedAt,
+	}
+	if row.UserUsername != nil {
+		user.Username = *row.UserUsername
 	}
 	if time.Now().UnixMilli() > sess.ExpiresAt {
 		return nil, nil, ErrInvalidSession
 	}
-	return &sess, &user, nil
+	return sess, user, nil
 }
 
 func (s *Store) ListSessions(ctx context.Context, userID string) ([]Session, error) {
-	rows, err := s.db.QueryContext(ctx,
-		`SELECT id, user_id, expires_at, ip_address, user_agent, impersonated_by, created_at
-		 FROM sessions WHERE user_id = ? ORDER BY created_at DESC`, userID)
+	rows, err := s.q.ListSessionsByUser(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
-	defer func() { _ = rows.Close() }()
-	var sessions []Session
-	for rows.Next() {
-		var sess Session
-		var imp sql.NullString
-		if err := rows.Scan(&sess.ID, &sess.UserID, &sess.ExpiresAt, &sess.IPAddress, &sess.UserAgent,
-			&imp, &sess.CreatedAt); err != nil {
-			return nil, err
-		}
-		if imp.Valid {
-			sess.ImpersonatedBy = &imp.String
-		}
-		sessions = append(sessions, sess)
+	sessions := make([]Session, 0, len(rows))
+	for _, r := range rows {
+		sessions = append(sessions, Session{
+			ID:             r.ID,
+			UserID:         r.UserID,
+			ExpiresAt:      r.ExpiresAt,
+			IPAddress:      r.IpAddress,
+			UserAgent:      r.UserAgent,
+			ImpersonatedBy: r.ImpersonatedBy,
+			CreatedAt:      r.CreatedAt,
+		})
 	}
-	return sessions, rows.Err()
+	return sessions, nil
 }
 
 func (s *Store) RevokeSession(ctx context.Context, userID, sessionID string) error {
-	_, err := s.db.ExecContext(ctx,
-		`DELETE FROM sessions WHERE id = ? AND user_id = ?`, sessionID, userID)
-	return err
+	return s.q.DeleteSession(ctx, store.DeleteSessionParams{ID: sessionID, UserID: userID})
 }
 
 func (s *Store) RevokeOtherSessions(ctx context.Context, userID, keepID string) error {
-	_, err := s.db.ExecContext(ctx,
-		`DELETE FROM sessions WHERE user_id = ? AND id != ?`, userID, keepID)
-	return err
+	return s.q.DeleteOtherSessions(ctx, store.DeleteOtherSessionsParams{UserID: userID, ID: keepID})
 }
 
 func (s *Store) RevokeAllSessions(ctx context.Context, userID string) error {
-	_, err := s.db.ExecContext(ctx, `DELETE FROM sessions WHERE user_id = ?`, userID)
-	return err
+	return s.q.DeleteSessionsByUser(ctx, userID)
 }
 
 func (s *Store) DeleteSessionByToken(ctx context.Context, token string) error {
-	_, err := s.db.ExecContext(ctx, `DELETE FROM sessions WHERE token_hash = ?`, HashToken(token))
-	return err
+	return s.q.DeleteSessionByTokenHash(ctx, HashToken(token))
 }
 
 func (s *Store) DeleteExpired(ctx context.Context) error {
-	_, err := s.db.ExecContext(ctx, `DELETE FROM sessions WHERE expires_at < ?`, time.Now().UnixMilli())
-	return err
+	return s.q.DeleteExpiredSessions(ctx, time.Now().UnixMilli())
 }
 
 func (s *Store) GetUserByID(ctx context.Context, id string) (*User, error) {
-	row := s.db.QueryRowContext(ctx,
-		`SELECT id, name, email, email_verified, username, avatar, role, created_at, updated_at
-		 FROM users WHERE id = ?`, id)
-	var u User
-	var username sql.NullString
-	if err := row.Scan(&u.ID, &u.Name, &u.Email, &u.EmailVerified, &username, &u.Avatar, &u.Role,
-		&u.CreatedAt, &u.UpdatedAt); err != nil {
+	row, err := s.q.GetUserByID(ctx, id)
+	if err != nil {
 		return nil, err
 	}
-	if username.Valid {
-		u.Username = username.String
-	}
-	return &u, nil
+	return userFromRow(row), nil
 }
 
 func (s *Store) UpdateUser(ctx context.Context, id, name, avatar string) error {
-	_, err := s.db.ExecContext(ctx,
-		`UPDATE users SET name = COALESCE(NULLIF(?, ''), name), avatar = ?,
-		 updated_at = ? WHERE id = ?`, name, avatar, time.Now().UnixMilli(), id)
-	return err
+	var nameArg *string
+	if name != "" {
+		nameArg = &name
+	}
+	return s.q.UpdateUser(ctx, store.UpdateUserParams{
+		Name:      nameArg,
+		Avatar:    avatar,
+		UpdatedAt: time.Now().UnixMilli(),
+		ID:        id,
+	})
 }
 
 func (s *Store) ChangeEmail(ctx context.Context, userID, email string) error {
-	_, err := s.db.ExecContext(ctx,
-		`UPDATE users SET email = ?, updated_at = ? WHERE id = ?`, email, time.Now().UnixMilli(), userID)
-	return err
+	return s.q.ChangeUserEmail(ctx, store.ChangeUserEmailParams{
+		Email:     email,
+		UpdatedAt: time.Now().UnixMilli(),
+		ID:        userID,
+	})
 }
 
 func (s *Store) SetPassword(ctx context.Context, userID, password string) error {
@@ -255,67 +273,47 @@ func (s *Store) SetPassword(ctx context.Context, userID, password string) error 
 	if err != nil {
 		return err
 	}
-	_, err = s.db.ExecContext(ctx,
-		`INSERT INTO credentials (user_id, password_hash, updated_at) VALUES (?, ?, ?)
-		 ON CONFLICT(user_id) DO UPDATE SET password_hash = excluded.password_hash, updated_at = excluded.updated_at`,
-		userID, hash, time.Now().UnixMilli())
-	return err
+	return s.q.UpsertCredential(ctx, store.UpsertCredentialParams{
+		UserID:       userID,
+		PasswordHash: hash,
+		UpdatedAt:    time.Now().UnixMilli(),
+	})
 }
 
 func (s *Store) VerifyPassword(ctx context.Context, userID, password string) (bool, error) {
-	row := s.db.QueryRowContext(ctx,
-		`SELECT password_hash FROM credentials WHERE user_id = ?`, userID)
-	var hash string
-	if err := row.Scan(&hash); err != nil {
+	row, err := s.q.GetCredential(ctx, userID)
+	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return false, nil
 		}
 		return false, err
 	}
-	return VerifyPassword(password, hash)
+	return VerifyPassword(password, row.PasswordHash)
 }
 
 func (s *Store) UserByEmail(ctx context.Context, email string) (*User, error) {
-	row := s.db.QueryRowContext(ctx,
-		`SELECT id, name, email, email_verified, username, avatar, role, created_at, updated_at
-		 FROM users WHERE email = ?`, email)
-	var u User
-	var username sql.NullString
-	err := row.Scan(&u.ID, &u.Name, &u.Email, &u.EmailVerified, &username, &u.Avatar, &u.Role,
-		&u.CreatedAt, &u.UpdatedAt)
+	row, err := s.q.GetUserByEmail(ctx, email)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}
 		return nil, err
 	}
-	if username.Valid {
-		u.Username = username.String
-	}
-	return &u, nil
+	return userFromRow(row), nil
 }
 
 func (s *Store) UserByUsername(ctx context.Context, username string) (*User, error) {
-	row := s.db.QueryRowContext(ctx,
-		`SELECT id, name, email, email_verified, username, avatar, role, created_at, updated_at
-		 FROM users WHERE username = ?`, username)
-	var u User
-	err := row.Scan(&u.ID, &u.Name, &u.Email, &u.EmailVerified, &u.Username, &u.Avatar, &u.Role,
-		&u.CreatedAt, &u.UpdatedAt)
+	row, err := s.q.GetUserByUsername(ctx, &username)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}
 		return nil, err
 	}
-	return &u, nil
+	return userFromRow(row), nil
 }
 
 func (s *Store) UsernameTaken(ctx context.Context, username string) (bool, error) {
-	var exists int
-	err := s.db.QueryRowContext(ctx, `SELECT 1 FROM users WHERE username = ?`, username).Scan(&exists)
-	if errors.Is(err, sql.ErrNoRows) {
-		return false, nil
-	}
-	return err == nil, err
+	count, err := s.q.UsernameTaken(ctx, &username)
+	return count > 0, err
 }

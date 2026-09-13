@@ -18,7 +18,7 @@ func StartPruneCron(cfg *config.Config, app *App) {
 		slog.Info("running docker system prune", "includeVolumes", includeVolumes)
 		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Minute)
 		defer cancel()
-		results, err := app.Docker().SystemPrune(ctx, includeVolumes)
+		results, err := app.docker.SystemPrune(ctx, includeVolumes)
 		if err != nil {
 			slog.Error("system prune failed", "error", err)
 			return

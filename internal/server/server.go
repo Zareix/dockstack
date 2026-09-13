@@ -1,7 +1,6 @@
 package server
 
 import (
-	"database/sql"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -20,32 +19,26 @@ type App struct {
 	stacks *dockerapi.Stacks
 }
 
-func (a *App) Docker() *dockerapi.Client { return a.docker }
-
-func (a *App) Stacks() *dockerapi.Stacks { return a.stacks }
-
 type Server struct {
 	cfg   *config.Config
-	db    *sql.DB
 	store *auth.Store
 	app   *App
 }
 
-func New(cfg *config.Config, db *sql.DB, store *auth.Store) (*Server, *App, error) {
+func New(cfg *config.Config, store *auth.Store) (*Server, *App, error) {
 	dockerClient, err := dockerapi.NewClient(cfg.DockerHost, cfg.DockerConfigDir)
 	if err != nil {
 		return nil, nil, err
 	}
 	stacks := dockerapi.NewStacks(dockerClient, cfg.StacksDir, cfg.DockerConfigDir, cfg.ServerHost, cfg.AutodetectURLBaseDomain)
 	app := &App{cfg: cfg, docker: dockerClient, stacks: stacks}
-	return &Server{cfg: cfg, db: db, store: store, app: app}, app, nil
+	return &Server{cfg: cfg, store: store, app: app}, app, nil
 }
 
 func (s *Server) deps() *api.Deps {
 	return &api.Deps{
 		Deps: &apiauth.Deps{
 			Cfg:   s.cfg,
-			DB:    s.db,
 			Store: s.store,
 		},
 		Docker: s.app.docker,

@@ -13,7 +13,6 @@ import (
 	"net/http"
 	"strings"
 	"time"
-	"uuid"
 
 	coreauth "github.com/zareix/dockstack/internal/auth"
 	"github.com/zareix/dockstack/internal/config"
@@ -22,7 +21,6 @@ import (
 
 type Deps struct {
 	Cfg   *config.Config
-	DB    *sql.DB
 	Store *coreauth.Store
 }
 
@@ -359,10 +357,8 @@ func (d *Deps) handleForgotPassword(ctx context.Context, in *struct{ Body forgot
 			web.LogError(web.RequestFrom(ctx), err)
 			return nil, huma.Error500InternalServerError("failed to generate token")
 		}
-		if _, err := d.DB.ExecContext(ctx,
-			`INSERT INTO reset_tokens (id, user_id, token_hash, expires_at, created_at) VALUES (?, ?, ?, ?, ?)`,
-			uuid.New().String(), user.ID, coreauth.HashToken(token), time.Now().Add(time.Hour).UnixMilli(),
-			time.Now().UnixMilli()); err != nil {
+		if err := d.Store.CreateResetToken(ctx, user.ID, coreauth.HashToken(token),
+			time.Now().Add(time.Hour).UnixMilli()); err != nil {
 			web.LogError(web.RequestFrom(ctx), err)
 			return nil, huma.Error500InternalServerError("failed to create reset token")
 		}
@@ -380,11 +376,8 @@ func (d *Deps) handleResetPassword(ctx context.Context, in *struct{ Body resetPa
 	if in.Body.Token == "" || in.Body.NewPassword == "" {
 		return nil, huma.Error400BadRequest("token and new password are required")
 	}
-	var userID string
-	row := d.DB.QueryRowContext(ctx,
-		`SELECT user_id FROM reset_tokens WHERE token_hash = ? AND expires_at > ?`,
-		coreauth.HashToken(in.Body.Token), time.Now().UnixMilli())
-	if err := row.Scan(&userID); err != nil {
+	userID, err := d.Store.ActiveResetTokenUser(ctx, coreauth.HashToken(in.Body.Token))
+	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, huma.Error400BadRequest("invalid or expired token")
 		}
@@ -395,8 +388,7 @@ func (d *Deps) handleResetPassword(ctx context.Context, in *struct{ Body resetPa
 		web.LogError(web.RequestFrom(ctx), err)
 		return nil, huma.Error500InternalServerError("failed to reset password")
 	}
-	if _, err := d.DB.ExecContext(ctx,
-		`DELETE FROM reset_tokens WHERE user_id = ?`, userID); err != nil {
+	if err := d.Store.DeleteResetTokensByUser(ctx, userID); err != nil {
 		web.LogError(web.RequestFrom(ctx), err)
 	}
 	return web.OK(), nil

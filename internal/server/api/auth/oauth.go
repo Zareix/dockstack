@@ -7,7 +7,6 @@ import (
 	"encoding/base64"
 	"net/http"
 	"strings"
-	"time"
 	"uuid"
 
 	"github.com/coreos/go-oidc/v3/oidc"
@@ -176,11 +175,7 @@ func (d *Deps) handleOAuthCallback(w http.ResponseWriter, r *http.Request) {
 }
 
 func (d *Deps) findOrLinkOAuthUser(ctx context.Context, providerID, sub, email string) (*coreauth.User, error) {
-	var userID string
-	err := d.DB.QueryRowContext(ctx,
-		`SELECT user_id FROM oauth_accounts WHERE provider_id = ? AND provider_user_id = ?`,
-		providerID, sub).Scan(&userID)
-	if err == nil {
+	if userID, err := d.Store.OAuthUserID(ctx, providerID, sub); err == nil {
 		return d.Store.GetUserByID(ctx, userID)
 	}
 
@@ -189,24 +184,12 @@ func (d *Deps) findOrLinkOAuthUser(ctx context.Context, providerID, sub, email s
 		return nil, err
 	}
 	if user == nil {
-
-		id := uuid.New().String()
-		now := time.Now().UnixMilli()
-		if _, err := d.DB.ExecContext(ctx,
-			`INSERT INTO users (id, name, email, email_verified, created_at, updated_at)
-			 VALUES (?, ?, ?, 1, ?, ?)`,
-			id, strings.SplitN(email, "@", 2)[0], email, now, now); err != nil {
-			return nil, err
-		}
-		user, err = d.Store.GetUserByID(ctx, id)
+		user, err = d.Store.CreateOAuthUser(ctx, email)
 		if err != nil {
 			return nil, err
 		}
 	}
-	if _, err := d.DB.ExecContext(ctx,
-		`INSERT INTO oauth_accounts (id, user_id, provider_id, provider_user_id, email, created_at)
-		 VALUES (?, ?, ?, ?, ?, ?)`,
-		uuid.New().String(), user.ID, providerID, sub, email, time.Now().UnixMilli()); err != nil {
+	if err := d.Store.LinkOAuthAccount(ctx, user.ID, providerID, sub, email); err != nil {
 		return nil, err
 	}
 	return user, nil

@@ -28,6 +28,10 @@ run: build
 openapi:
     go run ./cmd/openapi-gen wiki/openapi.yaml
 
+[group('build')]
+sqlc:
+    sqlc generate
+
 test:
     go test ./...
 

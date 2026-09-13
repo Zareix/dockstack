@@ -41,7 +41,7 @@ func newTestServer(t *testing.T) (*Server, *sql.DB) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	srv, app, err := New(cfg, sqlDB, store)
+	srv, app, err := New(cfg, store)
 	if err != nil {
 		t.Fatal(err)
 	}
