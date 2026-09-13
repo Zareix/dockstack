@@ -84,7 +84,7 @@ func TestGetDockerEnvStripsSecrets(t *testing.T) {
 	joined := map[string]bool{}
 	for _, kv := range env {
 		key := kv
-		for i := 0; i < len(kv); i++ {
+		for i := range len(kv) {
 			if kv[i] == '=' {
 				key = kv[:i]
 				break

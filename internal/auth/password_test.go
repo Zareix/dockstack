@@ -38,7 +38,7 @@ func TestHashTokenStable(t *testing.T) {
 }
 
 func TestTokenGeneration(t *testing.T) {
-	for i := 0; i < 5; i++ {
+	for range 5 {
 		tok, err := GenerateSessionToken()
 		if err != nil {
 			t.Fatal(err)

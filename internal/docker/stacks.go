@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strings"
 	"sync"
@@ -94,12 +95,7 @@ func (s *Stacks) StackExists(ctx context.Context, name string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	for _, n := range names {
-		if n == name {
-			return true, nil
-		}
-	}
-	return false, nil
+	return slices.Contains(names, name), nil
 }
 
 func getDockerEnv() []string {
@@ -405,14 +401,7 @@ func (s *Stacks) RedeployAllRunning(ctx context.Context, skipList []string) []Re
 	}
 	results := make([]RedeployResult, 0, len(names))
 	for _, name := range names {
-		skip := false
-		for _, s := range skipList {
-			if s == name {
-				skip = true
-				break
-			}
-		}
-		if skip {
+		if slices.Contains(skipList, name) {
 			continue
 		}
 		res := RedeployResult{Name: name, Action: "skipped"}
@@ -432,10 +421,8 @@ func (s *Stacks) RedeployAllRunning(ctx context.Context, skipList []string) []Re
 }
 
 func (s *Stacks) RedeployStack(ctx context.Context, name string, skipList []string) RedeployResult {
-	for _, s := range skipList {
-		if s == name {
-			return RedeployResult{Name: name, Action: "skipped"}
-		}
+	if slices.Contains(skipList, name) {
+		return RedeployResult{Name: name, Action: "skipped"}
 	}
 	services, err := s.GetRunningServices(ctx, name)
 	if err != nil {

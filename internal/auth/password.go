@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"crypto/subtle"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -33,7 +34,7 @@ func HashPassword(password string) (string, error) {
 func VerifyPassword(password, encoded string) (bool, error) {
 	parts := strings.Split(encoded, "$")
 	if len(parts) != 5 || parts[0] != "argon2id" {
-		return false, fmt.Errorf("unsupported password hash format")
+		return false, errors.New("unsupported password hash format")
 	}
 	var memory uint32
 	var time uint32

@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strconv"
@@ -95,23 +96,23 @@ func Load() (*Config, error) {
 	}
 
 	if cfg.AdminEmail == "" {
-		return nil, fmt.Errorf("ADMIN_EMAIL is required")
+		return nil, errors.New("ADMIN_EMAIL is required")
 	}
 
 	if cfg.AuthSecret == "" {
-		return nil, fmt.Errorf("AUTH_SECRET is required")
+		return nil, errors.New("AUTH_SECRET is required")
 	}
 
 	// OTHER_INSTANCE_URLS: "title,url;title,url"
 	if v := os.Getenv("OTHER_INSTANCE_URLS"); v != "" {
-		for _, entry := range strings.Split(v, ";") {
-			parts := strings.Split(strings.TrimSpace(entry), ",")
-			if len(parts) != 2 {
+		for entry := range strings.SplitSeq(v, ";") {
+			title, url, ok := strings.Cut(strings.TrimSpace(entry), ",")
+			if !ok || strings.Contains(url, ",") {
 				return nil, fmt.Errorf("invalid OTHER_INSTANCE_URLS entry %q: expected \"title,url\"", entry)
 			}
 			cfg.OtherInstanceURLs = append(cfg.OtherInstanceURLs, Instance{
-				Title: strings.TrimSpace(parts[0]),
-				URL:   strings.TrimSpace(parts[1]),
+				Title: strings.TrimSpace(title),
+				URL:   strings.TrimSpace(url),
 			})
 		}
 	}
@@ -130,7 +131,7 @@ func Load() (*Config, error) {
 	}
 
 	if v := os.Getenv("REDEPLOY_SKIP"); v != "" {
-		for _, s := range strings.Split(v, ",") {
+		for s := range strings.SplitSeq(v, ",") {
 			if s = strings.TrimSpace(s); s != "" {
 				cfg.RedeploySkip = append(cfg.RedeploySkip, s)
 			}
