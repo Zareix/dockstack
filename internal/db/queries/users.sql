@@ -19,8 +19,9 @@ SELECT COUNT(*) FROM users WHERE username = ?;
 
 -- name: UpdateUser :exec
 UPDATE users
-SET name = COALESCE(sqlc.narg('name'), name),
+SET name = ?,
     avatar = ?,
+    username = ?,
     updated_at = ?
 WHERE id = ?;
 

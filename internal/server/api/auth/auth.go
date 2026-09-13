@@ -11,6 +11,7 @@ import (
 	"log/slog"
 	"net"
 	"net/http"
+	"regexp"
 	"strings"
 	"time"
 
@@ -320,8 +321,9 @@ func (d *Deps) handleChangeEmail(ctx context.Context, in *struct{ Body changeEma
 }
 
 type updateUserRequest struct {
-	Name   string `json:"name,omitempty"`
-	Avatar string `json:"avatar,omitempty"`
+	Name     string  `json:"name,omitempty"`
+	Avatar   string  `json:"avatar,omitempty"`
+	Username *string `json:"username,omitempty"`
 }
 
 func (d *Deps) handleUpdateUser(ctx context.Context, in *struct{ Body updateUserRequest }) (*signInOutput, error) {
@@ -329,7 +331,29 @@ func (d *Deps) handleUpdateUser(ctx context.Context, in *struct{ Body updateUser
 	if user == nil {
 		return nil, huma.Error401Unauthorized("Unauthorized")
 	}
-	if err := d.Store.UpdateUser(ctx, user.ID, in.Body.Name, in.Body.Avatar); err != nil {
+	if in.Body.Username != nil {
+		username := strings.TrimSpace(*in.Body.Username)
+		if username == "" {
+			in.Body.Username = nil
+		} else {
+			if len(username) < 3 || len(username) > 32 || !usernameRe.MatchString(username) {
+				return nil, huma.Error400BadRequest("username must be 3-32 characters (letters, digits, - and _)")
+			}
+			taken, err := d.Store.UsernameTaken(ctx, username)
+			if err != nil {
+				web.LogError(web.RequestFrom(ctx), err)
+				return nil, huma.Error500InternalServerError("failed to check username")
+			}
+			if taken && username != user.Username {
+				return nil, huma.Error409Conflict("username already taken")
+			}
+			in.Body.Username = &username
+		}
+	}
+	if err := d.Store.UpdateUser(ctx, user.ID, in.Body.Name, in.Body.Avatar, in.Body.Username); err != nil {
+		if isUniqueViolation(err) {
+			return nil, huma.Error409Conflict("username already taken")
+		}
 		web.LogError(web.RequestFrom(ctx), err)
 		return nil, huma.Error500InternalServerError("failed to update user")
 	}
@@ -397,6 +421,8 @@ func (d *Deps) handleResetPassword(ctx context.Context, in *struct{ Body resetPa
 func isUniqueViolation(err error) bool {
 	return err != nil && strings.Contains(strings.ToLower(err.Error()), "unique")
 }
+
+var usernameRe = regexp.MustCompile(`^[a-zA-Z0-9_-]+$`)
 
 func (d *Deps) registerAuth(api huma.API) {
 	huma.Post(api, "/api/auth/sign-in/email", d.handleSignInEmail)

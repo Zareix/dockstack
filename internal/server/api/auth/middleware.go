@@ -38,7 +38,6 @@ func (d *Deps) HumaRequireAuth(ctx huma.Context, next func(huma.Context)) {
 			return
 		}
 		ctx = huma.WithValue(ctx, web.CtxUser, user)
-		ctx = huma.WithValue(ctx, web.CtxAPIKey, key)
 		next(ctx)
 		return
 	}
@@ -67,6 +66,6 @@ func (d *Deps) RequireSession(next http.Handler) http.Handler {
 			web.WriteError(w, http.StatusUnauthorized, "Unauthorized")
 			return
 		}
-		next.ServeHTTP(w, r.WithContext(web.WithUser(r.Context(), user, sess, nil)))
+		next.ServeHTTP(w, r.WithContext(web.WithUser(r.Context(), user, sess)))
 	})
 }

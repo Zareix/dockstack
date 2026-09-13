@@ -227,16 +227,8 @@ func (s *Store) RevokeOtherSessions(ctx context.Context, userID, keepID string) 
 	return s.q.DeleteOtherSessions(ctx, store.DeleteOtherSessionsParams{UserID: userID, ID: keepID})
 }
 
-func (s *Store) RevokeAllSessions(ctx context.Context, userID string) error {
-	return s.q.DeleteSessionsByUser(ctx, userID)
-}
-
 func (s *Store) DeleteSessionByToken(ctx context.Context, token string) error {
 	return s.q.DeleteSessionByTokenHash(ctx, HashToken(token))
-}
-
-func (s *Store) DeleteExpired(ctx context.Context) error {
-	return s.q.DeleteExpiredSessions(ctx, time.Now().UnixMilli())
 }
 
 func (s *Store) GetUserByID(ctx context.Context, id string) (*User, error) {
@@ -247,14 +239,21 @@ func (s *Store) GetUserByID(ctx context.Context, id string) (*User, error) {
 	return userFromRow(row), nil
 }
 
-func (s *Store) UpdateUser(ctx context.Context, id, name, avatar string) error {
-	var nameArg *string
-	if name != "" {
-		nameArg = &name
+func (s *Store) UpdateUser(ctx context.Context, id, name, avatar string, username *string) error {
+	cur, err := s.q.GetUserByID(ctx, id)
+	if err != nil {
+		return err
+	}
+	if name == "" {
+		name = cur.Name
+	}
+	if username == nil {
+		username = cur.Username
 	}
 	return s.q.UpdateUser(ctx, store.UpdateUserParams{
-		Name:      nameArg,
+		Name:      name,
 		Avatar:    avatar,
+		Username:  username,
 		UpdatedAt: time.Now().UnixMilli(),
 		ID:        id,
 	})

@@ -21,7 +21,6 @@ import { Route as AuthIndexRouteImport } from './routes/auth/index'
 import { Route as AuthForgotPasswordRouteImport } from './routes/auth/forgot-password'
 import { Route as AuthResetPasswordRouteImport } from './routes/auth/reset-password'
 import { Route as AuthSignInRouteImport } from './routes/auth/sign-in'
-import { Route as AuthSignOutRouteImport } from './routes/auth/sign-out'
 import { Route as PrivateSettingsIndexRouteImport } from './routes/_private/settings/index'
 import { Route as PrivateSettingsAccountRouteImport } from './routes/_private/settings/account'
 import { Route as PrivateSettingsSecurityRouteImport } from './routes/_private/settings/security'
@@ -86,11 +85,6 @@ const AuthSignInRoute = AuthSignInRouteImport.update({
   path: '/sign-in',
   getParentRoute: () => AuthRouteRoute,
 } as any)
-const AuthSignOutRoute = AuthSignOutRouteImport.update({
-  id: '/sign-out',
-  path: '/sign-out',
-  getParentRoute: () => AuthRouteRoute,
-} as any)
 const PrivateSettingsIndexRoute = PrivateSettingsIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -123,7 +117,6 @@ export interface FileRoutesByFullPath {
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/sign-in': typeof AuthSignInRoute
-  '/auth/sign-out': typeof AuthSignOutRoute
   '/auth/': typeof AuthIndexRoute
   '/settings/account': typeof PrivateSettingsAccountRoute
   '/settings/security': typeof PrivateSettingsSecurityRoute
@@ -138,7 +131,6 @@ export interface FileRoutesByTo {
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/sign-in': typeof AuthSignInRoute
-  '/auth/sign-out': typeof AuthSignOutRoute
   '/': typeof PrivateIndexRoute
   '/auth': typeof AuthIndexRoute
   '/settings/account': typeof PrivateSettingsAccountRoute
@@ -158,7 +150,6 @@ export interface FileRoutesById {
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/sign-in': typeof AuthSignInRoute
-  '/auth/sign-out': typeof AuthSignOutRoute
   '/_private/': typeof PrivateIndexRoute
   '/auth/': typeof AuthIndexRoute
   '/_private/settings/account': typeof PrivateSettingsAccountRoute
@@ -179,7 +170,6 @@ export interface FileRouteTypes {
     | '/auth/forgot-password'
     | '/auth/reset-password'
     | '/auth/sign-in'
-    | '/auth/sign-out'
     | '/auth/'
     | '/settings/account'
     | '/settings/security'
@@ -194,7 +184,6 @@ export interface FileRouteTypes {
     | '/auth/forgot-password'
     | '/auth/reset-password'
     | '/auth/sign-in'
-    | '/auth/sign-out'
     | '/'
     | '/auth'
     | '/settings/account'
@@ -213,7 +202,6 @@ export interface FileRouteTypes {
     | '/auth/forgot-password'
     | '/auth/reset-password'
     | '/auth/sign-in'
-    | '/auth/sign-out'
     | '/_private/'
     | '/auth/'
     | '/_private/settings/account'
@@ -313,13 +301,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSignInRouteImport
       parentRoute: typeof AuthRouteRoute
     }
-    '/auth/sign-out': {
-      id: '/auth/sign-out'
-      path: '/sign-out'
-      fullPath: '/auth/sign-out'
-      preLoaderRoute: typeof AuthSignOutRouteImport
-      parentRoute: typeof AuthRouteRoute
-    }
     '/_private/settings/': {
       id: '/_private/settings/'
       path: '/'
@@ -394,7 +375,6 @@ interface AuthRouteRouteChildren {
   AuthForgotPasswordRoute: typeof AuthForgotPasswordRoute
   AuthResetPasswordRoute: typeof AuthResetPasswordRoute
   AuthSignInRoute: typeof AuthSignInRoute
-  AuthSignOutRoute: typeof AuthSignOutRoute
   AuthIndexRoute: typeof AuthIndexRoute
 }
 
@@ -402,7 +382,6 @@ const AuthRouteRouteChildren: AuthRouteRouteChildren = {
   AuthForgotPasswordRoute: AuthForgotPasswordRoute,
   AuthResetPasswordRoute: AuthResetPasswordRoute,
   AuthSignInRoute: AuthSignInRoute,
-  AuthSignOutRoute: AuthSignOutRoute,
   AuthIndexRoute: AuthIndexRoute,
 }
 

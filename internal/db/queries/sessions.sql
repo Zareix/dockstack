@@ -36,11 +36,5 @@ DELETE FROM sessions WHERE id = ? AND user_id = ?;
 -- name: DeleteOtherSessions :exec
 DELETE FROM sessions WHERE user_id = ? AND id != ?;
 
--- name: DeleteSessionsByUser :exec
-DELETE FROM sessions WHERE user_id = ?;
-
 -- name: DeleteSessionByTokenHash :exec
 DELETE FROM sessions WHERE token_hash = ?;
-
--- name: DeleteExpiredSessions :exec
-DELETE FROM sessions WHERE expires_at < ?;

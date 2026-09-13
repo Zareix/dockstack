@@ -175,6 +175,54 @@ func TestSignOutRevokesSession(t *testing.T) {
 	}
 }
 
+func TestUpdateUser(t *testing.T) {
+	srv, _ := newTestServer(t)
+	h := srv.Handler()
+	cookies := signInAsAdmin(t, h)
+
+	rr := doJSON(t, h, http.MethodPatch, "/api/auth/user", map[string]string{
+		"name":     "New Name",
+		"avatar":   "https://x/y.png",
+		"username": "newname",
+	}, cookies)
+	if rr.Code != http.StatusOK {
+		t.Fatalf("update user: %d %s", rr.Code, rr.Body.String())
+	}
+	if !bytes.Contains(rr.Body.Bytes(), []byte(`"username":"newname"`)) {
+		t.Fatalf("username not updated: %s", rr.Body.String())
+	}
+
+	rr = doJSON(t, h, http.MethodPatch, "/api/auth/user", map[string]string{
+		"name": "Other Name",
+	}, cookies)
+	if rr.Code != http.StatusOK {
+		t.Fatalf("update without username: %d %s", rr.Code, rr.Body.String())
+	}
+	if !bytes.Contains(rr.Body.Bytes(), []byte(`"username":"newname"`)) {
+		t.Fatalf("username should be unchanged: %s", rr.Body.String())
+	}
+	if !bytes.Contains(rr.Body.Bytes(), []byte(`"name":"Other Name"`)) {
+		t.Fatalf("name not updated: %s", rr.Body.String())
+	}
+
+	rr = doJSON(t, h, http.MethodPatch, "/api/auth/user", map[string]any{
+		"username": "",
+	}, cookies)
+	if rr.Code != http.StatusOK {
+		t.Fatalf("empty username: %d %s", rr.Code, rr.Body.String())
+	}
+	if !bytes.Contains(rr.Body.Bytes(), []byte(`"username":"newname"`)) {
+		t.Fatalf("empty username should not clear: %s", rr.Body.String())
+	}
+
+	rr = doJSON(t, h, http.MethodPatch, "/api/auth/user", map[string]string{
+		"username": "bad name!",
+	}, cookies)
+	if rr.Code != http.StatusBadRequest {
+		t.Fatalf("invalid username: %d %s", rr.Code, rr.Body.String())
+	}
+}
+
 func TestStackStreamGated(t *testing.T) {
 	srv, _ := newTestServer(t)
 	h := srv.Handler()

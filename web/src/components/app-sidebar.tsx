@@ -13,6 +13,7 @@ import {
 import { Link, useLocation } from "@tanstack/react-router"
 import type { ValidateLinkOptions } from "@tanstack/react-router"
 import { useTheme } from "next-themes"
+import { toast } from "sonner"
 
 import { Avatar, AvatarFallback, AvatarImage } from "#/components/ui/avatar"
 import { Button } from "#/components/ui/button"
@@ -260,7 +261,7 @@ function UserIdentity({
 }
 
 function UserButton() {
-  const { session } = useSession()
+  const { session, logout } = useSession()
   const { theme = "system", setTheme } = useTheme()
   const user = session?.user
 
@@ -316,7 +317,14 @@ function UserButton() {
           </DropdownMenuSubContent>
         </DropdownMenuSub>
         <DropdownMenuSeparator />
-        <DropdownMenuItem render={<Link to="/auth/sign-out" />}>
+        <DropdownMenuItem
+          onClick={() => {
+            logout().then(() => {
+              toast.success("Signed out")
+              window.location.href = "/auth/sign-in"
+            })
+          }}
+        >
           <SignOutIcon className="size-4" />
           Sign out
         </DropdownMenuItem>

@@ -132,15 +132,17 @@ func (q *Queries) GetUserByUsername(ctx context.Context, username *string) (User
 
 const updateUser = `-- name: UpdateUser :exec
 UPDATE users
-SET name = COALESCE(?4, name),
+SET name = ?,
     avatar = ?,
+    username = ?,
     updated_at = ?
 WHERE id = ?
 `
 
 type UpdateUserParams struct {
-	Name      *string
+	Name      string
 	Avatar    string
+	Username  *string
 	UpdatedAt int64
 	ID        string
 }
@@ -149,6 +151,7 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
 	_, err := q.db.ExecContext(ctx, updateUser,
 		arg.Name,
 		arg.Avatar,
+		arg.Username,
 		arg.UpdatedAt,
 		arg.ID,
 	)

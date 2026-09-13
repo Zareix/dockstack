@@ -39,10 +39,11 @@ function SignIn() {
 
   const signInMutation = useMutation({
     mutationFn: async ({ identifier, password }: { identifier: string; password: string }) => {
-      if (identifier.includes("@")) {
-        return postAuthSignInEmail({ email: identifier, password })
+      const id = identifier.trim()
+      if (id.includes("@")) {
+        return postAuthSignInEmail({ email: id, password })
       }
-      return postAuthSignInUsername({ username: identifier, password })
+      return postAuthSignInUsername({ username: id, password })
     },
     onError: (e) => toast.error(e.message),
     onSuccess: () => {

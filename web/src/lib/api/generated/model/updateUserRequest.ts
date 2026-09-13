@@ -10,4 +10,5 @@ export interface UpdateUserRequest {
   readonly $schema?: string;
   avatar?: string;
   name?: string;
+  username?: string;
 }

@@ -42,11 +42,6 @@ func NewClient(dockerHost, configDir string) (*Client, error) {
 	return &Client{api: cli, httpClient: hc, configDir: configDir}, nil
 }
 
-func (c *Client) Ping(ctx context.Context) error {
-	_, err := c.api.Ping(ctx)
-	return err
-}
-
 func (c *Client) RemoteDigest(ctx context.Context, tag string) (string, bool) {
 	auth := map[string]string{}
 	if u, p, server, ok := c.RegistryAuth(tag); ok {

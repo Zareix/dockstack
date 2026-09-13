@@ -419,20 +419,3 @@ func (s *Stacks) RedeployAllRunning(ctx context.Context, skipList []string) []Re
 	}
 	return results
 }
-
-func (s *Stacks) RedeployStack(ctx context.Context, name string, skipList []string) RedeployResult {
-	if slices.Contains(skipList, name) {
-		return RedeployResult{Name: name, Action: "skipped"}
-	}
-	services, err := s.GetRunningServices(ctx, name)
-	if err != nil {
-		return RedeployResult{Name: name, Action: "error", Error: err.Error()}
-	}
-	if len(services) == 0 {
-		return RedeployResult{Name: name, Action: "skipped"}
-	}
-	if err := s.UpServices(ctx, name, services); err != nil {
-		return RedeployResult{Name: name, Action: "error", Error: err.Error()}
-	}
-	return RedeployResult{Name: name, Action: "redeployed", Services: services}
-}

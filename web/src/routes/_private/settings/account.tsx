@@ -38,11 +38,19 @@ function AccountSettings() {
     defaultValues: {
       name: user?.name ?? "",
       avatar: user?.avatar ?? "",
+      username: user?.username ?? "",
     },
-    onSubmit: ({ value }) =>
-      updateProfile.mutate({
-        data: value,
-      }),
+    onSubmit: ({ value }) => {
+      const data: { name: string; avatar: string; username?: string } = {
+        name: value.name,
+        avatar: value.avatar,
+      }
+      const username = value.username.trim()
+      if (username) {
+        data.username = username
+      }
+      updateProfile.mutate({ data })
+    },
   })
 
   const emailMutation = usePostAuthChangeEmail({
@@ -65,7 +73,7 @@ function AccountSettings() {
       <Card>
         <CardHeader>
           <CardTitle>Profile</CardTitle>
-          <CardDescription>Update your display name and avatar URL</CardDescription>
+          <CardDescription>Update your display name, username and avatar URL</CardDescription>
         </CardHeader>
         <CardContent>
           <form
@@ -83,6 +91,19 @@ function AccountSettings() {
                     id="name"
                     value={field.state.value}
                     onChange={(e) => field.handleChange(e.target.value)}
+                  />
+                </div>
+              )}
+            </profileForm.Field>
+            <profileForm.Field name="username">
+              {(field) => (
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="username">Username</Label>
+                  <Input
+                    id="username"
+                    value={field.state.value}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    placeholder="Used to sign in"
                   />
                 </div>
               )}
