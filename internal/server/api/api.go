@@ -32,9 +32,6 @@ func publicAPIConfig() huma.Config {
 func init() {
 	huma.GenerateOperationID = func(method, path string, _ any) string {
 		p := strings.TrimPrefix(strings.TrimSuffix(path, "/"), "/api")
-		if strings.HasSuffix(path, "/") {
-			p += "-slash"
-		}
 		return casing.Kebab(method + "-" + p)
 	}
 	huma.GenerateSummary = func(method, path string, _ any) string {
