@@ -13,14 +13,12 @@ import (
 	"github.com/zareix/dockstack/internal/server/api/web"
 )
 
-// Deps carries what the WebSocket endpoints need from the server.
 type Deps struct {
 	Store  *auth.Store
 	Docker *dockerapi.Client
 	Stacks *dockerapi.Stacks
 }
 
-// Mount registers the WebSocket routes on the router.
 func Mount(router chi.Router, d *Deps) {
 	router.HandleFunc("/api/ws/exec", d.handleWSAuth(d.handleExecWS))
 	router.HandleFunc("/api/ws/logs", d.handleWSAuth(d.handleLogsWS))
