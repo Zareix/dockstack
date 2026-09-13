@@ -40,8 +40,8 @@ import {
   useDeleteStacksName,
   useGetStacksName,
   usePostStacks,
-} from "#/lib/api/generated/default/default.ts"
-import { streamStackAction } from "#/lib/api/sse.ts"
+} from "#/lib/api/generated"
+import { streamStackAction } from "#/lib/api/sse"
 
 const tabSchema = v.object({
   tab: v.optional(v.picklist(["services", "files", "logs", "terminal"]), "files"),

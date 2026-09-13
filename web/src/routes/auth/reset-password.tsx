@@ -6,7 +6,7 @@ import { Button } from "#/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "#/components/ui/card"
 import { Input } from "#/components/ui/input"
 import { Label } from "#/components/ui/label"
-import { usePostAuthResetPassword } from "#/lib/api/generated/default/default.ts"
+import { usePostAuthResetPassword } from "#/lib/api/generated"
 
 export const Route = createFileRoute("/auth/reset-password")({
   component: ResetPassword,

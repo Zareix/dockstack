@@ -11,7 +11,7 @@ import {
   useGetStacksNameFiles,
   usePostStacksNameEnv,
   usePutStacksNameFiles,
-} from "#/lib/api/generated/default/default.ts"
+} from "#/lib/api/generated"
 
 const Editor = lazy(() => import("#/components/editor/monaco-file-editor"))
 

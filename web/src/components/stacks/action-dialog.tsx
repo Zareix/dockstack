@@ -9,8 +9,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "#/components/ui/dialog"
-import { HEARTBEAT } from "#/lib/api/sse.ts"
-import { cn } from "#/lib/utils.ts"
+import { HEARTBEAT } from "#/lib/api/sse"
+import { cn } from "#/lib/utils"
 
 import { ScrollArea } from "../ui/scroll-area"
 

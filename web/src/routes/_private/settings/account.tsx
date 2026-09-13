@@ -11,7 +11,7 @@ import {
   getGetAuthSessionQueryKey,
   usePatchAuthUser,
   usePostAuthChangeEmail,
-} from "#/lib/api/generated/default/default.ts"
+} from "#/lib/api/generated"
 import { useSession } from "#/lib/app-context/session"
 
 export const Route = createFileRoute("/_private/settings/account")({

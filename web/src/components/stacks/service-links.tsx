@@ -1,6 +1,6 @@
 import { ArrowSquareOutIcon, LinkIcon } from "@phosphor-icons/react"
 
-import { useGetStacksNameContainers } from "#/lib/api/generated/default/default.ts"
+import { useGetStacksNameContainers } from "#/lib/api/generated"
 
 import { Button } from "../ui/button"
 import {

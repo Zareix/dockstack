@@ -18,8 +18,8 @@ import {
 } from "#/components/ui/sheet.tsx"
 import { Skeleton } from "#/components/ui/skeleton.tsx"
 import { Tooltip, TooltipContent, TooltipTrigger } from "#/components/ui/tooltip.tsx"
-import { useIsMobile } from "#/hooks/use-mobile.ts"
-import { cn } from "#/lib/utils.ts"
+import { useIsMobile } from "#/hooks/use-mobile"
+import { cn } from "#/lib/utils"
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state"
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7

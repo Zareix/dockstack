@@ -1,4 +1,4 @@
-import { useGetStacksNameContainers } from "#/lib/api/generated/default/default.ts"
+import { useGetStacksNameContainers } from "#/lib/api/generated"
 
 import { ContainersTable } from "../containers/table"
 

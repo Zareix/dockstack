@@ -33,7 +33,7 @@ import {
   TableHeader,
   TableRow,
 } from "#/components/ui/table"
-import { cn } from "#/lib/utils.ts"
+import { cn } from "#/lib/utils"
 
 export const dataTableFeatures = tableFeatures({
   rowSortingFeature,

@@ -44,7 +44,7 @@ import {
   usePostAuthChangePassword,
   usePostAuthSessionsIdRevoke,
   usePostAuthSessionsRevokeOthers,
-} from "#/lib/api/generated/default/default.ts"
+} from "#/lib/api/generated"
 
 export const Route = createFileRoute("/_private/settings/security")({
   component: SecuritySettings,

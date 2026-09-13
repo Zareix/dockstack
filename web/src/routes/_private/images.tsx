@@ -11,7 +11,7 @@ import {
   SortableHeader,
 } from "#/components/ui/data-table"
 import { Spinner } from "#/components/ui/spinner"
-import { useGetImages, useGetImagesStale } from "#/lib/api/generated/default/default.ts"
+import { useGetImages, useGetImagesStale } from "#/lib/api/generated"
 import type { GetImagesStale200, ImageInfo } from "#/lib/api/generated/model"
 export const Route = createFileRoute("/_private/images")({
   component: ImagesPage,

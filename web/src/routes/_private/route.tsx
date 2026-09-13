@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router"
 
-import { getAuthSession, getGetAuthSessionQueryKey } from "#/lib/api/generated/default/default.ts"
+import { getAuthSession, getGetAuthSessionQueryKey } from "#/lib/api/generated"
 import { queryClient } from "#/lib/query-client"
 
 export const Route = createFileRoute("/_private")({

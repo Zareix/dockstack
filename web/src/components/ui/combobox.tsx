@@ -11,7 +11,7 @@ import {
   InputGroupButton,
   InputGroupInput,
 } from "#/components/ui/input-group.tsx"
-import { cn } from "#/lib/utils.ts"
+import { cn } from "#/lib/utils"
 
 const Combobox = ComboboxPrimitive.Root
 

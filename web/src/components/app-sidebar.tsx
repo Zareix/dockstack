@@ -34,7 +34,7 @@ import {
   SidebarMenuSubItem,
   useSidebar,
 } from "#/components/ui/sidebar"
-import { useGetStacks } from "#/lib/api/generated/default/default.ts"
+import { useGetStacks } from "#/lib/api/generated"
 import { useSession } from "#/lib/app-context/session"
 import { useSettings } from "#/lib/app-context/settings"
 import { cn } from "#/lib/utils"

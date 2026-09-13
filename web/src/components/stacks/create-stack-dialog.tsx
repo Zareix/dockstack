@@ -18,11 +18,7 @@ import {
 import { FieldError } from "#/components/ui/field"
 import { Input } from "#/components/ui/input"
 import { Label } from "#/components/ui/label"
-import {
-  getGetStacksQueryKey,
-  getStacksName,
-  usePostStacks,
-} from "#/lib/api/generated/default/default.ts"
+import { getGetStacksQueryKey, getStacksName, usePostStacks } from "#/lib/api/generated"
 
 const schema = v.object({
   name: v.pipe(

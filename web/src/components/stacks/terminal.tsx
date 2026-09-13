@@ -9,7 +9,7 @@ import {
   SelectValue,
 } from "#/components/ui/select"
 import { Spinner } from "#/components/ui/spinner"
-import { useGetStacksNameContainers } from "#/lib/api/generated/default/default.ts"
+import { useGetStacksNameContainers } from "#/lib/api/generated"
 
 const ContainerTerminal = lazy(() =>
   import("#/components/terminal/container-terminal").then((m) => ({
