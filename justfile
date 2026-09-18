@@ -42,5 +42,10 @@ lint:
     golangci-lint run 2>/dev/null || go vet ./...
     bun run web:lint
 
+[group('build')]
+format:
+    gofmt -s -w cmd internal
+    bun run web:format
+
 clean:
     rm -rf bin internal/server/web-dist
