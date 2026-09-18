@@ -18,9 +18,18 @@ export const Route = createRootRoute({
       <p className="text-muted-foreground">Page not found</p>
     </div>
   ),
-  errorComponent: ({ error, reset }) => (
-    <ErrorFallback message={error.message} onReset={reset} className="min-h-[60vh]" />
-  ),
+  errorComponent: ({ error, reset }) => {
+    const message =
+      typeof error === "string"
+        ? error
+        : typeof error === "object" &&
+            error !== null &&
+            "message" in error &&
+            typeof error.message === "string"
+          ? error.message
+          : "An unknown error occurred"
+    return <ErrorFallback message={message} onReset={reset} className="min-h-[60vh]" />
+  },
 })
 
 function DocumentTitle() {

@@ -6,13 +6,13 @@
     "wiki"
   ],
   "scripts": {
-    "web:dev": "bun run --filter dockstack-web --elide-lines=0 dev",
-    "web:api-gen": "bun run --filter dockstack-web --elide-lines=0 api:generate",
-    "web:build": "bun run --filter dockstack-web --elide-lines=0 build",
-    "web:format": "bun run --filter dockstack-web --elide-lines=0 format",
-    "web:lint": "bun run --filter dockstack-web --elide-lines=0 lint:fix",
-    "wiki:dev": "bun run --filter wiki --elide-lines=0 dev",
-    "wiki:build": "bun run --filter wiki --elide-lines=0 build"
+    "web:dev": "bun run --filter web dev",
+    "web:api-gen": "bun run --filter web api:generate",
+    "web:build": "bun run --filter web build",
+    "web:format": "bun run --filter web format",
+    "web:lint": "bun run --filter web lint:fix",
+    "wiki:dev": "bun run --filter wiki dev",
+    "wiki:build": "bun run --filter wiki build"
   },
   "devDependencies": {
     "@types/react": "^19.3.0",
