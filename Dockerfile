@@ -1,5 +1,5 @@
 # ---- Stage 1: build the SPA ----
-FROM oven/bun:1.3.14 AS web-builder
+FROM oven/bun:1.4.2 AS web-builder
 
 WORKDIR /app/web
 COPY web/package.json ./
