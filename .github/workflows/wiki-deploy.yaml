@@ -6,8 +6,8 @@ on:
       - main
     paths:
       - wiki/**
-      - src/lib/docker/stacks.ts
-      - scripts/generate-openapi.ts
+      - internal/**
+      - cmd/openapi-gen/**
       - .github/workflows/wiki-deploy.yaml
 
 permissions:
@@ -23,13 +23,15 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    env:
-      SKIP_ENV_VALIDATION: true
     steps:
       - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: true
       - run: bun install --frozen-lockfile
-      - run: bun run openapi:generate
+      - run: go run ./cmd/openapi-gen wiki/openapi.yaml
       - run: bun run wiki:build
       - run: touch wiki/out/.nojekyll
       - uses: actions/configure-pages@v6

@@ -13,24 +13,24 @@
     "@base-ui/react": "^1.6.0",
     "@orama/orama": "^3.1.18",
     "@phosphor-icons/react": "^2.1.10",
-    "cnfast": "^0.1.0",
-    "fumadocs-core": "16.14.4",
-    "fumadocs-mdx": "15.2.3",
-    "fumadocs-openapi": "^11.2.4",
-    "fumadocs-ui": "npm:@fumadocs/base-ui@16.14.4",
-    "next": "16.3.1",
-    "react": "^19.2.8",
-    "react-dom": "^19.2.8",
+    "cn": "^0.2.6",
+    "fumadocs-core": "16.15.11",
+    "fumadocs-mdx": "15.4.1",
+    "fumadocs-openapi": "^11.4.3",
+    "fumadocs-ui": "npm:@fumadocs/base-ui@16.15.11",
+    "next": "16.3.5",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
     "shiki": "^4.4.3"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.3",
     "@types/mdx": "^2.0.14",
-    "@types/node": "^26.2.0",
+    "@types/node": "^26.5.1",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
-    "postcss": "^8.5.26",
+    "postcss": "^8.5.28",
     "tailwindcss": "^4.3.3",
-    "typescript": "^5.9.3"
+    "typescript": "^7.0.2"
   }
 }
