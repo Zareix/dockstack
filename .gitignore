@@ -9,5 +9,6 @@ data/
 bin/
 tmp/
 db.sqlite*
-internal/server/web-dist/
+internal/server/web-dist/*
+!internal/server/web-dist/.gitkeep
 wiki/openapi.yaml
