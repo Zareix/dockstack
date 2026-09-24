@@ -41,12 +41,12 @@ func (d *Deps) appURL() string {
 	return "http://localhost:3000"
 }
 
-func (d *Deps) signOAuthState() (string, string) {
+func (d *Deps) signOAuthState() string {
 	token := uuid.New().String()
 	mac := hmac.New(sha256.New, []byte(d.Cfg.AuthSecret))
 	mac.Write([]byte(token))
 	sig := base64.RawURLEncoding.EncodeToString(mac.Sum(nil))
-	return token, token + "." + sig
+	return token + "." + sig
 }
 
 func (d *Deps) verifyOAuthState(state string) bool {
@@ -77,7 +77,7 @@ func (d *Deps) handleOAuthStart(w http.ResponseWriter, r *http.Request) {
 		web.WriteError(w, http.StatusInternalServerError, "failed to configure OAuth")
 		return
 	}
-	state, signed := d.signOAuthState()
+	signed := d.signOAuthState()
 	http.SetCookie(w, &http.Cookie{
 		Name:     oauthStateCookie,
 		Value:    signed,
@@ -87,7 +87,7 @@ func (d *Deps) handleOAuthStart(w http.ResponseWriter, r *http.Request) {
 		Secure:   d.Store.Secure(),
 		MaxAge:   600,
 	})
-	http.Redirect(w, r, cfg.AuthCodeURL(state), http.StatusFound)
+	http.Redirect(w, r, cfg.AuthCodeURL(signed), http.StatusFound)
 }
 
 func (d *Deps) handleOAuthCallback(w http.ResponseWriter, r *http.Request) {
