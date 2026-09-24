@@ -1,11 +1,14 @@
 # ---- Stage 1: build the SPA ----
 FROM oven/bun:1.4.2 AS web-builder
 
-WORKDIR /app/web
-COPY web/package.json ./
-RUN bun install
-COPY web/ .
-RUN bun run build
+WORKDIR /app
+COPY package.json bun.lock ./
+COPY web/package.json ./web/
+COPY wiki/package.json ./wiki/
+RUN bun install --filter web --frozen-lockfile
+
+COPY web/ ./web/
+RUN bun run --filter web build
 
 # ---- Stage 2: build the Go binary (embeds the SPA) ----
 FROM golang:1.27.1-alpine AS go-builder
@@ -15,8 +18,8 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
-# Mirror the built SPA into the embed location.
 COPY --from=web-builder /app/web/dist ./internal/server/web-dist
+
 RUN CGO_ENABLED=0 go build -ldflags="-s -w" -o /out/dockstack ./cmd/dockstack
 
 # ---- Stage 3: runtime ----
