@@ -121,9 +121,9 @@ export function CreateStackButton() {
             </form.Field>
           </div>
           <DialogFooter className="mt-4">
-            <form.Subscribe selector={(state) => state.isValidating}>
-              {(isValidating) => (
-                <Button type="submit" disabled={mutation.isPending || isValidating}>
+            <form.Subscribe selector={(state) => !state.canSubmit || state.isValidating}>
+              {(disabled) => (
+                <Button type="submit" disabled={mutation.isPending || disabled}>
                   {mutation.isPending ? "Creating..." : "Create"}
                 </Button>
               )}
