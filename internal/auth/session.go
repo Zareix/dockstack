@@ -13,6 +13,7 @@ import (
 	"time"
 	"uuid"
 
+	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
 
 	"github.com/zareix/dockstack/internal/config"
@@ -60,6 +61,15 @@ func NewStore(cfg *config.Config, db *sql.DB) (*Store, error) {
 		RPDisplayName: cfg.AppTitle,
 		RPID:          rpID,
 		RPOrigins:     []string{origin},
+		// Dockstack logs in with BeginDiscoverableLogin (empty allow list),
+		// which only matches discoverable (resident) credentials. Request one
+		// at registration, otherwise the passkey is created non-discoverable
+		// and password managers like Bitwarden never offer it at sign-in.
+		AuthenticatorSelection: protocol.AuthenticatorSelection{
+			ResidentKey:        protocol.ResidentKeyRequirementRequired,
+			RequireResidentKey: protocol.ResidentKeyRequired(),
+			UserVerification:   protocol.VerificationPreferred,
+		},
 	})
 	if err != nil {
 		return nil, err

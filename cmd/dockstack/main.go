@@ -19,7 +19,7 @@ import (
 	"github.com/zareix/dockstack/internal/server/api"
 )
 
-const Version = "1.0.0-beta.4"
+const Version = "1.0.0-beta.5"
 
 func main() {
 	api.Version = Version
