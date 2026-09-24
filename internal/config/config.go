@@ -122,6 +122,8 @@ func Load() (*Config, error) {
 		os.Getenv("OAUTH_CLIENT_ID"),
 		os.Getenv("OAUTH_CLIENT_SECRET"),
 		os.Getenv("OAUTH_DISCOVERY_URL"); id != "" && cid != "" && secret != "" && disc != "" {
+		disc = strings.TrimSuffix(disc, "/")
+		disc = strings.TrimSuffix(disc, "/.well-known/openid-configuration")
 		cfg.OAuth = &OAuthConfig{
 			ProviderID:   id,
 			ClientID:     cid,

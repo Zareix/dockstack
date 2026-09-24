@@ -126,6 +126,25 @@ func TestLoadOAuth(t *testing.T) {
 	if cfg.OAuth == nil || cfg.OAuth.ProviderID != "github" {
 		t.Fatalf("oauth = %+v", cfg.OAuth)
 	}
+	if cfg.OAuth.DiscoveryURL != "https://accounts.example.com" {
+		t.Errorf("DiscoveryURL = %q, want issuer base URL", cfg.OAuth.DiscoveryURL)
+	}
+
+	clearEnv()
+	t.Setenv("ADMIN_EMAIL", "admin@example.com")
+	t.Setenv("AUTH_SECRET", "secret")
+	t.Setenv("OAUTH_PROVIDER_ID", "github")
+	t.Setenv("OAUTH_CLIENT_ID", "id")
+	t.Setenv("OAUTH_CLIENT_SECRET", "secret")
+	t.Setenv("OAUTH_DISCOVERY_URL", "https://accounts.example.com/")
+
+	cfg, err = Load()
+	if err != nil {
+		t.Fatalf("load: %v", err)
+	}
+	if cfg.OAuth == nil || cfg.OAuth.DiscoveryURL != "https://accounts.example.com" {
+		t.Fatalf("DiscoveryURL = %+v, want trailing slash trimmed", cfg.OAuth)
+	}
 }
 
 func TestLoadRedeploySkip(t *testing.T) {
