@@ -43,7 +43,7 @@ func (q *Queries) GetChallenge(ctx context.Context, arg GetChallengeParams) (Get
 
 const insertChallenge = `-- name: InsertChallenge :exec
 INSERT INTO webauthn_challenges (id, challenge, user_id, kind, expires_at, created_at)
-VALUES (?, ?, ?6, ?, ?, ?)
+VALUES (?, ?, ?, ?, ?, ?)
 `
 
 type InsertChallengeParams struct {

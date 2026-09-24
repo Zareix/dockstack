@@ -1,6 +1,6 @@
 -- name: InsertChallenge :exec
 INSERT INTO webauthn_challenges (id, challenge, user_id, kind, expires_at, created_at)
-VALUES (?, ?, sqlc.narg('user_id'), ?, ?, ?);
+VALUES (?, ?, ?, ?, ?, ?);
 
 -- name: GetChallenge :one
 SELECT challenge, user_id FROM webauthn_challenges
