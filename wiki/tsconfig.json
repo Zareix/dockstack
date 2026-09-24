@@ -4,6 +4,8 @@
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
+    "declaration": false,
+    "declarationMap": false,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "noEmit": true,
@@ -25,9 +27,11 @@
     ]
   },
   "include": [
-    "next-env.d.ts",
-    "**/*.ts",
+    "next-env.d",
+    "**/*",
     "**/*.tsx",
+    ".next/types/**/*",
+    ".next/dev/types/**/*",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],

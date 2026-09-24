@@ -1,0 +1,15 @@
+version: "2"
+sql:
+  - engine: "sqlite"
+    schema: "internal/db/migrations"
+    queries: "internal/db/queries"
+    gen:
+      go:
+        package: "store"
+        out: "internal/db/store"
+        emit_pointers_for_null_types: true
+        overrides:
+          - column: "users.email_verified"
+            go_type: "bool"
+          - column: "api_keys.enabled"
+            go_type: "bool"
