@@ -112,6 +112,11 @@ directly. UI components in `web/src/components/ui` are shadcn-generated
 (base-ui primitives + `class-variance-authority`); treat them as vendored, prefer composing over
 editing. Monaco (compose editor) and xterm (terminal) are client-only bundles.
 
+## Code style
+
+- Don't add comments to everything — keep code comment-free unless something is genuinely
+  non-obvious (workarounds, subtle invariants, why-not explanations).
+
 ## Security notes
 
 - The compose runner scrubs app-specific env vars from child processes (see `getDockerEnv`).

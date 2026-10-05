@@ -80,7 +80,7 @@ func (d *Deps) createSession(ctx context.Context, user *coreauth.User) (string, 
 		web.LogError(r, err)
 		return "", huma.Error500InternalServerError("failed to create session")
 	}
-	return d.setCookieString(coreauth.CookieName, signed, 0), nil
+	return d.setCookieString(coreauth.CookieName, signed, int(coreauth.SessionTTL.Seconds())), nil
 }
 
 func clientIP(r *http.Request) string {

@@ -24,6 +24,8 @@ const CookieName = "dockstack_session"
 
 var ErrInvalidSession = errors.New("invalid session")
 
+const SessionTTL = 7 * 24 * time.Hour
+
 type User struct {
 	ID            string
 	Name          string
@@ -78,7 +80,7 @@ func NewStore(cfg *config.Config, db *sql.DB) (*Store, error) {
 		q:          store.New(db),
 		secret:     []byte(cfg.AuthSecret),
 		secure:     secure,
-		sessionTTL: 7 * 24 * time.Hour,
+		sessionTTL: SessionTTL,
 		wa:         wa,
 	}, nil
 }
