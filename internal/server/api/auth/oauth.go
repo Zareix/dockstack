@@ -170,6 +170,7 @@ func (d *Deps) handleOAuthCallback(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,
 		Secure:   d.Store.Secure(),
+		MaxAge:   int(coreauth.SessionTTL.Seconds()),
 	})
 	http.Redirect(w, r, d.appURL()+"/", http.StatusFound)
 }
