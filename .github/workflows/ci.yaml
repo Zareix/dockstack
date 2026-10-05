@@ -6,41 +6,91 @@ on:
       - main
 
 jobs:
-  lint:
-    name: Lint
+  backend-lint:
+    name: Backend lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+      - run: go vet ./...
+
+  backend-format:
+    name: Backend format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+      - name: Check gofmt
+        run: |
+          unformatted=$(gofmt -s -l cmd internal)
+          if [ -n "$unformatted" ]; then
+            echo "Files not gofmt-formatted:"
+            echo "$unformatted"
+            exit 1
+          fi
+
+  backend-test:
+    name: Backend test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+      - run: go test ./...
+
+  backend-build:
+    name: Backend build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+      - run: go build ./cmd/dockstack
+
+  frontend-lint:
+    name: Frontend lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
-      - run: bun run lint
+      - run: bun run --filter web lint
 
-  format:
-    name: Format
+  frontend-format:
+    name: Frontend format
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
-      - run: bun run format:check
+      - run: bun run --filter web format:check
 
-  build:
-    name: Build
+  frontend-build:
+    name: Frontend build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
-      - run: bun run build
+      - run: bun run web:build
 
-  wiki:
+  wiki-build:
     name: Wiki build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
       - run: bun install --frozen-lockfile
-      - run: bun run openapi:generate
+      - run: go run ./cmd/openapi-gen wiki/openapi.yaml
       - run: bun run wiki:build
 
   docker:
