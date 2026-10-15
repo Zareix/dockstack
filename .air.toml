@@ -1,0 +1,15 @@
+root = "."
+tmp_dir = "tmp"
+
+[build]
+  cmd = "go build -o ./tmp/dockstack ./cmd/dockstack"
+  bin = "./tmp/dockstack"
+  include_ext = ["go"]
+  exclude_dir = ["tmp", "bin", "web", "wiki", "node_modules", "data", "internal/server/web-dist"]
+  delay = 1000
+  stop_on_error = true
+  send_interrupt = true
+  kill_delay = 500
+
+[log]
+  time = false
