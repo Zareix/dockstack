@@ -243,6 +243,10 @@ func (s *Store) deleteChallenge(ctx context.Context, id string) {
 	_ = s.q.DeleteChallenge(ctx, id)
 }
 
+func (s *Store) DeleteExpiredChallenges(ctx context.Context) (int64, error) {
+	return s.q.DeleteExpiredChallenges(ctx, time.Now().UnixMilli())
+}
+
 func mustJSON(v any) []byte {
 	b, err := json.Marshal(v)
 	if err != nil {

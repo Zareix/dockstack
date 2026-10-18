@@ -31,6 +31,10 @@ func (s *Store) DeleteResetTokensByUser(ctx context.Context, userID string) erro
 	return s.q.DeleteResetTokensByUser(ctx, userID)
 }
 
+func (s *Store) DeleteExpiredResetTokens(ctx context.Context) (int64, error) {
+	return s.q.DeleteExpiredResetTokens(ctx, time.Now().UnixMilli())
+}
+
 func (s *Store) OAuthUserID(ctx context.Context, providerID, providerUserID string) (string, error) {
 	row, err := s.q.GetOAuthAccountUser(ctx, store.GetOAuthAccountUserParams{
 		ProviderID:     providerID,

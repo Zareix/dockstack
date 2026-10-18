@@ -12,7 +12,7 @@ func clearEnv() {
 		"DOCKER_CONFIG_DIR_PATH", "DOCKER_HOST", "APP_URL", "AUTH_SECRET", "ADMIN_EMAIL",
 		"OTHER_INSTANCE_URLS", "OAUTH_PROVIDER_ID", "OAUTH_CLIENT_ID", "OAUTH_CLIENT_SECRET",
 		"OAUTH_DISCOVERY_URL", "DOCKER_SYSTEM_PRUNE_CRON", "DOCKER_SYSTEM_PRUNE_INCLUDE_VOLUMES",
-		"REDEPLOY_SKIP", "AUTODETECT_URL_BASE_DOMAIN",
+		"AUTH_CLEANUP_CRON", "REDEPLOY_SKIP", "AUTODETECT_URL_BASE_DOMAIN",
 	} {
 		_ = os.Unsetenv(k)
 	}
@@ -76,6 +76,9 @@ func TestLoadDefaults(t *testing.T) {
 	}
 	if cfg.DockerHost != "unix:///var/run/docker.sock" {
 		t.Errorf("DockerHost = %q", cfg.DockerHost)
+	}
+	if cfg.AuthCleanupCron != "0 3 * * 1" {
+		t.Errorf("AuthCleanupCron = %q", cfg.AuthCleanupCron)
 	}
 	if cfg.OAuth != nil {
 		t.Error("OAuth should be nil without all vars")
@@ -159,5 +162,20 @@ func TestLoadRedeploySkip(t *testing.T) {
 	}
 	if len(cfg.RedeploySkip) != 2 || cfg.RedeploySkip[0] != "traefik" || cfg.RedeploySkip[1] != "proxy" {
 		t.Fatalf("redeploy skip = %+v", cfg.RedeploySkip)
+	}
+}
+
+func TestLoadCustomAuthCleanupCron(t *testing.T) {
+	clearEnv()
+	t.Setenv("ADMIN_EMAIL", "admin@example.com")
+	t.Setenv("AUTH_SECRET", "secret")
+	t.Setenv("AUTH_CLEANUP_CRON", "0 */6 * * *")
+
+	cfg, err := Load()
+	if err != nil {
+		t.Fatalf("load: %v", err)
+	}
+	if cfg.AuthCleanupCron != "0 */6 * * *" {
+		t.Errorf("AuthCleanupCron = %q", cfg.AuthCleanupCron)
 	}
 }

@@ -9,6 +9,18 @@ import (
 	"context"
 )
 
+const deleteExpiredResetTokens = `-- name: DeleteExpiredResetTokens :execrows
+DELETE FROM reset_tokens WHERE expires_at < ?
+`
+
+func (q *Queries) DeleteExpiredResetTokens(ctx context.Context, expiresAt int64) (int64, error) {
+	result, err := q.db.ExecContext(ctx, deleteExpiredResetTokens, expiresAt)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
 const deleteResetTokensByUser = `-- name: DeleteResetTokensByUser :exec
 DELETE FROM reset_tokens WHERE user_id = ?
 `

@@ -10,6 +10,7 @@ Self-hosted Docker Compose stack management UI. Browse, edit, start, stop, resta
 - **Built-in editor** — edit compose files directly in the UI with YAML validation
 - **Webhook redeploy** — `POST /api/stacks/redeploy` pulls and restarts all running services (via API key)
 - **Auth** — email/username + password, passkeys (WebAuthn), OIDC / OAuth login, API keys
+- **Maintenance** — expired WebAuthn challenges and password reset tokens are cleaned up weekly (schedule via `AUTH_CLEANUP_CRON`); optional automatic `docker system prune` via `DOCKER_SYSTEM_PRUNE_CRON`
 - **Terminal & live logs** — WebSocket-based container terminal and stack log streaming
 - **Non-intrusive** — talks to the Docker socket via the official Docker SDK, shells out to `docker compose`; fully compatible with manual CLI usage, no lock-in
 

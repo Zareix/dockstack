@@ -8,3 +8,6 @@ WHERE id = ? AND kind = ? AND expires_at > ?;
 
 -- name: DeleteChallenge :exec
 DELETE FROM webauthn_challenges WHERE id = ?;
+
+-- name: DeleteExpiredChallenges :execrows
+DELETE FROM webauthn_challenges WHERE expires_at < ?;

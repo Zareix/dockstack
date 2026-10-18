@@ -70,6 +70,11 @@ export const envVars: Record<string, EnvVarInfo> = {
     description: "Set to `true` to also prune unused volumes during the scheduled prune",
     default: "false",
   },
+  AUTH_CLEANUP_CRON: {
+    description:
+      "Cron expression for the weekly cleanup of expired auth rows (webauthn challenges, password reset tokens)",
+    default: "0 3 * * 1",
+  },
   REDEPLOY_SKIP: {
     description: "Comma-separated list of service names to skip during redeploy",
   },

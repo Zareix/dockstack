@@ -7,8 +7,44 @@ import (
 	"time"
 
 	"github.com/go-co-op/gocron/v2"
+	"github.com/zareix/dockstack/internal/auth"
 	"github.com/zareix/dockstack/internal/config"
 )
+
+func StartAuthCleanupCron(cfg *config.Config, store *auth.Store) {
+	run := func() {
+		ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+		defer cancel()
+		challenges, err := store.DeleteExpiredChallenges(ctx)
+		if err != nil {
+			slog.Error("failed to delete expired challenges", "error", err)
+		}
+		tokens, err := store.DeleteExpiredResetTokens(ctx)
+		if err != nil {
+			slog.Error("failed to delete expired reset tokens", "error", err)
+		}
+		if challenges > 0 || tokens > 0 {
+			slog.Info("deleted expired auth rows", "challenges", challenges, "resetTokens", tokens)
+		}
+	}
+	spec := cfg.AuthCleanupCron
+
+	s, err := gocron.NewScheduler()
+	if err != nil {
+		slog.Error("failed to create scheduler", "error", err)
+		return
+	}
+	if _, err := s.NewJob(
+		gocron.CronJob(spec, false),
+		gocron.NewTask(run),
+	); err != nil {
+		slog.Error("invalid cleanup cron spec", "spec", spec, "error", err)
+		return
+	}
+	slog.Info("starting auth cleanup cron", "spec", spec)
+	run()
+	s.Start()
+}
 
 func StartPruneCron(cfg *config.Config, app *App) {
 	s, err := gocron.NewScheduler()

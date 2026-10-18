@@ -18,6 +18,18 @@ func (q *Queries) DeleteChallenge(ctx context.Context, id string) error {
 	return err
 }
 
+const deleteExpiredChallenges = `-- name: DeleteExpiredChallenges :execrows
+DELETE FROM webauthn_challenges WHERE expires_at < ?
+`
+
+func (q *Queries) DeleteExpiredChallenges(ctx context.Context, expiresAt int64) (int64, error) {
+	result, err := q.db.ExecContext(ctx, deleteExpiredChallenges, expiresAt)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
 const getChallenge = `-- name: GetChallenge :one
 SELECT challenge, user_id FROM webauthn_challenges
 WHERE id = ? AND kind = ? AND expires_at > ?

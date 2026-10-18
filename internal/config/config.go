@@ -24,6 +24,8 @@ type Config struct {
 	AppURL     string
 	AuthSecret string
 
+	AuthCleanupCron string
+
 	OtherInstanceURLs []Instance
 	OAuth             *OAuthConfig
 
@@ -88,6 +90,8 @@ func Load() (*Config, error) {
 
 		AppURL:     getenv("APP_URL", ""),
 		AuthSecret: os.Getenv("AUTH_SECRET"),
+
+		AuthCleanupCron: getenv("AUTH_CLEANUP_CRON", "0 3 * * 1"),
 
 		DockerSystemPruneCron:           os.Getenv("DOCKER_SYSTEM_PRUNE_CRON"),
 		DockerSystemPruneIncludeVolumes: getenvBool("DOCKER_SYSTEM_PRUNE_INCLUDE_VOLUMES", false),

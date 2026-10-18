@@ -61,6 +61,8 @@ func main() {
 		fatal("server", err)
 	}
 
+	server.StartAuthCleanupCron(cfg, store)
+
 	if cfg.DockerSystemPruneCron != "" {
 		server.StartPruneCron(cfg, app)
 	}

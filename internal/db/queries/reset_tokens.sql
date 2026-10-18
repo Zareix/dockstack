@@ -7,3 +7,6 @@ SELECT user_id FROM reset_tokens WHERE token_hash = ? AND expires_at > ?;
 
 -- name: DeleteResetTokensByUser :exec
 DELETE FROM reset_tokens WHERE user_id = ?;
+
+-- name: DeleteExpiredResetTokens :execrows
+DELETE FROM reset_tokens WHERE expires_at < ?;
