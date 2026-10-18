@@ -253,7 +253,7 @@ func (d *Deps) handleStackActionStream(w http.ResponseWriter, r *http.Request, a
 		web.WriteError(w, http.StatusBadRequest, "invalid stack name")
 		return
 	}
-	lines, err := d.Stacks.StreamCompose(r.Context(), name, args...)
+	lines, waitErr, err := d.Stacks.StreamCompose(r.Context(), name, args...)
 	if err != nil {
 		web.LogError(r, err)
 		web.WriteError(w, http.StatusInternalServerError, "failed to start compose command")
@@ -272,6 +272,10 @@ func (d *Deps) handleStackActionStream(w http.ResponseWriter, r *http.Request, a
 		if _, err := w.Write([]byte("data: " + escaped + "\n\n")); err != nil {
 			return
 		}
+		flusher.Flush()
+	}
+	if err := <-waitErr; err != nil {
+		w.Write([]byte("data: Error: compose command failed: " + err.Error() + "\n\n"))
 		flusher.Flush()
 	}
 }

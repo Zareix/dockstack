@@ -143,10 +143,10 @@ func (s *Stacks) composeCommand(stackName string, args ...string) ([]string, err
 	return cmd, nil
 }
 
-func (s *Stacks) StreamCompose(ctx context.Context, stackName string, args ...string) (<-chan string, error) {
+func (s *Stacks) StreamCompose(ctx context.Context, stackName string, args ...string) (<-chan string, <-chan error, error) {
 	cmdArgs, err := s.composeCommand(stackName, args...)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	full := append([]string{"docker"}, cmdArgs...)
 
@@ -155,17 +155,18 @@ func (s *Stacks) StreamCompose(ctx context.Context, stackName string, args ...st
 
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	stderr, err := cmd.StderrPipe()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	if err := cmd.Start(); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	out := make(chan string)
+	waitErr := make(chan error, 1)
 	go func() {
 		defer close(out)
 		out <- "$ " + strings.Join(full, " ")
@@ -188,7 +189,7 @@ func (s *Stacks) StreamCompose(ctx context.Context, stackName string, args ...st
 		done := make(chan struct{})
 		go func() {
 			wg.Wait()
-			_ = cmd.Wait()
+			waitErr <- cmd.Wait()
 			close(done)
 		}()
 
@@ -208,17 +209,17 @@ func (s *Stacks) StreamCompose(ctx context.Context, stackName string, args ...st
 		}
 	}()
 
-	return out, nil
+	return out, waitErr, nil
 }
 
 func (s *Stacks) RunCompose(ctx context.Context, stackName string, args ...string) error {
-	ch, err := s.StreamCompose(ctx, stackName, args...)
+	lines, waitErr, err := s.StreamCompose(ctx, stackName, args...)
 	if err != nil {
 		return err
 	}
-	for range ch {
+	for range lines {
 	}
-	return nil
+	return <-waitErr
 }
 
 func (s *Stacks) UpServices(ctx context.Context, stackName string, services []string) error {

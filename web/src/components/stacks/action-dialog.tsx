@@ -89,6 +89,7 @@ export function StackActionDialog({ title, action, onDone, children }: Props) {
                 className={cn(
                   "whitespace-pre",
                   line === "Done." && "text-emerald-400",
+                  line.startsWith("Error: ") && "text-red-400",
                   line.startsWith("$ ") && "text-zinc-400",
                 )}
               >
