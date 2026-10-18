@@ -129,6 +129,91 @@ func TestSignInWrongPassword(t *testing.T) {
 	}
 }
 
+func TestSignInBruteForceLockout(t *testing.T) {
+	srv, _ := newTestServer(t)
+	h := srv.Handler()
+
+	fail := func(email string) *httptest.ResponseRecorder {
+		return doJSON(t, h, http.MethodPost, "/api/auth/sign-in/email", map[string]string{
+			"email": email, "password": "wrong",
+		}, nil)
+	}
+	ok := func(email string) *httptest.ResponseRecorder {
+		return doJSON(t, h, http.MethodPost, "/api/auth/sign-in/email", map[string]string{
+			"email": email, "password": "password",
+		}, nil)
+	}
+
+	// Matches signInIdentifierMaxFailures in the auth api package.
+	for range 5 {
+		if rr := fail("admin@example.com"); rr.Code != http.StatusUnauthorized {
+			t.Fatalf("failed attempt: expected 401, got %d: %s", rr.Code, rr.Body.String())
+		}
+	}
+
+	// The identifier is locked out: even correct credentials are rejected.
+	rr := ok("admin@example.com")
+	if rr.Code != http.StatusTooManyRequests {
+		t.Fatalf("correct password after repeated failures: expected 429, got %d: %s", rr.Code, rr.Body.String())
+	}
+	if ra := rr.Header().Get("Retry-After"); ra == "" {
+		t.Fatal("429 response missing Retry-After header")
+	}
+
+	// A different identifier from the same IP is not locked yet.
+	if rr := fail("unknown@example.com"); rr.Code != http.StatusUnauthorized {
+		t.Fatalf("other identifier: expected 401, got %d: %s", rr.Code, rr.Body.String())
+	}
+
+	// Matches signInIPMaxFailures in the auth api package: the isolation
+	// attempt above counts as the 6th IP failure, so 4 more reach 10.
+	for range 4 {
+		if rr := fail("unknown@example.com"); rr.Code != http.StatusUnauthorized {
+			t.Fatalf("ip failure: expected 401, got %d: %s", rr.Code, rr.Body.String())
+		}
+	}
+	if rr := ok("admin@example.com"); rr.Code != http.StatusTooManyRequests {
+		t.Fatalf("ip locked: expected 429, got %d: %s", rr.Code, rr.Body.String())
+	}
+	if rr := fail("fresh@example.com"); rr.Code != http.StatusTooManyRequests {
+		t.Fatalf("fresh identifier from locked ip: expected 429, got %d: %s", rr.Code, rr.Body.String())
+	}
+}
+
+func TestSignInFailureCounterResetsOnSuccess(t *testing.T) {
+	srv, _ := newTestServer(t)
+	h := srv.Handler()
+
+	fail := func() *httptest.ResponseRecorder {
+		return doJSON(t, h, http.MethodPost, "/api/auth/sign-in/email", map[string]string{
+			"email": "admin@example.com", "password": "wrong",
+		}, nil)
+	}
+	ok := func() *httptest.ResponseRecorder {
+		return doJSON(t, h, http.MethodPost, "/api/auth/sign-in/email", map[string]string{
+			"email": "admin@example.com", "password": "password",
+		}, nil)
+	}
+
+	// Matches signInIdentifierMaxFailures in the auth api package.
+	for range 4 {
+		if rr := fail(); rr.Code != http.StatusUnauthorized {
+			t.Fatalf("failed attempt: expected 401, got %d: %s", rr.Code, rr.Body.String())
+		}
+	}
+	if rr := ok(); rr.Code != http.StatusOK {
+		t.Fatalf("correct password below threshold: expected 200, got %d: %s", rr.Code, rr.Body.String())
+	}
+	if rr := fail(); rr.Code != http.StatusUnauthorized {
+		t.Fatalf("failed attempt after success: expected 401, got %d: %s", rr.Code, rr.Body.String())
+	}
+	// Without a reset this failure would accumulate on top of the earlier four
+	// and the next sign-in would be locked out.
+	if rr := ok(); rr.Code != http.StatusOK {
+		t.Fatalf("counter should reset after success: expected 200, got %d: %s", rr.Code, rr.Body.String())
+	}
+}
+
 func TestAPIKeyAuth(t *testing.T) {
 	srv, _ := newTestServer(t)
 	h := srv.Handler()

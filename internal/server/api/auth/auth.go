@@ -23,6 +23,8 @@ import (
 type Deps struct {
 	Cfg   *config.Config
 	Store *coreauth.Store
+
+	guard signInGuard
 }
 
 type authUserResponse struct {
@@ -120,12 +122,19 @@ func (d *Deps) signInWithPassword(ctx context.Context, identifier, password, mis
 	if identifier == "" || password == "" {
 		return nil, huma.Error400BadRequest(missingMsg)
 	}
+	ipKey := signInLimitKey("ip", clientIP(web.RequestFrom(ctx)))
+	idKey := signInLimitKey("id", identifier)
+	if err := d.guard.check(ipKey, idKey); err != nil {
+		return nil, err
+	}
 	user, err := lookup(ctx, identifier)
 	if err != nil {
 		web.LogError(web.RequestFrom(ctx), err)
 		return nil, huma.Error500InternalServerError("failed to look up user")
 	}
 	if user == nil {
+		coreauth.VerifyDummyPassword(password)
+		d.guard.recordFailure(ipKey, idKey)
 		return nil, huma.Error401Unauthorized("Invalid credentials")
 	}
 	ok, err := d.Store.VerifyPassword(ctx, user.ID, password)
@@ -134,8 +143,10 @@ func (d *Deps) signInWithPassword(ctx context.Context, identifier, password, mis
 		return nil, huma.Error500InternalServerError("failed to verify password")
 	}
 	if !ok {
+		d.guard.recordFailure(ipKey, idKey)
 		return nil, huma.Error401Unauthorized("Invalid credentials")
 	}
+	d.guard.clear(ipKey, idKey)
 	cookie, err := d.createSession(ctx, user)
 	if err != nil {
 		return nil, err

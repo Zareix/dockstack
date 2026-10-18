@@ -31,6 +31,18 @@ func HashPassword(password string) (string, error) {
 	), nil
 }
 
+var dummyPasswordHash = func() string {
+	h, err := HashPassword("dockstack:dummy-password-equalize-verify-timing")
+	if err != nil {
+		panic(err)
+	}
+	return h
+}()
+
+func VerifyDummyPassword(password string) {
+	_, _ = VerifyPassword(password, dummyPasswordHash)
+}
+
 func VerifyPassword(password, encoded string) (bool, error) {
 	parts := strings.Split(encoded, "$")
 	if len(parts) != 5 || parts[0] != "argon2id" {
