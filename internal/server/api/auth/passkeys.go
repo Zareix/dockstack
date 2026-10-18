@@ -89,6 +89,9 @@ func (d *Deps) handlePasskeyRegisterFinish(ctx context.Context, in *struct{ Body
 type passkeyAuthBeginOutput = passkeyOptionsOutput
 
 func (d *Deps) handlePasskeyAuthBegin(ctx context.Context, _ *struct{}) (*passkeyAuthBeginOutput, error) {
+	if err := d.limits.passkeyBegin(web.RequestFrom(ctx)); err != nil {
+		return nil, err
+	}
 	options, challengeID, err := d.Store.BeginAuthentication(ctx)
 	if err != nil {
 		web.LogError(web.RequestFrom(ctx), err)

@@ -24,7 +24,8 @@ type Deps struct {
 	Cfg   *config.Config
 	Store *coreauth.Store
 
-	guard signInGuard
+	guard  signInGuard
+	limits requestGuard
 }
 
 type authUserResponse struct {
@@ -380,6 +381,9 @@ type forgotPasswordRequest struct {
 }
 
 func (d *Deps) handleForgotPassword(ctx context.Context, in *struct{ Body forgotPasswordRequest }) (*web.OKResponse, error) {
+	if err := d.limits.forgotPassword(web.RequestFrom(ctx)); err != nil {
+		return nil, err
+	}
 	user, err := d.Store.UserByEmail(ctx, in.Body.Email)
 	if err != nil {
 		web.LogError(web.RequestFrom(ctx), err)

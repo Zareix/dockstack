@@ -22,6 +22,12 @@ const (
 	signInMaxEntries            = 100
 )
 
+const (
+	requestLimitMax     = signInIPMaxFailures
+	requestLimitWindow  = signInFailureWindow
+	requestLimitLockout = signInLockout
+)
+
 type bruteLimiter struct {
 	mu      sync.Mutex
 	entries map[string]*signInAttempts
@@ -85,6 +91,10 @@ func (l *bruteLimiter) reset(key string) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	delete(l.entries, key)
+}
+
+func (l *bruteLimiter) hit(key string) time.Duration {
+	return l.fail(key)
 }
 
 func (e *signInAttempts) prune(now time.Time, window time.Duration) {
@@ -153,11 +163,47 @@ func signInLimitKey(kind, value string) string {
 }
 
 func signInTooManyRequests(wait time.Duration) error {
+	return tooManyRequests("Too many failed sign-in attempts.", wait)
+}
+
+func tooManyRequests(msg string, wait time.Duration) error {
 	secs := int(wait.Round(time.Second) / time.Second)
 	if secs < 1 {
 		secs = 1
 	}
 	return huma.ErrorWithHeaders(huma.Error429TooManyRequests(
-		fmt.Sprintf("Too many failed sign-in attempts. Try again in %s.", wait.Round(time.Second)),
+		fmt.Sprintf("%s Try again in %s.", msg, wait.Round(time.Second)),
 	), http.Header{"Retry-After": []string{strconv.Itoa(secs)}})
+}
+
+type requestGuard struct {
+	once       sync.Once
+	passkey    *bruteLimiter
+	forgotPass *bruteLimiter
+}
+
+func (g *requestGuard) init() {
+	g.once.Do(func() {
+		g.passkey = newBruteLimiter(requestLimitMax, requestLimitWindow, requestLimitLockout)
+		g.forgotPass = newBruteLimiter(requestLimitMax, requestLimitWindow, requestLimitLockout)
+	})
+}
+
+func (g *requestGuard) passkeyBegin(r *http.Request) error {
+	g.init()
+	return g.limit(g.passkey, r)
+}
+
+func (g *requestGuard) forgotPassword(r *http.Request) error {
+	g.init()
+	return g.limit(g.forgotPass, r)
+}
+
+func (g *requestGuard) limit(l *bruteLimiter, r *http.Request) error {
+	ipKey := signInLimitKey("ip", clientIP(r))
+	if wait := l.blocked(ipKey); wait > 0 {
+		return tooManyRequests("Too many requests.", wait)
+	}
+	l.hit(ipKey)
+	return nil
 }
