@@ -11,7 +11,7 @@ COPY web/ ./web/
 RUN bun run --filter web build
 
 # ---- Stage 2: build the Go binary (embeds the SPA) ----
-FROM golang:1.27.1-alpine AS go-builder
+FROM golang:1.27.3-alpine AS go-builder
 
 WORKDIR /app
 COPY go.mod go.sum ./
