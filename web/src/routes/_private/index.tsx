@@ -18,6 +18,7 @@ import {
   type DataTableFeatures,
   FilterableHeader,
   SortableHeader,
+  TableSearch,
 } from "#/components/ui/data-table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "#/components/ui/tooltip"
 import {
@@ -138,6 +139,7 @@ function Home() {
   const columns: ColumnDef<DataTableFeatures, Stack>[] = [
     {
       accessorKey: "name",
+      filterFn: "includesString",
       header: ({ column }) => <SortableHeader column={column} label="Name" />,
       cell: ({ row }) => <span className="font-mono">{row.getValue("name")}</span>,
     },
@@ -180,6 +182,11 @@ function Home() {
         columns={columns}
         data={stacksQuery.data ?? []}
         isLoading={stacksQuery.isLoading}
+        toolbar={(table) => (
+          <div className="mb-3 flex flex-row-reverse">
+            <TableSearch table={table} columnId="name" placeholder="Search stacks..." />
+          </div>
+        )}
         onRowClick={({ name }) => navigate({ to: "/stacks/$name", params: { name } })}
         getRowAriaLabel={({ name }) => `Open stack ${name}`}
       />
