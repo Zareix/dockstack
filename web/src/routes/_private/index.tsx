@@ -145,11 +145,15 @@ function Home() {
     },
     {
       accessorKey: "status",
+      filterFn: (row, columnId, filterValue) => {
+        const status: Stack["status"] = row.getValue(columnId)
+        if (filterValue === "running") return status === "running" || status === "healthy"
+        return status === filterValue
+      },
       header: ({ column }) => (
         <FilterableHeader
           items={[
             { label: "Status", value: "all" },
-            { label: "Healthy", value: "healthy" },
             { label: "Running", value: "running" },
             { label: "Down", value: "down" },
             { label: "Stopped", value: "stopped" },
