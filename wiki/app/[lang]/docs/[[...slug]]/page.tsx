@@ -32,7 +32,7 @@ export default async function Page(props: PageProps<"/[lang]/docs/[[...slug]]">)
   }
 
   const MDX = page.data.body
-  const markdownUrl = "/dockstack" + getPageMarkdownUrl(page).url
+  const markdownUrl = getPageMarkdownUrl(page).url
 
   return (
     <DocsPage toc={page.data.toc} full={page.data.full}>
