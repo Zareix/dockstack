@@ -1,8 +1,6 @@
-air := `command -v air 2>/dev/null || echo "$(go env GOPATH)/bin/air"`
-
 [group('dev')]
 dev-backend:
-    {{air}}
+    go tool air
 
 [group('dev')]
 dev-frontend:

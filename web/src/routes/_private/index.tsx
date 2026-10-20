@@ -18,6 +18,7 @@ import {
   type DataTableFeatures,
   FilterableHeader,
   SortableHeader,
+  TableSearch,
 } from "#/components/ui/data-table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "#/components/ui/tooltip"
 import {
@@ -138,16 +139,21 @@ function Home() {
   const columns: ColumnDef<DataTableFeatures, Stack>[] = [
     {
       accessorKey: "name",
+      filterFn: "includesString",
       header: ({ column }) => <SortableHeader column={column} label="Name" />,
       cell: ({ row }) => <span className="font-mono">{row.getValue("name")}</span>,
     },
     {
       accessorKey: "status",
+      filterFn: (row, columnId, filterValue) => {
+        const status: Stack["status"] = row.getValue(columnId)
+        if (filterValue === "running") return status === "running" || status === "healthy"
+        return status === filterValue
+      },
       header: ({ column }) => (
         <FilterableHeader
           items={[
             { label: "Status", value: "all" },
-            { label: "Healthy", value: "healthy" },
             { label: "Running", value: "running" },
             { label: "Down", value: "down" },
             { label: "Stopped", value: "stopped" },
@@ -180,6 +186,11 @@ function Home() {
         columns={columns}
         data={stacksQuery.data ?? []}
         isLoading={stacksQuery.isLoading}
+        toolbar={(table) => (
+          <div className="mb-3 flex flex-row-reverse">
+            <TableSearch table={table} columnId="name" placeholder="Search stacks..." />
+          </div>
+        )}
         onRowClick={({ name }) => navigate({ to: "/stacks/$name", params: { name } })}
         getRowAriaLabel={({ name }) => `Open stack ${name}`}
       />

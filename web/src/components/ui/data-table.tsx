@@ -1,4 +1,4 @@
-import { ArrowDownIcon, ArrowUpIcon, FunnelIcon } from "@phosphor-icons/react"
+import { ArrowDownIcon, ArrowUpIcon, FunnelIcon, MagnifyingGlassIcon } from "@phosphor-icons/react"
 import {
   type Column,
   type ColumnDef,
@@ -18,6 +18,7 @@ import {
 } from "@tanstack/react-table"
 
 import { Button } from "#/components/ui/button"
+import { Input } from "#/components/ui/input"
 import {
   Select,
   SelectContent,
@@ -113,6 +114,35 @@ export function FilterableHeader<TData extends RowData>({
         ))}
       </SelectContent>
     </Select>
+  )
+}
+
+export function TableSearch<TData extends RowData>({
+  table,
+  columnId,
+  placeholder = "Search...",
+}: {
+  table: TanstackTable<DataTableFeatures, TData>
+  columnId: string
+  placeholder?: string
+}) {
+  const value = (table.getColumn(columnId)?.getFilterValue() as string | undefined) ?? ""
+
+  return (
+    <div className="relative w-full max-w-xs">
+      <MagnifyingGlassIcon className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
+      <Input
+        value={value}
+        onChange={(e) => table.getColumn(columnId)?.setFilterValue(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Escape") e.currentTarget.blur()
+        }}
+        placeholder={placeholder}
+        aria-label={placeholder}
+        autoFocus={true}
+        className="pl-8"
+      />
+    </div>
   )
 }
 
