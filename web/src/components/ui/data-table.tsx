@@ -134,6 +134,9 @@ export function TableSearch<TData extends RowData>({
       <Input
         value={value}
         onChange={(e) => table.getColumn(columnId)?.setFilterValue(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Escape") e.currentTarget.blur()
+        }}
         placeholder={placeholder}
         aria-label={placeholder}
         autoFocus={true}
