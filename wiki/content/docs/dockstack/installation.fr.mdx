@@ -19,8 +19,8 @@ services:
       - dockstack-db:/app/data
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
-      - BETTER_AUTH_SECRET=changeme
-      - BETTER_AUTH_URL=https://dockstack.example.com
+      - AUTH_SECRET=changeme
+      - APP_URL=https://dockstack.example.com
       - ADMIN_EMAIL=you@example.com
 
 volumes:
@@ -39,7 +39,7 @@ Lancez-le :
 docker compose up -d
 ```
 
-Ouvrez l'URL définie dans <EnvVar name="BETTER_AUTH_URL" />, connectez-vous avec <EnvVar name="ADMIN_EMAIL" /> / `password`, puis changez le mot de passe depuis les paramètres.
+Ouvrez l'URL définie dans <EnvVar name="APP_URL" />, connectez-vous avec <EnvVar name="ADMIN_EMAIL" /> / `password`, puis changez le mot de passe depuis les paramètres.
 
 ## Structure des stacks
 

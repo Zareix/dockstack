@@ -18,14 +18,14 @@ export interface EnvVarInfo {
 }
 
 export const envVars: Record<string, EnvVarInfo> = {
-  BETTER_AUTH_SECRET: {
+  AUTH_SECRET: {
     description:
-      "Secret key for session signing (min 32 chars). Generate with `openssl rand -hex 32`",
+      "Secret key for session signing (use at least 32 chars). Generate with `openssl rand -hex 32`",
     required: true,
   },
-  BETTER_AUTH_URL: {
-    description: "Public URL of the Dockstack instance",
-    required: true,
+  APP_URL: {
+    description:
+      "Public URL of the Dockstack instance, used for OAuth redirect URLs and secure cookies",
   },
   ADMIN_EMAIL: {
     description: "Email of the initial admin user (default password `password`)",
@@ -39,8 +39,21 @@ export const envVars: Record<string, EnvVarInfo> = {
     description: "Name of this instance, shown in the UI to tell instances apart",
   },
   SERVER_HOST: {
-    description: "Host shown in port links in the UI",
+    description:
+      "Host or `host:port` the server listens on, also shown in port links in the UI",
     default: "localhost",
+  },
+  DOCKER_HOST: {
+    description: "Docker engine endpoint the app connects to",
+    default: "unix:///var/run/docker.sock",
+  },
+  LOG_LEVEL: {
+    description: "Log verbosity, one of `debug`, `info`, `warn`, `error`",
+    default: "info",
+  },
+  LOG_FORMAT: {
+    description: "Log output format, `text` or `json`",
+    default: "text",
   },
   STACKS_DIR: {
     description: "Path to the stacks directory inside the container",
@@ -51,10 +64,6 @@ export const envVars: Record<string, EnvVarInfo> = {
     description: "Path to the SQLite auth database",
     default: "./db.sqlite",
     dockerDefault: "/app/data/db.sqlite",
-  },
-  PORT: {
-    description: "HTTP port the server listens on",
-    default: "3000",
   },
   DOCKER_CONFIG_DIR_PATH: {
     description:
