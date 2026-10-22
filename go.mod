@@ -4,7 +4,7 @@ go 1.27.0
 
 require (
 	github.com/coder/websocket v1.8.15
-	github.com/coreos/go-oidc/v3 v3.20.0
+	github.com/coreos/go-oidc/v3 v3.21.0
 	github.com/danielgtaylor/huma/v2 v2.39.1
 	github.com/docker/docker v28.5.2+incompatible
 	github.com/go-chi/chi/v5 v5.3.1
