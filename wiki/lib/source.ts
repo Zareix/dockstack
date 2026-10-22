@@ -1,15 +1,27 @@
 import * as icons from "@phosphor-icons/react/ssr";
 import { docs } from "collections/server";
 import { loader } from "fumadocs-core/source";
+import type { StaticSource } from "fumadocs-core/source";
 import { createElement } from "react";
 
 import { i18n } from "./i18n";
 import { openapi } from "./openapi";
 import { docsContentRoute, docsImageRoute, docsRoute } from "./shared";
 
+const rawDocsSource = docs.toFumadocsSource();
+type DocsFiles = (typeof rawDocsSource)["files"];
+type DocsPageData = Extract<DocsFiles[number], { type: "page" }>["data"];
+type DocsMetaData = Extract<DocsFiles[number], { type: "meta" }>["data"];
+// annotating avoids a TS inference fallback that strips the doc page data
+// when the source comes straight from the generic `toFumadocsSource()` method
+const docsSource: StaticSource<{
+  pageData: DocsPageData;
+  metaData: DocsMetaData;
+}> = rawDocsSource;
+
 export const source = loader(
   {
-    docs: docs.toFumadocsSource(),
+    docs: docsSource,
     openapi: await openapi.staticSource({
       baseDir: "openapi/(generated)",
     }),

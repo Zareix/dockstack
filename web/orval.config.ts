@@ -13,7 +13,7 @@ export default defineConfig({
 
       override: {
         mutator: {
-          path: "./src/lib/api/orval-mutator",
+          path: "./src/lib/api/orval-mutator.ts",
           name: "orvalInstance",
         },
         fetch: {

@@ -45,5 +45,11 @@ format:
     gofmt -s -w cmd internal
     bun run web:format
 
+[group('dev')]
+update:
+    go get -u ./...
+    go mod tidy
+    go build ./...
+
 clean:
     rm -rf bin internal/server/web-dist
