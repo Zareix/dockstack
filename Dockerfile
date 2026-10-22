@@ -23,7 +23,7 @@ COPY --from=web-builder /app/web/dist ./internal/server/web-dist
 RUN CGO_ENABLED=0 go build -ldflags="-s -w" -o /out/dockstack ./cmd/dockstack
 
 # ---- Stage 3: runtime ----
-FROM docker:29.9.1-cli AS docker-cli
+FROM docker:29.9.2-cli AS docker-cli
 
 FROM alpine:3.24 AS runner
 
