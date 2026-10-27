@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"testing"
 
 	_ "modernc.org/sqlite"
@@ -305,6 +307,47 @@ func TestUpdateUser(t *testing.T) {
 	}, cookies)
 	if rr.Code != http.StatusBadRequest {
 		t.Fatalf("invalid username: %d %s", rr.Code, rr.Body.String())
+	}
+}
+
+func TestStackRename(t *testing.T) {
+	srv, _ := newTestServer(t)
+	h := srv.Handler()
+
+	if rr := doJSON(t, h, http.MethodPost, "/api/stacks/old/rename", map[string]string{"name": "new"}, nil); rr.Code != http.StatusUnauthorized {
+		t.Fatalf("rename without auth: %d", rr.Code)
+	}
+
+	cookies := signInAsAdmin(t, h)
+	stacksDir := srv.deps().Stacks.Dir()
+	oldDir := filepath.Join(stacksDir, "old")
+	if err := os.MkdirAll(oldDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	rr := doJSON(t, h, http.MethodPost, "/api/stacks/old/rename", map[string]string{"name": "new"}, cookies)
+	if rr.Code != http.StatusOK {
+		t.Fatalf("rename: %d %s", rr.Code, rr.Body.String())
+	}
+	if _, err := os.Stat(filepath.Join(stacksDir, "new")); err != nil {
+		t.Fatalf("new dir missing: %v", err)
+	}
+	if _, err := os.Stat(oldDir); !os.IsNotExist(err) {
+		t.Fatalf("old dir should be gone: %v", err)
+	}
+
+	if rr := doJSON(t, h, http.MethodPost, "/api/stacks/missing/rename", map[string]string{"name": "other"}, cookies); rr.Code != http.StatusNotFound {
+		t.Fatalf("rename missing stack: %d %s", rr.Code, rr.Body.String())
+	}
+	if rr := doJSON(t, h, http.MethodPost, "/api/stacks/new/rename", map[string]string{"name": "old!"}, cookies); rr.Code != http.StatusBadRequest {
+		t.Fatalf("invalid new name: %d %s", rr.Code, rr.Body.String())
+	}
+
+	if err := os.MkdirAll(filepath.Join(stacksDir, "other"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if rr := doJSON(t, h, http.MethodPost, "/api/stacks/new/rename", map[string]string{"name": "other"}, cookies); rr.Code != http.StatusConflict {
+		t.Fatalf("conflict: %d %s", rr.Code, rr.Body.String())
 	}
 }
 

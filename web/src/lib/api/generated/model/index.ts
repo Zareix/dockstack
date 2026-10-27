@@ -43,6 +43,7 @@ export * from './stackFilesResponseBody.ts';
 export * from './stackFilesSaveRequest.ts';
 export * from './stackGetResponseBody.ts';
 export * from './stackGetResponseBodyStatus.ts';
+export * from './stackRenameRequest.ts';
 export * from './stackStatus.ts';
 export * from './updateUserRequest.ts';
 export * from './userBody.ts';

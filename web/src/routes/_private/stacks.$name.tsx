@@ -15,6 +15,7 @@ import * as v from "valibot"
 import { StackActionDialog } from "#/components/stacks/action-dialog"
 import { StackFiles } from "#/components/stacks/files"
 import { ContainerLogs } from "#/components/stacks/logs"
+import { RenameStackDialog } from "#/components/stacks/rename-stack-dialog"
 import { StackServiceLinks } from "#/components/stacks/service-links"
 import { StackServices } from "#/components/stacks/services"
 import { StackTerminal } from "#/components/stacks/terminal"
@@ -178,6 +179,8 @@ function StackDetails({ name }: { name: string }) {
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
+
+          <RenameStackDialog stackName={name} />
 
           <StackActionDialog
             title={`Pulling ${name}`}

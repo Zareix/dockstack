@@ -35,6 +35,8 @@ var stackActions = []struct {
 	{"pull", []string{"pull"}},
 }
 
+var upArgs = stackActions[0].args
+
 type nameInput struct {
 	Name string `path:"name"`
 }
@@ -212,6 +214,63 @@ func (d *Deps) handleStackCreateEnv(ctx context.Context, in *nameInput) (*web.OK
 	return web.OK(), nil
 }
 
+type stackRenameRequest struct {
+	Name string `json:"name"`
+}
+
+func (d *Deps) handleStackRename(ctx context.Context, in *struct {
+	Name string `path:"name"`
+	Body stackRenameRequest
+}) (*web.OKResponse, error) {
+	if err := validateStackName(in.Name); err != nil {
+		return nil, err
+	}
+	if err := validateStackName(in.Body.Name); err != nil {
+		return nil, huma.Error400BadRequest("invalid new stack name (allowed: a-zA-Z0-9_-)")
+	}
+	if in.Body.Name == in.Name {
+		return web.OK(), nil
+	}
+	exists, err := d.Stacks.StackExists(ctx, in.Name)
+	if err != nil {
+		web.LogError(web.RequestFrom(ctx), err)
+		return nil, huma.Error500InternalServerError("failed to check stack")
+	}
+	if !exists {
+		return nil, huma.Error404NotFound("stack not found")
+	}
+	newExists, err := d.Stacks.StackExists(ctx, in.Body.Name)
+	if err != nil {
+		web.LogError(web.RequestFrom(ctx), err)
+		return nil, huma.Error500InternalServerError("failed to check stack")
+	}
+	if newExists {
+		return nil, huma.Error409Conflict("stack already exists")
+	}
+	if _, err := d.Stacks.FindComposePath(in.Name); err == nil {
+		if err := d.Stacks.RunCompose(ctx, in.Name, "down"); err != nil {
+			web.LogError(web.RequestFrom(ctx), err)
+			return nil, huma.Error500InternalServerError("failed to bring stack down")
+		}
+	}
+	oldDir := filepath.Join(d.Stacks.Dir(), in.Name)
+	newDir := filepath.Join(d.Stacks.Dir(), in.Body.Name)
+	if !isWithinStacksDir(d.Stacks.Dir(), oldDir) || !isWithinStacksDir(d.Stacks.Dir(), newDir) {
+		return nil, huma.Error400BadRequest("invalid stack path")
+	}
+	if err := os.Rename(oldDir, newDir); err != nil {
+		web.LogError(web.RequestFrom(ctx), err)
+		return nil, huma.Error500InternalServerError("failed to rename stack directory")
+	}
+	if _, err := d.Stacks.FindComposePath(in.Body.Name); err == nil {
+		if err := d.Stacks.RunCompose(ctx, in.Body.Name, upArgs...); err != nil {
+			web.LogError(web.RequestFrom(ctx), err)
+			return nil, huma.Error500InternalServerError("stack renamed but failed to start it")
+		}
+	}
+	return web.OK(), nil
+}
+
 func (d *Deps) handleStackDestroy(ctx context.Context, in *nameInput) (*web.OKResponse, error) {
 	if err := validateStackName(in.Name); err != nil {
 		return nil, err
@@ -288,6 +347,7 @@ func (d *Deps) registerStacks(api huma.API, router chi.Router) {
 	huma.Get(api, "/api/stacks/{name}/files", d.handleStackFilesGet, d.AuthMW)
 	huma.Put(api, "/api/stacks/{name}/files", d.handleStackFilesSave, d.AuthMW)
 	huma.Post(api, "/api/stacks/{name}/env", d.handleStackCreateEnv, d.AuthMW)
+	huma.Post(api, "/api/stacks/{name}/rename", d.handleStackRename, d.AuthMW)
 	huma.Delete(api, "/api/stacks/{name}", d.handleStackDestroy, d.AuthMW)
 	for _, a := range stackActions {
 		action := a
