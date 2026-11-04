@@ -12,6 +12,7 @@ import {
   type DataTableFeatures,
   FilterableHeader,
   SortableHeader,
+  TableSearch,
 } from "../ui/data-table"
 import { ContainerActions } from "./container-actions"
 
@@ -35,6 +36,7 @@ export const ContainersTable = ({ data, isLoading, showStack = true }: Props) =>
     },
     {
       accessorKey: "name",
+      filterFn: "includesString",
       header: ({ column }) => <SortableHeader column={column} label="Name" />,
       cell: ({ row }) => <span className="font-mono text-sm">{row.getValue("name")}</span>,
     },
@@ -171,6 +173,15 @@ export const ContainersTable = ({ data, isLoading, showStack = true }: Props) =>
       columns={columns.filter((c): c is ColumnDef<DataTableFeatures, ContainerInfo> => Boolean(c))}
       data={data}
       isLoading={isLoading}
+      toolbar={
+        showStack
+          ? (table) => (
+              <div className="mb-3 flex flex-row-reverse">
+                <TableSearch table={table} columnId="name" placeholder="Search containers..." />
+              </div>
+            )
+          : undefined
+      }
     />
   )
 }

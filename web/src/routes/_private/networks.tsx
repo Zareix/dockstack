@@ -7,6 +7,7 @@ import {
   type DataTableFeatures,
   FilterableHeader,
   SortableHeader,
+  TableSearch,
 } from "#/components/ui/data-table"
 import { Spinner } from "#/components/ui/spinner"
 import { useGetNetworks } from "#/lib/api/generated/default/default"
@@ -22,6 +23,7 @@ function NetworksPage() {
   const columns: ColumnDef<DataTableFeatures, NetworkInfo>[] = [
     {
       accessorKey: "name",
+      filterFn: "includesString",
       header: ({ column }) => <SortableHeader column={column} label="Name" />,
       cell: ({ row }) => <span className="font-mono text-sm">{row.getValue("name")}</span>,
     },
@@ -66,7 +68,16 @@ function NetworksPage() {
       ) : query.isError ? (
         <div>{query.error.message}</div>
       ) : (
-        <DataTable columns={columns} data={query.data ?? []} isLoading={query.isLoading} />
+        <DataTable
+          columns={columns}
+          data={query.data ?? []}
+          isLoading={query.isLoading}
+          toolbar={(table) => (
+            <div className="mb-3 flex flex-row-reverse">
+              <TableSearch table={table} columnId="name" placeholder="Search networks..." />
+            </div>
+          )}
+        />
       )}
     </>
   )

@@ -7,6 +7,7 @@ import {
   type DataTableFeatures,
   FilterableHeader,
   SortableHeader,
+  TableSearch,
 } from "#/components/ui/data-table"
 import { Spinner } from "#/components/ui/spinner.tsx"
 import { PruneVolumesButton } from "#/components/volumes/prune-volumes-button"
@@ -23,6 +24,7 @@ function VolumesPage() {
   const columns: ColumnDef<DataTableFeatures, VolumeInfo>[] = [
     {
       accessorKey: "name",
+      filterFn: "includesString",
       header: ({ column }) => <SortableHeader column={column} label="Name" />,
       cell: ({ row }) => <span className="font-mono text-sm">{row.getValue("name")}</span>,
     },
@@ -99,6 +101,11 @@ function VolumesPage() {
           columns={columns}
           data={volumesQuery.data ?? []}
           isLoading={volumesQuery.isLoading}
+          toolbar={(table) => (
+            <div className="mb-3 flex flex-row-reverse">
+              <TableSearch table={table} columnId="name" placeholder="Search volumes..." />
+            </div>
+          )}
         />
       )}
     </>
