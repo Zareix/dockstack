@@ -35,6 +35,7 @@ import type {
   ForgotPasswordRequest,
   GetImagesStale200,
   GetSessionResponseBody,
+  GetStacksDrift200,
   GetStacksUpdates200,
   ImageInfo,
   NetworkInfo,
@@ -3480,7 +3481,107 @@ export const usePostStacks = <TError = ErrorType<ApiError>,
       > => {
       return useMutation(getPostStacksMutationOptions(options), queryClient);
     }
-    export const getPostStacksRedeployUrl = () => {
+    export const getGetStacksDriftUrl = () => {
+
+
+
+
+  return `/api/stacks/drift`
+}
+
+/**
+ * @summary GET /api/stacks/drift
+ */
+export const getStacksDrift = async ( options?: Parameters<typeof orvalInstance>[1]): Promise<GetStacksDrift200> => {
+
+  return orvalInstance<GetStacksDrift200>(getGetStacksDriftUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetStacksDriftQueryKey = () => {
+    return [
+    `/api/stacks/drift`
+    ] as const;
+    }
+
+
+export const getGetStacksDriftQueryOptions = <TData = Awaited<ReturnType<typeof getStacksDrift>>, TError = ErrorType<ApiError>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStacksDrift>>, TError, TData>>, request?: SecondParameter<typeof orvalInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetStacksDriftQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getStacksDrift>>> = ({ signal }) => getStacksDrift({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getStacksDrift>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetStacksDriftQueryResult = NonNullable<Awaited<ReturnType<typeof getStacksDrift>>>
+export type GetStacksDriftQueryError = ErrorType<ApiError>
+
+
+export function useGetStacksDrift<TData = Awaited<ReturnType<typeof getStacksDrift>>, TError = ErrorType<ApiError>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStacksDrift>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getStacksDrift>>,
+          TError,
+          Awaited<ReturnType<typeof getStacksDrift>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof orvalInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetStacksDrift<TData = Awaited<ReturnType<typeof getStacksDrift>>, TError = ErrorType<ApiError>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStacksDrift>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getStacksDrift>>,
+          TError,
+          Awaited<ReturnType<typeof getStacksDrift>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof orvalInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetStacksDrift<TData = Awaited<ReturnType<typeof getStacksDrift>>, TError = ErrorType<ApiError>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStacksDrift>>, TError, TData>>, request?: SecondParameter<typeof orvalInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary GET /api/stacks/drift
+ */
+
+export function useGetStacksDrift<TData = Awaited<ReturnType<typeof getStacksDrift>>, TError = ErrorType<ApiError>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStacksDrift>>, TError, TData>>, request?: SecondParameter<typeof orvalInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetStacksDriftQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getPostStacksRedeployUrl = () => {
 
 
 

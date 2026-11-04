@@ -1,0 +1,35 @@
+---
+title: Détection de dérive de configuration
+---
+
+Dockstack compare la configuration Compose sur disque avec les conteneurs réellement en cours d'exécution. Quand les deux ne correspondent plus, la liste des stacks et la page de la stack affichent un badge **Drift**.
+
+## Ce qui est détecté
+
+Dockstack calcule le hash de configuration Compose à partir du `compose.yaml` et du `.env` courants :
+
+```sh
+docker compose config --hash='*'
+```
+
+Il le compare ensuite au label `com.docker.compose.config-hash` enregistré sur chaque conteneur au moment de sa création. Le hash couvre la définition résolue du service : tag d'image, commande, environnement (y compris les variables interpolées depuis `.env` et, avec les versions récentes de Compose, le contenu des `env_file` de service), ports, volumes, labels, réseaux, etc. Toute modification de ces valeurs marque la stack comme **outdated**.
+
+La vérification tourne à chaque rafraîchissement (30 secondes), sans cache côté serveur. Les conteneurs one-off (`docker compose run`) et les services qui n'existent plus dans le fichier Compose sont ignorés.
+
+## Appliquer la nouvelle configuration
+
+Cliquez sur **Deploy** / **Start** dans la page de la stack pour lancer `docker compose up -d --remove-orphans --build`, qui recrée uniquement les conteneurs dont la configuration a changé. Le badge disparaît dès que les conteneurs correspondent à nouveau au fichier.
+
+## Ce qui n'est pas détecté
+
+- **Un nouveau digest d'image sous le même tag** — c'est le rôle de la [détection des mises à jour d'images](/fr/docs/dockstack/features/image-updates). Un badge de dérive ne signifie pas que l'image est obsolète.
+- **Les changements de contexte `build:` ou de Dockerfile** — le hash de configuration n'inclut pas le contenu de l'image construite. Reconstruisez avec `docker compose up -d --build`.
+- **Le contenu des fichiers montés en bind et des volumes** — seul le modèle Compose est haché, pas les données vers lesquelles ces chemins pointent.
+
+## Statut inconnu
+
+Une stack est signalée comme inconnue, sans badge, quand :
+
+- elle n'a aucun conteneur (jamais démarrée, ou passée `down`) ;
+- aucun conteneur ne correspond à un service du fichier Compose ;
+- le fichier Compose est absent, invalide, ou `docker compose config` échoue ou dépasse le délai de 10 secondes.

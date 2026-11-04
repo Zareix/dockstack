@@ -8,6 +8,7 @@ import {
   ArrowsClockwiseIcon,
   SquareIcon,
   TrashIcon,
+  WarningIcon,
 } from "@phosphor-icons/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { ClientOnly, createFileRoute, useRouter } from "@tanstack/react-router"
@@ -43,14 +44,17 @@ import {
 } from "#/components/ui/dropdown-menu"
 import { Spinner } from "#/components/ui/spinner.tsx"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/components/ui/tabs"
+import { Tooltip, TooltipContent, TooltipTrigger } from "#/components/ui/tooltip"
 import {
   getGetImagesStaleQueryKey,
+  getGetStacksDriftQueryKey,
   getGetStacksNameContainersQueryKey,
   getGetStacksNameQueryKey,
   getGetStacksQueryKey,
   getGetStacksUpdatesQueryKey,
   getStacksName,
   useDeleteStacksName,
+  useGetStacksDrift,
   useGetStacksName,
   useGetStacksUpdates,
   usePostStacks,
@@ -97,6 +101,7 @@ function StackNotFound({ name }: { name: string }) {
         toast.success(`Stack ${name} created`)
         router.invalidate()
         queryClient.invalidateQueries({ queryKey: getGetStacksQueryKey() })
+        queryClient.invalidateQueries({ queryKey: getGetStacksDriftQueryKey() })
       },
     },
   })
@@ -131,6 +136,10 @@ function StackDetails({ name }: { name: string }) {
     query: { refetchInterval: 60_000, staleTime: 60_000, retry: 1 },
   })
   const updateAvailable = updatesQuery.data?.[name] === "outdated"
+  const driftQuery = useGetStacksDrift({
+    query: { refetchInterval: 30_000, staleTime: 30_000, retry: 1 },
+  })
+  const driftOutdated = driftQuery.data?.[name] === "outdated"
   const [pendingAction, setPendingAction] = useState<"pull" | "restart" | "down" | null>(null)
   const [destroyOpen, setDestroyOpen] = useState(false)
   const isRunning = statusQuery.data
@@ -142,6 +151,7 @@ function StackDetails({ name }: { name: string }) {
     queryClient.invalidateQueries({ queryKey: getGetStacksNameContainersQueryKey(name) })
     queryClient.invalidateQueries({ queryKey: getGetStacksQueryKey() })
     queryClient.invalidateQueries({ queryKey: getGetStacksUpdatesQueryKey() })
+    queryClient.invalidateQueries({ queryKey: getGetStacksDriftQueryKey() })
     queryClient.invalidateQueries({ queryKey: getGetImagesStaleQueryKey() })
   }, [queryClient, name])
 
@@ -151,6 +161,7 @@ function StackDetails({ name }: { name: string }) {
       onSuccess: () => {
         toast.success(`Stack ${name} destroyed`)
         queryClient.invalidateQueries({ queryKey: getGetStacksQueryKey() })
+        queryClient.invalidateQueries({ queryKey: getGetStacksDriftQueryKey() })
         navigate({ to: "/" })
       },
     },
@@ -187,12 +198,32 @@ function StackDetails({ name }: { name: string }) {
         </h2>
 
         <div className="mt-4 ml-auto flex flex-wrap items-center gap-2 md:mt-0">
+          {driftOutdated && (
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <Badge variant="warning" className="gap-1" tabIndex={0}>
+                    <WarningIcon className="size-3.5" />
+                    Drift detected
+                  </Badge>
+                }
+              />
+              <TooltipContent>
+                The compose file or .env changed since these containers were created. Deploy the
+                stack to apply the current configuration.
+              </TooltipContent>
+            </Tooltip>
+          )}
+
           <StackActionDialog
             title={isRunning ? `Deploying ${name}` : `Starting ${name}`}
             action={streamStackAction(name, "up")}
             onDone={invalidateStatus}
           >
-            <Button variant={updateAvailable ? "outline" : "default"}>
+            <Button
+              variant={updateAvailable ? "outline" : "default"}
+              className={driftOutdated ? "pulse-button" : undefined}
+            >
               <PlayIcon data-icon="inline-start" />
               {isRunning ? "Deploy" : "Start"}
             </Button>

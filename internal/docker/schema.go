@@ -25,6 +25,10 @@ func (StaleStatus) Schema(_ huma.Registry) *huma.Schema {
 	return enumSchema(StaleOutdated, StaleUpToDate, StaleUnknown)
 }
 
+func (DriftStatus) Schema(_ huma.Registry) *huma.Schema {
+	return enumSchema(DriftInSync, DriftOutdated, DriftUnknown)
+}
+
 func (VolumeStatus) Schema(_ huma.Registry) *huma.Schema {
 	return enumSchema(VolumeInUse, VolumeFree)
 }

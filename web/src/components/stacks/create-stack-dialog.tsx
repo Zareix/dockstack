@@ -18,7 +18,12 @@ import {
 import { FieldError } from "#/components/ui/field"
 import { Input } from "#/components/ui/input"
 import { Label } from "#/components/ui/label"
-import { getGetStacksQueryKey, getStacksName, usePostStacks } from "#/lib/api/generated"
+import {
+  getGetStacksDriftQueryKey,
+  getGetStacksQueryKey,
+  getStacksName,
+  usePostStacks,
+} from "#/lib/api/generated"
 
 const schema = v.object({
   name: v.pipe(
@@ -38,6 +43,7 @@ export function CreateStackButton() {
       onSuccess: (_, stack) => {
         toast.success(`Stack "${stack.data.name}" created`)
         queryClient.invalidateQueries({ queryKey: getGetStacksQueryKey() })
+        queryClient.invalidateQueries({ queryKey: getGetStacksDriftQueryKey() })
         setOpen(false)
         form.reset()
         navigate({

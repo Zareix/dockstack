@@ -55,6 +55,14 @@ const (
 	StaleUnknown  StaleStatus = "unknown"
 )
 
+type DriftStatus string
+
+const (
+	DriftInSync   DriftStatus = "in-sync"
+	DriftOutdated DriftStatus = "outdated"
+	DriftUnknown  DriftStatus = "unknown"
+)
+
 type VolumeStatus string
 
 const (

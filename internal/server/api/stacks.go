@@ -76,6 +76,15 @@ func (d *Deps) handleStackUpdates(ctx context.Context, _ *struct{}) (*web.MapOut
 	return &web.MapOutput[dockerapi.StaleStatus]{Body: updates}, nil
 }
 
+func (d *Deps) handleStacksDrift(ctx context.Context, _ *struct{}) (*web.MapOutput[dockerapi.DriftStatus], error) {
+	drift, err := d.Stacks.CheckStacksDrift(ctx)
+	if err != nil {
+		web.LogError(web.RequestFrom(ctx), err)
+		return nil, huma.Error500InternalServerError("failed to check stacks drift")
+	}
+	return &web.MapOutput[dockerapi.DriftStatus]{Body: drift}, nil
+}
+
 type stackGetResponse struct {
 	Body struct {
 		Name   string                `json:"name"`
@@ -350,7 +359,9 @@ func (d *Deps) handleStackActionStream(w http.ResponseWriter, r *http.Request, a
 				web.WriteError(w, http.StatusInternalServerError, "failed to start compose command")
 				return
 			}
-			w.Write([]byte("data: Error: failed to start compose command: " + err.Error() + "\n\n"))
+			if _, writeErr := w.Write([]byte("data: Error: failed to start compose command: " + err.Error() + "\n\n")); writeErr != nil {
+				return
+			}
 			flusher.Flush()
 			return
 		}
@@ -368,7 +379,9 @@ func (d *Deps) handleStackActionStream(w http.ResponseWriter, r *http.Request, a
 			flusher.Flush()
 		}
 		if err := <-waitErr; err != nil {
-			w.Write([]byte("data: Error: compose command failed: " + err.Error() + "\n\n"))
+			if _, writeErr := w.Write([]byte("data: Error: compose command failed: " + err.Error() + "\n\n")); writeErr != nil {
+				return
+			}
 			flusher.Flush()
 			return
 		}
@@ -382,6 +395,7 @@ func (d *Deps) registerStacks(api huma.API, router chi.Router) {
 	huma.Get(api, "/api/stacks", d.handleStacksList, d.AuthMW)
 	huma.Post(api, "/api/stacks", d.handleStackCreate, d.AuthMW)
 	huma.Get(api, "/api/stacks/updates", d.handleStackUpdates, d.AuthMW)
+	huma.Get(api, "/api/stacks/drift", d.handleStacksDrift, d.AuthMW)
 	huma.Get(api, "/api/stacks/{name}", d.handleStackGet, d.AuthMW)
 	huma.Get(api, "/api/stacks/{name}/containers", d.handleStackContainers, d.AuthMW)
 	huma.Get(api, "/api/stacks/{name}/files", d.handleStackFilesGet, d.AuthMW)

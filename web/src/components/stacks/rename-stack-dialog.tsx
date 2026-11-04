@@ -19,7 +19,12 @@ import {
 import { FieldError } from "#/components/ui/field"
 import { Input } from "#/components/ui/input"
 import { Label } from "#/components/ui/label"
-import { getGetStacksQueryKey, getStacksName, usePostStacksNameRename } from "#/lib/api/generated"
+import {
+  getGetStacksDriftQueryKey,
+  getGetStacksQueryKey,
+  getStacksName,
+  usePostStacksNameRename,
+} from "#/lib/api/generated"
 
 const schema = v.object({
   name: v.pipe(
@@ -45,6 +50,7 @@ export function RenameStackDialog({
       onSuccess: (_, { name, data }) => {
         toast.success(`Stack "${name}" renamed to "${data.name}"`)
         queryClient.invalidateQueries({ queryKey: getGetStacksQueryKey() })
+        queryClient.invalidateQueries({ queryKey: getGetStacksDriftQueryKey() })
         setOpen(false)
         form.reset()
         navigate({

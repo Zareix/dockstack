@@ -18,6 +18,7 @@ export * from './forgotPasswordRequest.ts';
 export * from './getApiImagesStale200.ts';
 export * from './getImagesStale200.ts';
 export * from './getSessionResponseBody.ts';
+export * from './getStacksDrift200.ts';
 export * from './getStacksUpdates200.ts';
 export * from './imageInfo.ts';
 export * from './instance.ts';

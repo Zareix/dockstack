@@ -6,6 +6,7 @@ import { toast } from "sonner"
 import { Button } from "#/components/ui/button"
 import { Spinner } from "#/components/ui/spinner"
 import {
+  getGetStacksDriftQueryKey,
   getGetStacksNameFilesQueryKey,
   getGetStacksNameQueryKey,
   useGetStacksNameFiles,
@@ -27,6 +28,7 @@ export function StackFiles({ stackName }: { stackName: string }) {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: getGetStacksNameFilesQueryKey(stackName) })
         queryClient.invalidateQueries({ queryKey: getGetStacksNameQueryKey(stackName) })
+        queryClient.invalidateQueries({ queryKey: getGetStacksDriftQueryKey() })
         toast.success("Saved")
       },
       onError: () => toast.error("Failed to save"),
@@ -35,8 +37,10 @@ export function StackFiles({ stackName }: { stackName: string }) {
 
   const createDotEnvMutation = usePostStacksNameEnv({
     mutation: {
-      onSuccess: () =>
-        queryClient.invalidateQueries({ queryKey: getGetStacksNameFilesQueryKey(stackName) }),
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: getGetStacksNameFilesQueryKey(stackName) })
+        queryClient.invalidateQueries({ queryKey: getGetStacksDriftQueryKey() })
+      },
     },
   })
 

@@ -394,6 +394,24 @@ func TestStackRename(t *testing.T) {
 	}
 }
 
+func TestStacksDrift(t *testing.T) {
+	srv, _ := newTestServer(t)
+	h := srv.Handler()
+
+	if rr := doJSON(t, h, http.MethodGet, "/api/stacks/drift", nil, nil); rr.Code != http.StatusUnauthorized {
+		t.Fatalf("drift without auth: %d", rr.Code)
+	}
+
+	cookies := signInAsAdmin(t, h)
+	rr := doJSON(t, h, http.MethodGet, "/api/stacks/drift", nil, cookies)
+	if rr.Code != http.StatusOK {
+		t.Fatalf("drift: %d %s", rr.Code, rr.Body.String())
+	}
+	if strings.TrimSpace(rr.Body.String()) != "{}" {
+		t.Fatalf("empty stacks dir should return empty map, got: %s", rr.Body.String())
+	}
+}
+
 func TestStackStreamGated(t *testing.T) {
 	srv, _ := newTestServer(t)
 	h := srv.Handler()

@@ -26,9 +26,11 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from "#/components/ui/tooltip"
 import {
   getGetImagesStaleQueryKey,
+  getGetStacksDriftQueryKey,
   getGetStacksQueryKey,
   getGetStacksUpdatesQueryKey,
   useGetStacks,
+  useGetStacksDrift,
   useGetStacksUpdates,
   usePostStackActionDown,
   usePostStackActionPull,
@@ -48,6 +50,7 @@ function StackActions({ name, updateAvailable }: { name: string; updateAvailable
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: getGetStacksQueryKey() })
     queryClient.invalidateQueries({ queryKey: getGetStacksUpdatesQueryKey() })
+    queryClient.invalidateQueries({ queryKey: getGetStacksDriftQueryKey() })
     queryClient.invalidateQueries({ queryKey: getGetImagesStaleQueryKey() })
   }
 
@@ -166,6 +169,9 @@ function Home() {
   const updatesQuery = useGetStacksUpdates({
     query: { refetchInterval: 60_000, staleTime: 60_000, retry: 1 },
   })
+  const driftQuery = useGetStacksDrift({
+    query: { refetchInterval: 30_000, staleTime: 30_000, retry: 1 },
+  })
 
   const columns: ColumnDef<DataTableFeatures, Stack>[] = [
     {
@@ -177,6 +183,14 @@ function Home() {
           {row.getValue("name")}
           {updatesQuery.data?.[row.original.name] === "outdated" && (
             <Badge variant="warning">Update</Badge>
+          )}
+          {driftQuery.data?.[row.original.name] === "outdated" && (
+            <Tooltip>
+              <TooltipTrigger render={<Badge variant="warning">Drift</Badge>} />
+              <TooltipContent>
+                Compose file or .env changed since the containers were created
+              </TooltipContent>
+            </Tooltip>
           )}
         </span>
       ),

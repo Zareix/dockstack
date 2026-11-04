@@ -1,0 +1,35 @@
+---
+title: Configuration drift detection
+---
+
+Dockstack compares the Compose configuration on disk with the containers that are actually running. When they no longer match, the stack list and the stack page show a **Drift** badge.
+
+## What is detected
+
+Dockstack computes the Compose configuration hash from the current `compose.yaml` and `.env`:
+
+```sh
+docker compose config --hash='*'
+```
+
+It then compares it with the `com.docker.compose.config-hash` label stored on each container when it was created. The hash covers the resolved service definition: image tag, command, environment (including variables interpolated from `.env` and, with recent Compose versions, service `env_file` contents), ports, volumes, labels, networks, and so on. Any change to those values marks the stack as **outdated**.
+
+The check runs on every poll (30 seconds) with no server-side cache. One-off containers (`docker compose run`) and services that no longer exist in the Compose file are ignored.
+
+## Applying the new configuration
+
+Click **Deploy** / **Start** in the stack page to run `docker compose up -d --remove-orphans --build`, which recreates only the containers whose configuration changed. The badge disappears once the containers match the file again.
+
+## What is not detected
+
+- **New image digest under the same tag** — that is what [image update detection](/en/docs/dockstack/features/image-updates) covers. A drift badge does not mean the image is outdated.
+- **Changes to a `build:` context or Dockerfile** — the configuration hash does not include the built image content. Rebuild with `docker compose up -d --build`.
+- **Contents of bind-mounted files and volumes** — only the Compose model is hashed, not the data those paths point to.
+
+## Unknown status
+
+A stack is reported as unknown, and shows no badge, when:
+
+- it has no containers (never started, or brought `down`);
+- no container matches a service in the Compose file;
+- the Compose file is missing, invalid, or `docker compose config` fails or times out (10 seconds).

@@ -14,6 +14,7 @@ Dockstack est une interface web auto-hébergée pour gérer vos stacks Docker Co
 - **Éditeur intégré** — modifiez les fichiers compose directement dans l'interface avec validation YAML
 - **Redéploiement par webhook** — déclenchez un pull + redémarrage de toutes les stacks en cours d'exécution depuis une CI ou un hook Git
 - **Détection des mises à jour d'images** — badge par stack quand un digest d'image plus récent est disponible, avec mise à jour en un clic et en streaming
+- **Détection de dérive** — badge par stack quand le fichier compose ou le `.env` ne correspond plus aux conteneurs en cours d'exécution
 - **Connexion OIDC / OAuth** — n'importe quel fournisseur OpenID Connect (Pocket ID, Authentik, etc.), plus les passkeys
 - **Non-intrusif** — appelle le socket Docker ou de simples commandes `docker compose` en coulisses ; entièrement compatible avec une utilisation manuelle en CLI, **aucun lock-in**
 

@@ -142,3 +142,48 @@ body,
 .monaco-editor > .overflow-guard {
   @apply rounded-lg;
 }
+
+.pulse-button {
+  position: relative;
+}
+
+.pulse-button::before,
+.pulse-button::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgb(249 115 22 / 0.8);
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  animation: pulse-ring 2s cubic-bezier(0.2, 0.6, 0.4, 1) infinite;
+}
+
+.pulse-button::after {
+  animation-delay: 1s;
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.75;
+  }
+  70% {
+    opacity: 0.2;
+  }
+  100% {
+    transform: scale(1.1, 1.35);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pulse-button::before {
+    animation: none;
+    opacity: 0.5;
+    transform: scale(1.06, 1.18);
+  }
+  .pulse-button::after {
+    display: none;
+  }
+}
