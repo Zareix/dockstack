@@ -1,7 +1,9 @@
 import {
   ArrowCircleUpIcon,
   DownloadIcon,
+  DotsThreeIcon,
   PauseIcon,
+  PencilSimpleIcon,
   PlayIcon,
   ArrowsClockwiseIcon,
   SquareIcon,
@@ -9,7 +11,7 @@ import {
 } from "@phosphor-icons/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { ClientOnly, createFileRoute, useRouter } from "@tanstack/react-router"
-import { useCallback, useEffect } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { toast } from "sonner"
 import * as v from "valibot"
 
@@ -29,10 +31,16 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "#/components/ui/alert-dialog"
 import { Badge } from "#/components/ui/badge"
 import { Button } from "#/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "#/components/ui/dropdown-menu"
 import { Spinner } from "#/components/ui/spinner.tsx"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/components/ui/tabs"
 import {
@@ -123,6 +131,11 @@ function StackDetails({ name }: { name: string }) {
     query: { refetchInterval: 60_000, staleTime: 60_000, retry: 1 },
   })
   const updateAvailable = updatesQuery.data?.[name] === "outdated"
+  const [pendingAction, setPendingAction] = useState<"pull" | "restart" | "down" | null>(null)
+  const [destroyOpen, setDestroyOpen] = useState(false)
+  const isRunning = statusQuery.data
+    ? !["stopped", "down", "missing", "unknown"].includes(statusQuery.data)
+    : false
 
   const invalidateStatus = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: getGetStacksNameQueryKey(name) })
@@ -154,21 +167,117 @@ function StackDetails({ name }: { name: string }) {
       <header className="items-center gap-2 md:flex">
         <h2 className="flex items-center gap-2 text-2xl font-bold">
           <span>{name}</span>
+          <RenameStackDialog
+            stackName={name}
+            trigger={
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-7 text-muted-foreground"
+                aria-label="Rename stack"
+                title="Rename stack"
+              >
+                <PencilSimpleIcon className="size-4" />
+              </Button>
+            }
+          />
           {statusQuery.data && <StatusBadge status={statusQuery.data} />}
           {updateAvailable && <Badge variant="warning">Update available</Badge>}
           <StackServiceLinks stackName={name} />
         </h2>
 
         <div className="mt-4 ml-auto flex flex-wrap items-center gap-2 md:mt-0">
-          <AlertDialog>
-            <AlertDialogTrigger
+          <StackActionDialog
+            title={isRunning ? `Deploying ${name}` : `Starting ${name}`}
+            action={streamStackAction(name, "up")}
+            onDone={invalidateStatus}
+          >
+            <Button variant={updateAvailable ? "outline" : "default"}>
+              <PlayIcon data-icon="inline-start" />
+              {isRunning ? "Deploy" : "Start"}
+            </Button>
+          </StackActionDialog>
+
+          {isRunning && (
+            <StackActionDialog
+              title={`Stopping ${name}`}
+              action={streamStackAction(name, "stop")}
+              onDone={invalidateStatus}
+            >
+              <Button variant="outline">
+                <PauseIcon data-icon="inline-start" />
+                Stop
+              </Button>
+            </StackActionDialog>
+          )}
+
+          {updateAvailable && (
+            <StackActionDialog
+              title={`Updating ${name}`}
+              action={streamStackAction(name, "update")}
+              onDone={invalidateStatus}
+            >
+              <Button>
+                <ArrowCircleUpIcon data-icon="inline-start" />
+                Update
+              </Button>
+            </StackActionDialog>
+          )}
+
+          <DropdownMenu>
+            <DropdownMenuTrigger
               render={
-                <Button variant="destructive" disabled={destroyMutation.isPending}>
-                  <TrashIcon data-icon="inline-start" />
-                  {destroyMutation.isPending ? "Destroying..." : "Destroy"}
+                <Button
+                  variant="outline"
+                  size="icon"
+                  aria-label="More actions"
+                  title="More actions"
+                >
+                  <DotsThreeIcon className="size-4" />
                 </Button>
               }
             />
+            <DropdownMenuContent align="end" className="min-w-44">
+              <DropdownMenuItem onClick={() => setPendingAction("pull")}>
+                <DownloadIcon />
+                Pull
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setPendingAction("restart")}>
+                <ArrowsClockwiseIcon />
+                Restart
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setPendingAction("down")}>
+                <SquareIcon />
+                Down
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem variant="destructive" onClick={() => setDestroyOpen(true)}>
+                <TrashIcon />
+                Destroy
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {(["pull", "restart", "down"] as const).map((action) => (
+            <StackActionDialog
+              key={action}
+              title={
+                action === "pull"
+                  ? `Pulling ${name}`
+                  : action === "restart"
+                    ? `Restarting ${name}`
+                    : `Taking down ${name}`
+              }
+              action={streamStackAction(name, action)}
+              onDone={invalidateStatus}
+              open={pendingAction === action}
+              onOpenChange={(open) => {
+                if (!open) setPendingAction(null)
+              }}
+            />
+          ))}
+
+          <AlertDialog open={destroyOpen} onOpenChange={setDestroyOpen}>
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>Destroy "{name}"?</AlertDialogTitle>
@@ -192,74 +301,6 @@ function StackDetails({ name }: { name: string }) {
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
-
-          <RenameStackDialog stackName={name} />
-
-          <StackActionDialog
-            title={`Pulling ${name}`}
-            action={streamStackAction(name, "pull")}
-            onDone={invalidateStatus}
-          >
-            <Button variant="outline">
-              <DownloadIcon data-icon="inline-start" />
-              Pull
-            </Button>
-          </StackActionDialog>
-
-          <StackActionDialog
-            title={`Updating ${name}`}
-            action={streamStackAction(name, "update")}
-            onDone={invalidateStatus}
-          >
-            <Button variant={updateAvailable ? "default" : "outline"}>
-              <ArrowCircleUpIcon data-icon="inline-start" />
-              Update
-            </Button>
-          </StackActionDialog>
-
-          <StackActionDialog
-            title={`Restarting ${name}`}
-            action={streamStackAction(name, "restart")}
-            onDone={invalidateStatus}
-          >
-            <Button variant="outline">
-              <ArrowsClockwiseIcon data-icon="inline-start" />
-              Restart
-            </Button>
-          </StackActionDialog>
-
-          <StackActionDialog
-            title={`Stopping ${name}`}
-            action={streamStackAction(name, "stop")}
-            onDone={invalidateStatus}
-          >
-            <Button variant="outline">
-              <PauseIcon data-icon="inline-start" />
-              Stop
-            </Button>
-          </StackActionDialog>
-
-          <StackActionDialog
-            title={`Taking down ${name}`}
-            action={streamStackAction(name, "down")}
-            onDone={invalidateStatus}
-          >
-            <Button variant="outline">
-              <SquareIcon data-icon="inline-start" />
-              Down
-            </Button>
-          </StackActionDialog>
-
-          <StackActionDialog
-            title={`Starting ${name}`}
-            action={streamStackAction(name, "up")}
-            onDone={invalidateStatus}
-          >
-            <Button>
-              <PlayIcon data-icon="inline-start" />
-              Up
-            </Button>
-          </StackActionDialog>
         </div>
       </header>
 

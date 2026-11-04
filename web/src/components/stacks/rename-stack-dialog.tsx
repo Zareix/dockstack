@@ -6,11 +6,7 @@ import { useState } from "react"
 import { toast } from "sonner"
 import * as v from "valibot"
 
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from "#/components/ui/alert"
+import { Alert, AlertDescription, AlertTitle } from "#/components/ui/alert"
 import { Button } from "#/components/ui/button"
 import {
   Dialog,
@@ -23,11 +19,7 @@ import {
 import { FieldError } from "#/components/ui/field"
 import { Input } from "#/components/ui/input"
 import { Label } from "#/components/ui/label"
-import {
-  getGetStacksQueryKey,
-  getStacksName,
-  usePostStacksNameRename,
-} from "#/lib/api/generated"
+import { getGetStacksQueryKey, getStacksName, usePostStacksNameRename } from "#/lib/api/generated"
 
 const schema = v.object({
   name: v.pipe(
@@ -37,7 +29,13 @@ const schema = v.object({
   ),
 })
 
-export function RenameStackDialog({ stackName }: { stackName: string }) {
+export function RenameStackDialog({
+  stackName,
+  trigger,
+}: {
+  stackName: string
+  trigger?: React.ReactElement
+}) {
   const [open, setOpen] = useState(false)
   const navigate = useNavigate()
   const queryClient = useQueryClient()
@@ -70,10 +68,12 @@ export function RenameStackDialog({ stackName }: { stackName: string }) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
         render={
-          <Button variant="outline">
-            <PencilSimpleIcon data-icon="inline-start" />
-            Rename
-          </Button>
+          trigger ?? (
+            <Button variant="outline">
+              <PencilSimpleIcon data-icon="inline-start" />
+              Rename
+            </Button>
+          )
         }
       />
       <DialogContent>

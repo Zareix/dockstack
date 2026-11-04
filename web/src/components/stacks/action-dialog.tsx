@@ -18,11 +18,22 @@ type Props = {
   title: string
   action: () => Promise<AsyncIterable<string>>
   onDone?: () => void
-  children: React.ReactElement
+  children?: React.ReactElement
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
 }
 
-export function StackActionDialog({ title, action, onDone, children }: Props) {
-  const [open, setOpen] = useState(false)
+export function StackActionDialog({
+  title,
+  action,
+  onDone,
+  children,
+  open: controlledOpen,
+  onOpenChange,
+}: Props) {
+  const [internalOpen, setInternalOpen] = useState(false)
+  const open = controlledOpen ?? internalOpen
+  const setOpen = onOpenChange ?? setInternalOpen
   const [lines, setLines] = useState<string[]>([])
   const [running, setRunning] = useState(false)
   const stopRef = useRef<(() => void) | null>(null)
@@ -71,7 +82,7 @@ export function StackActionDialog({ title, action, onDone, children }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={children} />
+      {children ? <DialogTrigger render={children} /> : null}
       <DialogContent className="md:max-w-3xl">
         <DialogHeader>
           <DialogTitle>
