@@ -21,9 +21,8 @@ func (c *Client) ListContainers(ctx context.Context, all bool, project string) (
 }
 
 func (c *Client) ListRunningContainers(ctx context.Context, project string) ([]container.Summary, error) {
-	opts := container.ListOptions{}
+	opts := container.ListOptions{Filters: filters.NewArgs()}
 	if project != "" {
-		opts.Filters = filters.NewArgs()
 		opts.Filters.Add("label", "com.docker.compose.project="+project)
 	}
 	opts.Filters.Add("status", "running")

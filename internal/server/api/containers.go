@@ -21,6 +21,15 @@ func (d *Deps) handleContainersList(ctx context.Context, _ *struct{}) (*web.List
 	return &web.ListOutput[dockerapi.ContainerInfo]{Body: containers}, nil
 }
 
+func (d *Deps) handleContainersStats(ctx context.Context, _ *struct{}) (*web.ListOutput[dockerapi.ContainerStats], error) {
+	stats, err := d.Docker.ListRunningContainerStats(ctx)
+	if err != nil {
+		web.LogError(web.RequestFrom(ctx), err)
+		return nil, huma.Error500InternalServerError("failed to list container stats")
+	}
+	return &web.ListOutput[dockerapi.ContainerStats]{Body: stats}, nil
+}
+
 func (d *Deps) handleContainersPrune(ctx context.Context, _ *struct{}) (*web.DataOutput[dockerapi.PruneResult], error) {
 	res, err := d.Docker.ContainerPrune(ctx)
 	if err != nil {
@@ -71,6 +80,7 @@ func (d *Deps) handleContainerRemove(ctx context.Context, in *idInput) (*web.OKR
 
 func (d *Deps) registerContainers(api huma.API) {
 	huma.Get(api, "/api/containers", d.handleContainersList, d.AuthMW)
+	huma.Get(api, "/api/containers/stats", d.handleContainersStats, d.AuthMW)
 	huma.Post(api, "/api/containers/prune", d.handleContainersPrune, d.AuthMW)
 	huma.Post(api, "/api/containers/{id}/start", d.containerAction("start"), d.AuthMW)
 	huma.Post(api, "/api/containers/{id}/stop", d.containerAction("stop"), d.AuthMW)

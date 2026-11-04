@@ -2,14 +2,17 @@ package server
 
 import (
 	"bytes"
+	"context"
 	"database/sql"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
+	"github.com/coder/websocket"
 	_ "modernc.org/sqlite"
 
 	"github.com/zareix/dockstack/internal/auth"
@@ -246,6 +249,46 @@ func TestAPIKeyAuth(t *testing.T) {
 	h.ServeHTTP(rr, req)
 	if rr.Code != http.StatusUnauthorized {
 		t.Fatalf("expected 401 without key, got %d", rr.Code)
+	}
+}
+
+func TestWebSocketAPIKeyAuth(t *testing.T) {
+	srv, _ := newTestServer(t)
+	h := srv.Handler()
+	cookies := signInAsAdmin(t, h)
+
+	rr := doJSON(t, h, http.MethodPost, "/api/auth/api-keys", map[string]string{"name": "ws"}, cookies)
+	if rr.Code != http.StatusOK {
+		t.Fatalf("create key: %d %s", rr.Code, rr.Body.String())
+	}
+	var created struct {
+		Key string `json:"key"`
+	}
+	if err := json.Unmarshal(rr.Body.Bytes(), &created); err != nil || created.Key == "" {
+		t.Fatalf("parse key: %v %s", err, rr.Body.String())
+	}
+
+	ts := httptest.NewServer(h)
+	defer ts.Close()
+	wsURL := "ws" + strings.TrimPrefix(ts.URL, "http")
+
+	ctx := context.Background()
+	if _, resp, err := websocket.Dial(ctx, wsURL+"/api/ws/logs", nil); err == nil || resp == nil || resp.StatusCode != http.StatusUnauthorized {
+		t.Fatalf("ws without auth: err=%v status=%v", err, resp)
+	}
+
+	conn, resp, err := websocket.Dial(ctx, wsURL+"/api/ws/logs?token="+created.Key, nil)
+	if err != nil {
+		t.Fatalf("ws with api key: %v (status %v)", err, resp)
+	}
+	_ = conn.Close(websocket.StatusNormalClosure, "")
+}
+
+func TestContainerStatsAuth(t *testing.T) {
+	srv, _ := newTestServer(t)
+	rr := doJSON(t, srv.Handler(), http.MethodGet, "/api/containers/stats", nil, nil)
+	if rr.Code != http.StatusUnauthorized {
+		t.Fatalf("container stats without auth: %d", rr.Code)
 	}
 }
 

@@ -87,6 +87,19 @@ type NetworkInfo struct {
 	Status NetworkStatus `json:"status"`
 }
 
+type ContainerStats struct {
+	ContainerID   string  `json:"containerId"`
+	CPUPercent    float64 `json:"cpuPercent"`
+	MemoryUsed    uint64  `json:"memoryUsed"`
+	MemoryLimit   uint64  `json:"memoryLimit"`
+	MemoryPercent float64 `json:"memoryPercent"`
+	NetworkRx     uint64  `json:"networkRx"`
+	NetworkTx     uint64  `json:"networkTx"`
+	BlockRead     uint64  `json:"blockRead"`
+	BlockWrite    uint64  `json:"blockWrite"`
+	PIDs          uint64  `json:"pids"`
+}
+
 type LogEntry struct {
 	ContainerName string `json:"containerName"`
 	Message       string `json:"message"`

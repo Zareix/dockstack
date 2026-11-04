@@ -30,6 +30,7 @@ import type {
   ChangeEmailRequest,
   ChangePasswordRequest,
   ContainerInfo,
+  ContainerStats,
   CreateAPIKeyOutputBody,
   CreateAPIKeyRequest,
   ForgotPasswordRequest,
@@ -2254,7 +2255,107 @@ export const usePostContainersPrune = <TError = ErrorType<ApiError>,
       > => {
       return useMutation(getPostContainersPruneMutationOptions(options), queryClient);
     }
-    export const getDeleteContainersIdUrl = (id: string,) => {
+    export const getGetContainersStatsUrl = () => {
+
+
+
+
+  return `/api/containers/stats`
+}
+
+/**
+ * @summary GET /api/containers/stats
+ */
+export const getContainersStats = async ( options?: Parameters<typeof orvalInstance>[1]): Promise<ContainerStats[] | null> => {
+
+  return orvalInstance<ContainerStats[] | null>(getGetContainersStatsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetContainersStatsQueryKey = () => {
+    return [
+    `/api/containers/stats`
+    ] as const;
+    }
+
+
+export const getGetContainersStatsQueryOptions = <TData = Awaited<ReturnType<typeof getContainersStats>>, TError = ErrorType<ApiError>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getContainersStats>>, TError, TData>>, request?: SecondParameter<typeof orvalInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetContainersStatsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getContainersStats>>> = ({ signal }) => getContainersStats({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getContainersStats>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetContainersStatsQueryResult = NonNullable<Awaited<ReturnType<typeof getContainersStats>>>
+export type GetContainersStatsQueryError = ErrorType<ApiError>
+
+
+export function useGetContainersStats<TData = Awaited<ReturnType<typeof getContainersStats>>, TError = ErrorType<ApiError>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getContainersStats>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getContainersStats>>,
+          TError,
+          Awaited<ReturnType<typeof getContainersStats>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof orvalInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetContainersStats<TData = Awaited<ReturnType<typeof getContainersStats>>, TError = ErrorType<ApiError>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getContainersStats>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getContainersStats>>,
+          TError,
+          Awaited<ReturnType<typeof getContainersStats>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof orvalInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetContainersStats<TData = Awaited<ReturnType<typeof getContainersStats>>, TError = ErrorType<ApiError>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getContainersStats>>, TError, TData>>, request?: SecondParameter<typeof orvalInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary GET /api/containers/stats
+ */
+
+export function useGetContainersStats<TData = Awaited<ReturnType<typeof getContainersStats>>, TError = ErrorType<ApiError>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getContainersStats>>, TError, TData>>, request?: SecondParameter<typeof orvalInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetContainersStatsQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getDeleteContainersIdUrl = (id: string,) => {
 
 
 

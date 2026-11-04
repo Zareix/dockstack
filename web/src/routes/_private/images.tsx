@@ -13,14 +13,10 @@ import {
 import { Spinner } from "#/components/ui/spinner"
 import { useGetImages, useGetImagesStale } from "#/lib/api/generated"
 import type { GetImagesStale200, ImageInfo } from "#/lib/api/generated/model"
+import { formatSize } from "#/lib/utils"
 export const Route = createFileRoute("/_private/images")({
   component: ImagesPage,
 })
-
-function formatSize(bytes: number): string {
-  if (bytes >= 1e9) return `${(bytes / 1e9).toFixed(1)} GB`
-  return `${(bytes / 1e6).toFixed(0)} MB`
-}
 
 function StaleCell({
   imageId,

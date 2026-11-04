@@ -12,6 +12,7 @@ export * from './authUserResponse.ts';
 export * from './changeEmailRequest.ts';
 export * from './changePasswordRequest.ts';
 export * from './containerInfo.ts';
+export * from './containerStats.ts';
 export * from './createAPIKeyOutputBody.ts';
 export * from './createAPIKeyRequest.ts';
 export * from './forgotPasswordRequest.ts';

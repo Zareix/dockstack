@@ -2,7 +2,9 @@ import { ArrowSquareOutIcon } from "@phosphor-icons/react/dist/ssr/ArrowSquareOu
 import { Link } from "@tanstack/react-router"
 import type { ColumnDef } from "@tanstack/react-table"
 
-import type { ContainerInfo } from "#/lib/api/generated/model"
+import { useGetContainersStats } from "#/lib/api/generated"
+import type { ContainerInfo, ContainerStats } from "#/lib/api/generated/model"
+import { formatSize } from "#/lib/utils"
 
 import { StatusBadge } from "../status-badge"
 import {
@@ -20,6 +22,11 @@ type Props = {
 }
 
 export const ContainersTable = ({ data, isLoading, showStack = true }: Props) => {
+  const statsQuery = useGetContainersStats({ query: { refetchInterval: 5000 } })
+  const statsMap = new Map<string, ContainerStats>(
+    (statsQuery.data ?? []).map((s) => [s.containerId, s]),
+  )
+
   const columns: (ColumnDef<DataTableFeatures, ContainerInfo> | false)[] = [
     !showStack && {
       accessorKey: "serviceName",
@@ -80,6 +87,24 @@ export const ContainersTable = ({ data, isLoading, showStack = true }: Props) =>
       cell: ({ row }) => (
         <span className="text-sm text-muted-foreground">{row.getValue("uptime")}</span>
       ),
+    },
+    {
+      id: "usage",
+      header: "Usage",
+      cell: ({ row }) => {
+        const stats = statsMap.get(row.original.id)
+        if (!stats) return <span className="text-sm text-muted-foreground">-</span>
+        return (
+          <span
+            className="font-mono text-sm whitespace-nowrap"
+            title={`Net Rx ${formatSize(stats.networkRx)} / Tx ${formatSize(stats.networkTx)} · Disk R ${formatSize(stats.blockRead)} / W ${formatSize(stats.blockWrite)} · ${stats.pids} PIDs`}
+          >
+            {stats.cpuPercent.toFixed(2)}% · {formatSize(stats.memoryUsed)}
+            {stats.memoryLimit > 0 ? ` / ${formatSize(stats.memoryLimit)}` : ""}
+          </span>
+        )
+      },
+      enableSorting: false,
     },
     {
       accessorKey: "ports",
