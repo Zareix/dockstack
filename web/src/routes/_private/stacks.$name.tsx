@@ -1,4 +1,5 @@
 import {
+  ArrowCircleUpIcon,
   DownloadIcon,
   PauseIcon,
   PlayIcon,
@@ -30,16 +31,20 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "#/components/ui/alert-dialog"
+import { Badge } from "#/components/ui/badge"
 import { Button } from "#/components/ui/button"
 import { Spinner } from "#/components/ui/spinner.tsx"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/components/ui/tabs"
 import {
+  getGetImagesStaleQueryKey,
   getGetStacksNameContainersQueryKey,
   getGetStacksNameQueryKey,
   getGetStacksQueryKey,
+  getGetStacksUpdatesQueryKey,
   getStacksName,
   useDeleteStacksName,
   useGetStacksName,
+  useGetStacksUpdates,
   usePostStacks,
 } from "#/lib/api/generated"
 import { streamStackAction } from "#/lib/api/sse"
@@ -114,10 +119,17 @@ function StackDetails({ name }: { name: string }) {
   const statusQuery = useGetStacksName(name, {
     query: { refetchInterval: 1000, select: (data) => data.status },
   })
+  const updatesQuery = useGetStacksUpdates({
+    query: { refetchInterval: 60_000, staleTime: 60_000, retry: 1 },
+  })
+  const updateAvailable = updatesQuery.data?.[name] === "outdated"
 
   const invalidateStatus = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: getGetStacksNameQueryKey(name) })
     queryClient.invalidateQueries({ queryKey: getGetStacksNameContainersQueryKey(name) })
+    queryClient.invalidateQueries({ queryKey: getGetStacksQueryKey() })
+    queryClient.invalidateQueries({ queryKey: getGetStacksUpdatesQueryKey() })
+    queryClient.invalidateQueries({ queryKey: getGetImagesStaleQueryKey() })
   }, [queryClient, name])
 
   const destroyMutation = useDeleteStacksName({
@@ -143,6 +155,7 @@ function StackDetails({ name }: { name: string }) {
         <h2 className="flex items-center gap-2 text-2xl font-bold">
           <span>{name}</span>
           {statusQuery.data && <StatusBadge status={statusQuery.data} />}
+          {updateAvailable && <Badge variant="warning">Update available</Badge>}
           <StackServiceLinks stackName={name} />
         </h2>
 
@@ -190,6 +203,17 @@ function StackDetails({ name }: { name: string }) {
             <Button variant="outline">
               <DownloadIcon data-icon="inline-start" />
               Pull
+            </Button>
+          </StackActionDialog>
+
+          <StackActionDialog
+            title={`Updating ${name}`}
+            action={streamStackAction(name, "update")}
+            onDone={invalidateStatus}
+          >
+            <Button variant={updateAvailable ? "default" : "outline"}>
+              <ArrowCircleUpIcon data-icon="inline-start" />
+              Update
             </Button>
           </StackActionDialog>
 

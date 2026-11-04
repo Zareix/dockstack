@@ -1,6 +1,6 @@
 {
   "title": "Fonctionnalités",
-  "pages": ["auto-detect-urls", "api", "wont-have"],
+  "pages": ["auto-detect-urls", "image-updates", "api", "wont-have"],
   "icon": "Function",
   "defaultOpen": true
 }

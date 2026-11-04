@@ -1,0 +1,24 @@
+---
+title: Image update detection
+---
+
+Dockstack compares the image each container runs with the current digest of its tag in the registry. When a newer image is available, the stack list and the stack page show an **Update** badge.
+
+The check is cached server-side for one hour per tag, so registry rate limits are not hammered. The Images page shows the same status for every local image.
+
+## Updating a stack
+
+Clicking **Update** streams two commands:
+
+1. `docker compose pull --ignore-buildable` — pulls services that use a registry image and skips services that have a `build:` section.
+2. `docker compose up -d --remove-orphans` — recreates only the containers whose image changed.
+
+Updates are per stack; there is no global "update all" action.
+
+## Limitations
+
+- Locally built images are ignored by the pull and reported as unknown.
+- Images without a tag or without a registry digest are reported as unknown.
+- Stacks with no containers (never started or brought `down`) have no badge: the deployed image is unknown.
+- Private registries use the credentials in `DOCKER_CONFIG_DIR_PATH/config.json`.
+- A stack still running an old image after a manual `Pull` keeps its badge until it is recreated.

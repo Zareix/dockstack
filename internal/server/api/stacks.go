@@ -24,18 +24,28 @@ func isWithinStacksDir(base, target string) bool {
 	return target == base || strings.HasPrefix(target, base+string(os.PathSeparator))
 }
 
-var stackActions = []struct {
+type stackAction struct {
 	path string
-	args []string
-}{
-	{"up", []string{"up", "-d", "--remove-orphans", "--build"}},
-	{"stop", []string{"stop"}},
-	{"down", []string{"down"}},
-	{"restart", []string{"restart"}},
-	{"pull", []string{"pull"}},
+	cmds [][]string
 }
 
-var upArgs = stackActions[0].args
+var upArgs = []string{"up", "-d", "--remove-orphans", "--build"}
+
+var stackActions = []stackAction{
+	{"up", [][]string{upArgs}},
+	{"stop", [][]string{{"stop"}}},
+	{"down", [][]string{{"down"}}},
+	{"restart", [][]string{{"restart"}}},
+	{"pull", [][]string{{"pull"}}},
+	{"update", [][]string{
+		{"pull", "--ignore-buildable"},
+		{"up", "-d", "--remove-orphans"},
+	}},
+}
+
+func (a stackAction) invalidatesDigests() bool {
+	return a.path == "pull" || a.path == "update"
+}
 
 type nameInput struct {
 	Name string `path:"name"`
@@ -55,6 +65,15 @@ func (d *Deps) handleStacksList(ctx context.Context, _ *struct{}) (*web.ListOutp
 		return nil, huma.Error500InternalServerError("failed to list stacks")
 	}
 	return &web.ListOutput[dockerapi.Stack]{Body: stacks}, nil
+}
+
+func (d *Deps) handleStackUpdates(ctx context.Context, _ *struct{}) (*web.MapOutput[dockerapi.StaleStatus], error) {
+	updates, err := d.Stacks.ListStackUpdates(ctx)
+	if err != nil {
+		web.LogError(web.RequestFrom(ctx), err)
+		return nil, huma.Error500InternalServerError("failed to check stack updates")
+	}
+	return &web.MapOutput[dockerapi.StaleStatus]{Body: updates}, nil
 }
 
 type stackGetResponse struct {
@@ -295,27 +314,26 @@ func (d *Deps) handleStacksRedeploy(ctx context.Context, _ *struct{}) (*web.List
 	return &web.ListOutput[dockerapi.RedeployResult]{Body: results}, nil
 }
 
-func (d *Deps) handleStackAction(ctx context.Context, in *nameInput, args []string) (*web.OKResponse, error) {
+func (d *Deps) handleStackAction(ctx context.Context, in *nameInput, action stackAction) (*web.OKResponse, error) {
 	if err := validateStackName(in.Name); err != nil {
 		return nil, err
 	}
-	if err := d.Stacks.RunCompose(ctx, in.Name, args...); err != nil {
-		web.LogError(web.RequestFrom(ctx), err)
-		return nil, huma.Error500InternalServerError("compose command failed")
+	for _, args := range action.cmds {
+		if err := d.Stacks.RunCompose(ctx, in.Name, args...); err != nil {
+			web.LogError(web.RequestFrom(ctx), err)
+			return nil, huma.Error500InternalServerError("compose command failed")
+		}
+	}
+	if action.invalidatesDigests() {
+		d.Docker.InvalidateRemoteDigests()
 	}
 	return web.OK(), nil
 }
 
-func (d *Deps) handleStackActionStream(w http.ResponseWriter, r *http.Request, args []string) {
+func (d *Deps) handleStackActionStream(w http.ResponseWriter, r *http.Request, action stackAction) {
 	name := chi.URLParam(r, "name")
 	if !stackNameRe.MatchString(name) {
 		web.WriteError(w, http.StatusBadRequest, "invalid stack name")
-		return
-	}
-	lines, waitErr, err := d.Stacks.StreamCompose(r.Context(), name, args...)
-	if err != nil {
-		web.LogError(r, err)
-		web.WriteError(w, http.StatusInternalServerError, "failed to start compose command")
 		return
 	}
 	flusher, ok := w.(http.Flusher)
@@ -323,25 +341,47 @@ func (d *Deps) handleStackActionStream(w http.ResponseWriter, r *http.Request, a
 		web.WriteError(w, http.StatusInternalServerError, "streaming unsupported")
 		return
 	}
-	w.Header().Set("Content-Type", "text/event-stream")
-	w.Header().Set("Cache-Control", "no-cache")
-	w.Header().Set("Connection", "keep-alive")
-	for line := range lines {
-		escaped := strings.ReplaceAll(line, "\n", "\\n")
-		if _, err := w.Write([]byte("data: " + escaped + "\n\n")); err != nil {
+	headersSet := false
+	for _, args := range action.cmds {
+		lines, waitErr, err := d.Stacks.StreamCompose(r.Context(), name, args...)
+		if err != nil {
+			web.LogError(r, err)
+			if !headersSet {
+				web.WriteError(w, http.StatusInternalServerError, "failed to start compose command")
+				return
+			}
+			w.Write([]byte("data: Error: failed to start compose command: " + err.Error() + "\n\n"))
+			flusher.Flush()
 			return
 		}
-		flusher.Flush()
+		if !headersSet {
+			w.Header().Set("Content-Type", "text/event-stream")
+			w.Header().Set("Cache-Control", "no-cache")
+			w.Header().Set("Connection", "keep-alive")
+			headersSet = true
+		}
+		for line := range lines {
+			escaped := strings.ReplaceAll(line, "\n", "\\n")
+			if _, err := w.Write([]byte("data: " + escaped + "\n\n")); err != nil {
+				return
+			}
+			flusher.Flush()
+		}
+		if err := <-waitErr; err != nil {
+			w.Write([]byte("data: Error: compose command failed: " + err.Error() + "\n\n"))
+			flusher.Flush()
+			return
+		}
 	}
-	if err := <-waitErr; err != nil {
-		w.Write([]byte("data: Error: compose command failed: " + err.Error() + "\n\n"))
-		flusher.Flush()
+	if action.invalidatesDigests() {
+		d.Docker.InvalidateRemoteDigests()
 	}
 }
 
 func (d *Deps) registerStacks(api huma.API, router chi.Router) {
 	huma.Get(api, "/api/stacks", d.handleStacksList, d.AuthMW)
 	huma.Post(api, "/api/stacks", d.handleStackCreate, d.AuthMW)
+	huma.Get(api, "/api/stacks/updates", d.handleStackUpdates, d.AuthMW)
 	huma.Get(api, "/api/stacks/{name}", d.handleStackGet, d.AuthMW)
 	huma.Get(api, "/api/stacks/{name}/containers", d.handleStackContainers, d.AuthMW)
 	huma.Get(api, "/api/stacks/{name}/files", d.handleStackFilesGet, d.AuthMW)
@@ -357,7 +397,7 @@ func (d *Deps) registerStacks(api huma.API, router chi.Router) {
 			OperationID: "post-stack-action-" + action.path,
 			Middlewares: huma.Middlewares{d.HumaRequireAuth},
 		}, func(ctx context.Context, in *nameInput) (*web.OKResponse, error) {
-			return d.handleStackAction(ctx, in, action.args)
+			return d.handleStackAction(ctx, in, action)
 		})
 	}
 	router.Group(func(gr chi.Router) {
@@ -365,7 +405,7 @@ func (d *Deps) registerStacks(api huma.API, router chi.Router) {
 		for _, a := range stackActions {
 			action := a
 			gr.Post("/api/stacks/{name}/"+action.path+"/stream", func(w http.ResponseWriter, req *http.Request) {
-				d.handleStackActionStream(w, req, action.args)
+				d.handleStackActionStream(w, req, action)
 			})
 		}
 	})

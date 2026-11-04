@@ -9,6 +9,7 @@ Self-hosted Docker Compose stack management UI. Browse, edit, start, stop, resta
 - **Stateless and local-first** — SQLite used only for auth; stack state lives in Docker itself and on your filesystem
 - **Built-in editor** — edit compose files directly in the UI with YAML validation
 - **Webhook redeploy** — `POST /api/stacks/redeploy` pulls and restarts all running services (via API key)
+- **Image update detection** — per-stack badge when a newer image digest is available, with a streamed one-click update (pull + recreate)
 - **Auth** — email/username + password, passkeys (WebAuthn), OIDC / OAuth login, API keys
 - **Maintenance** — expired WebAuthn challenges and password reset tokens are cleaned up weekly (schedule via `AUTH_CLEANUP_CRON`); optional automatic `docker system prune` via `DOCKER_SYSTEM_PRUNE_CRON`
 - **Terminal & live logs** — WebSocket-based container terminal and stack log streaming

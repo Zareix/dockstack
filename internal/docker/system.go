@@ -137,6 +137,25 @@ func (c *Client) ListImagesInfo(ctx context.Context) ([]ImageInfo, error) {
 	return out, nil
 }
 
+func digestIn(repoDigests []string, digest string) bool {
+	for _, d := range repoDigests {
+		if strings.Contains(d, digest) {
+			return true
+		}
+	}
+	return false
+}
+
+func staleFromDigest(repoDigests []string, digest string, ok bool) StaleStatus {
+	if !ok || digest == "" || len(repoDigests) == 0 {
+		return StaleUnknown
+	}
+	if digestIn(repoDigests, digest) {
+		return StaleUpToDate
+	}
+	return StaleOutdated
+}
+
 func (c *Client) CheckImagesStale(ctx context.Context) map[string]StaleStatus {
 	images, err := c.ListImagesInfo(ctx)
 	if err != nil {
@@ -153,18 +172,8 @@ func (c *Client) CheckImagesStale(ctx context.Context) map[string]StaleStatus {
 		wg.Add(1)
 		go func(img ImageInfo) {
 			defer wg.Done()
-			status := StaleUnknown
-			if digest, ok := c.RemoteDigest(ctx, img.Tags[0]); ok {
-				for _, d := range img.RepoDigests {
-					if strings.Contains(d, digest) {
-						status = StaleUpToDate
-						break
-					}
-				}
-				if status != StaleUpToDate {
-					status = StaleOutdated
-				}
-			}
+			digest, ok := c.RemoteDigestCached(ctx, img.Tags[0])
+			status := staleFromDigest(img.RepoDigests, digest, ok)
 			mu.Lock()
 			results[img.ID] = status
 			mu.Unlock()

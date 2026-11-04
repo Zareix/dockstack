@@ -21,8 +21,8 @@ func TestOpenAPISpecIncludesAllRoutes(t *testing.T) {
 	want := []string{
 		"/api/health", "/api/settings", "/api/auth/providers",
 		"/api/auth/sign-in/email", "/api/auth/session", "/api/auth/api-keys",
-		"/api/stacks", "/api/stacks/{name}", "/api/stacks/{name}/up",
-		"/api/stacks/redeploy", "/api/containers", "/api/images", "/api/volumes", "/api/networks",
+		"/api/stacks", "/api/stacks/{name}", "/api/stacks/{name}/up", "/api/stacks/{name}/update",
+		"/api/stacks/updates", "/api/stacks/redeploy", "/api/containers", "/api/images", "/api/volumes", "/api/networks",
 	}
 	for _, p := range want {
 		if _, ok := spec.Paths[p]; !ok {

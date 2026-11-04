@@ -34,7 +34,7 @@ async function* sseStream(path: string): AsyncGenerator<string, void, unknown> {
 export const streamStackAction =
   (
     stackName: string,
-    action: "up" | "stop" | "down" | "restart" | "pull",
+    action: "up" | "stop" | "down" | "restart" | "pull" | "update",
   ): (() => Promise<AsyncIterable<string>>) =>
   () =>
     Promise.resolve(sseStream(`/api/stacks/${encodeURIComponent(stackName)}/${action}/stream`))

@@ -1,0 +1,24 @@
+---
+title: Détection des mises à jour d'images
+---
+
+Dockstack compare l'image utilisée par chaque conteneur au digest courant de son tag dans le registre. Quand une image plus récente est disponible, la liste des stacks et la page de la stack affichent un badge **Update**.
+
+La vérification est mise en cache côté serveur pendant une heure par tag, pour ne pas marteler les registres. La page Images affiche le même statut pour chaque image locale.
+
+## Mettre à jour une stack
+
+Le bouton **Update** enchaîne deux commandes en streaming :
+
+1. `docker compose pull --ignore-buildable` — récupère les services qui utilisent une image de registre et ignore les services avec une section `build:`.
+2. `docker compose up -d --remove-orphans` — recrée uniquement les conteneurs dont l'image a changé.
+
+La mise à jour est propre à chaque stack ; il n'existe pas d'action globale « tout mettre à jour ».
+
+## Limites
+
+- Les images construites localement sont ignorées par le pull et signalées comme inconnues.
+- Les images sans tag ou sans digest de registre sont signalées comme inconnues.
+- Les stacks sans conteneur (jamais démarrées ou passées `down`) n'ont pas de badge : l'image déployée est inconnue.
+- Les registres privés utilisent les identifiants de `DOCKER_CONFIG_DIR_PATH/config.json`.
+- Une stack qui tourne encore sur une ancienne image après un `Pull` manuel garde son badge tant qu'elle n'est pas recréée.

@@ -1,4 +1,5 @@
 import {
+  ArrowCircleUpIcon,
   DownloadIcon,
   PauseIcon,
   PlayIcon,
@@ -10,8 +11,10 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import type { ColumnDef } from "@tanstack/react-table"
 import { toast } from "sonner"
 
+import { StackActionDialog } from "#/components/stacks/action-dialog"
 import { CreateStackButton } from "#/components/stacks/create-stack-dialog"
 import { StatusBadge } from "#/components/status-badge"
+import { Badge } from "#/components/ui/badge"
 import { Button } from "#/components/ui/button"
 import {
   DataTable,
@@ -22,8 +25,11 @@ import {
 } from "#/components/ui/data-table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "#/components/ui/tooltip"
 import {
+  getGetImagesStaleQueryKey,
   getGetStacksQueryKey,
+  getGetStacksUpdatesQueryKey,
   useGetStacks,
+  useGetStacksUpdates,
   usePostStackActionDown,
   usePostStackActionPull,
   usePostStackActionRestart,
@@ -31,14 +37,19 @@ import {
   usePostStackActionUp,
 } from "#/lib/api/generated/default/default"
 import type { Stack } from "#/lib/api/generated/model"
+import { streamStackAction } from "#/lib/api/sse"
 
 export const Route = createFileRoute("/_private/")({
   component: Home,
 })
 
-function StackActions({ name }: { name: string }) {
+function StackActions({ name, updateAvailable }: { name: string; updateAvailable: boolean }) {
   const queryClient = useQueryClient()
-  const invalidate = () => queryClient.invalidateQueries({ queryKey: getGetStacksQueryKey() })
+  const invalidate = () => {
+    queryClient.invalidateQueries({ queryKey: getGetStacksQueryKey() })
+    queryClient.invalidateQueries({ queryKey: getGetStacksUpdatesQueryKey() })
+    queryClient.invalidateQueries({ queryKey: getGetImagesStaleQueryKey() })
+  }
 
   const upMutation = usePostStackActionUp({
     mutation: {
@@ -107,6 +118,23 @@ function StackActions({ name }: { name: string }) {
 
   return (
     <div className="flex items-center justify-end gap-1">
+      {updateAvailable && (
+        <StackActionDialog
+          title={`Updating ${name}`}
+          action={streamStackAction(name, "update")}
+          onDone={invalidate}
+        >
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-8 text-orange-500"
+            title="Update"
+            aria-label="Update"
+          >
+            <ArrowCircleUpIcon className="size-4" />
+          </Button>
+        </StackActionDialog>
+      )}
       {actions.map(({ label, icon: Icon, onClick }) => (
         <Tooltip key={label}>
           <TooltipTrigger
@@ -135,13 +163,23 @@ function Home() {
   const stacksQuery = useGetStacks({
     query: { refetchInterval: 5000 },
   })
+  const updatesQuery = useGetStacksUpdates({
+    query: { refetchInterval: 60_000, staleTime: 60_000, retry: 1 },
+  })
 
   const columns: ColumnDef<DataTableFeatures, Stack>[] = [
     {
       accessorKey: "name",
       filterFn: "includesString",
       header: ({ column }) => <SortableHeader column={column} label="Name" />,
-      cell: ({ row }) => <span className="font-mono">{row.getValue("name")}</span>,
+      cell: ({ row }) => (
+        <span className="flex items-center gap-2 font-mono">
+          {row.getValue("name")}
+          {updatesQuery.data?.[row.original.name] === "outdated" && (
+            <Badge variant="warning">Update</Badge>
+          )}
+        </span>
+      ),
     },
     {
       accessorKey: "status",
@@ -168,7 +206,10 @@ function Home() {
       id: "actions",
       cell: ({ row }) => (
         <div className="text-right" data-row-action>
-          <StackActions name={row.original.name} />
+          <StackActions
+            name={row.original.name}
+            updateAvailable={updatesQuery.data?.[row.original.name] === "outdated"}
+          />
         </div>
       ),
     },

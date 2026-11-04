@@ -10,15 +10,24 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/docker/docker/client"
 )
 
+type remoteDigestEntry struct {
+	digest string
+	at     time.Time
+}
+
 type Client struct {
 	api        *client.Client
 	httpClient *http.Client
 	configDir  string
+
+	digestMu sync.Mutex
+	digests  map[string]remoteDigestEntry
 }
 
 func NewClient(dockerHost, configDir string) (*Client, error) {
@@ -73,6 +82,36 @@ func (c *Client) RemoteDigest(ctx context.Context, tag string) (string, bool) {
 		return "", false
 	}
 	return data.Descriptor.Digest, true
+}
+
+const remoteDigestTTL = time.Hour
+
+func (c *Client) RemoteDigestCached(ctx context.Context, tag string) (string, bool) {
+	c.digestMu.Lock()
+	entry, ok := c.digests[tag]
+	c.digestMu.Unlock()
+	if ok && time.Since(entry.at) < remoteDigestTTL {
+		return entry.digest, true
+	}
+
+	digest, ok := c.RemoteDigest(ctx, tag)
+	if !ok {
+		return "", false
+	}
+
+	c.digestMu.Lock()
+	if c.digests == nil {
+		c.digests = map[string]remoteDigestEntry{}
+	}
+	c.digests[tag] = remoteDigestEntry{digest: digest, at: time.Now()}
+	c.digestMu.Unlock()
+	return digest, true
+}
+
+func (c *Client) InvalidateRemoteDigests() {
+	c.digestMu.Lock()
+	c.digests = nil
+	c.digestMu.Unlock()
 }
 
 func registryFromTag(tag string) string {

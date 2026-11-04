@@ -13,6 +13,7 @@ Dockstack is a self-hosted web UI for managing Docker Compose stacks. Browse, ed
 - **Stateless and local-first** — SQLite used only for auth; stack state lives in Docker itself and on your filesystem
 - **Built-in editor** — edit compose files directly in the UI with YAML validation
 - **Webhook redeploy** — trigger a pull + restart of all running stacks from CI or a Git hook
+- **Image update detection** — per-stack badge when a newer image digest is available, with a streamed one-click update
 - **OIDC / OAuth login** — any OpenID Connect provider (Pocket ID, Authentik, etc.), plus passkeys
 - **Non-intrusive** — calls the Docker socket or plain `docker compose` commands under the hood; fully compatible with manual CLI usage, **no lock-in**
 

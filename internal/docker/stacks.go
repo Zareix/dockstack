@@ -327,6 +327,140 @@ func (s *Stacks) ListStacksWithStatus(ctx context.Context) ([]Stack, error) {
 	return out, nil
 }
 
+func aggregateStale(statuses []StaleStatus) StaleStatus {
+	out := StaleUpToDate
+	for _, st := range statuses {
+		switch st {
+		case StaleOutdated:
+			return StaleOutdated
+		case StaleUnknown:
+			out = StaleUnknown
+		}
+	}
+	return out
+}
+
+func isImageID(value string) bool {
+	if strings.HasPrefix(value, "sha256:") {
+		return true
+	}
+	if len(value) != 12 {
+		return false
+	}
+	for _, r := range value {
+		if (r < '0' || r > '9') && (r < 'a' || r > 'f') {
+			return false
+		}
+	}
+	return true
+}
+
+func validImageTag(tag string) bool {
+	return tag != "" && tag != "<none>:<none>" && !isImageID(tag) && !strings.Contains(tag, "@sha256:")
+}
+
+func containerImageTag(c container.Summary, composeTag string, img ImageInfo) string {
+	if validImageTag(c.Image) {
+		return c.Image
+	}
+	if validImageTag(composeTag) && !strings.Contains(composeTag, "$") {
+		return composeTag
+	}
+	for _, tag := range img.Tags {
+		if validImageTag(tag) {
+			return tag
+		}
+	}
+	return ""
+}
+
+func (s *Stacks) containerStale(ctx context.Context, c container.Summary, images map[string]ImageInfo, composeTag string) StaleStatus {
+	img, ok := images[formatImageTag(c.ImageID)]
+	if !ok {
+		return StaleUnknown
+	}
+	tag := containerImageTag(c, composeTag, img)
+	if tag == "" {
+		return StaleUnknown
+	}
+	digest, ok := s.client.RemoteDigestCached(ctx, tag)
+	return staleFromDigest(img.RepoDigests, digest, ok)
+}
+
+func (s *Stacks) composeServiceImages(stackName string) map[string]string {
+	composePath, err := s.FindComposePath(stackName)
+	if err != nil {
+		return nil
+	}
+	data, err := os.ReadFile(composePath)
+	if err != nil {
+		return nil
+	}
+	var compose struct {
+		Services map[string]struct {
+			Image string `yaml:"image"`
+		} `yaml:"services"`
+	}
+	if err := yaml.Unmarshal(data, &compose); err != nil {
+		return nil
+	}
+	out := make(map[string]string, len(compose.Services))
+	for name, svc := range compose.Services {
+		if svc.Image != "" {
+			out[name] = svc.Image
+		}
+	}
+	return out
+}
+
+func (s *Stacks) ListStackUpdates(ctx context.Context) (map[string]StaleStatus, error) {
+	names, err := s.ListStacks(ctx)
+	if err != nil {
+		return nil, err
+	}
+	containers, err := s.client.ListContainers(ctx, true, "")
+	if err != nil {
+		return nil, err
+	}
+	images, err := s.client.ListImagesInfo(ctx)
+	if err != nil {
+		return nil, err
+	}
+	byID := make(map[string]ImageInfo, len(images))
+	for _, img := range images {
+		byID[img.ID] = img
+	}
+
+	wanted := make(map[string]bool, len(names))
+	for _, name := range names {
+		wanted[name] = true
+	}
+
+	perStack := make(map[string][]StaleStatus, len(names))
+	serviceImages := make(map[string]map[string]string, len(names))
+	for _, c := range containers {
+		project, ok := c.Labels["com.docker.compose.project"]
+		if !ok || !wanted[project] {
+			continue
+		}
+		service := c.Labels["com.docker.compose.service"]
+		tags, ok := serviceImages[project]
+		if !ok {
+			tags = s.composeServiceImages(project)
+			serviceImages[project] = tags
+		}
+		perStack[project] = append(perStack[project], s.containerStale(ctx, c, byID, tags[service]))
+	}
+
+	out := make(map[string]StaleStatus, len(names))
+	for _, name := range names {
+		if statuses, ok := perStack[name]; ok && len(statuses) > 0 {
+			out[name] = aggregateStale(statuses)
+		}
+	}
+	return out, nil
+}
+
 func (s *Stacks) GetStackContainers(ctx context.Context, stackName string) ([]ContainerInfo, error) {
 	containers, err := s.client.ListContainers(ctx, true, stackName)
 	if err != nil {
