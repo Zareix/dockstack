@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router"
 import type { ColumnDef } from "@tanstack/react-table"
 
+import { NetworkActions } from "#/components/networks/network-actions"
+import { PruneNetworksButton } from "#/components/networks/prune-networks-button"
 import { StatusBadge } from "#/components/status-badge"
 import {
   DataTable,
@@ -56,12 +58,21 @@ function NetworksPage() {
         <span className="text-sm text-muted-foreground">{row.getValue("scope")}</span>
       ),
     },
+    {
+      id: "actions",
+      cell: ({ row }) => (
+        <div className="text-right">
+          <NetworkActions network={row.original} />
+        </div>
+      ),
+    },
   ]
 
   return (
     <>
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-3xl font-bold">Networks</h1>
+        <PruneNetworksButton />
       </div>
       {query.isLoading ? (
         <Spinner />

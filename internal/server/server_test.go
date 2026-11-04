@@ -293,6 +293,29 @@ func TestContainerStatsAuth(t *testing.T) {
 	}
 }
 
+func TestNetworkActions(t *testing.T) {
+	srv, _ := newTestServer(t)
+	h := srv.Handler()
+
+	if rr := doJSON(t, h, http.MethodPost, "/api/networks/prune", nil, nil); rr.Code != http.StatusUnauthorized {
+		t.Fatalf("prune without auth: %d", rr.Code)
+	}
+	if rr := doJSON(t, h, http.MethodDelete, "/api/networks/app_net", nil, nil); rr.Code != http.StatusUnauthorized {
+		t.Fatalf("remove without auth: %d", rr.Code)
+	}
+
+	cookies := signInAsAdmin(t, h)
+	if rr := doJSON(t, h, http.MethodDelete, "/api/networks/bad!name", nil, cookies); rr.Code != http.StatusBadRequest {
+		t.Fatalf("invalid name: %d %s", rr.Code, rr.Body.String())
+	}
+	if rr := doJSON(t, h, http.MethodPost, "/api/networks/prune", nil, cookies); rr.Code != http.StatusInternalServerError {
+		t.Fatalf("prune with docker unavailable: %d %s", rr.Code, rr.Body.String())
+	}
+	if rr := doJSON(t, h, http.MethodDelete, "/api/networks/app_net", nil, cookies); rr.Code != http.StatusInternalServerError {
+		t.Fatalf("remove with docker unavailable: %d %s", rr.Code, rr.Body.String())
+	}
+}
+
 func TestSignOutRevokesSession(t *testing.T) {
 	srv, _ := newTestServer(t)
 	h := srv.Handler()

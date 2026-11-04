@@ -3195,7 +3195,153 @@ export function useGetNetworks<TData = Awaited<ReturnType<typeof getNetworks>>, 
 
 
 
-export const getGetSettingsUrl = () => {
+export const getPostNetworksPruneUrl = () => {
+
+
+
+
+  return `/api/networks/prune`
+}
+
+/**
+ * @summary POST /api/networks/prune
+ */
+export const postNetworksPrune = async ( options?: Parameters<typeof orvalInstance>[1]): Promise<PruneResult> => {
+
+  return orvalInstance<PruneResult>(getPostNetworksPruneUrl(),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getPostNetworksPruneMutationKey = () => ['postNetworksPrune'] as const;
+
+export const getPostNetworksPruneMutationOptions = <TError = ErrorType<ApiError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postNetworksPrune>>, TError,void, TContext>, request?: SecondParameter<typeof orvalInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postNetworksPrune>>, TError,void, TContext> => {
+
+const mutationKey = getPostNetworksPruneMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postNetworksPrune>>, void> = () => {
+
+
+          return  postNetworksPrune(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostNetworksPruneMutationResult = NonNullable<Awaited<ReturnType<typeof postNetworksPrune>>>
+
+    export type PostNetworksPruneMutationError = ErrorType<ApiError>
+
+
+    /**
+ * @summary POST /api/networks/prune
+ */
+export const usePostNetworksPrune = <TError = ErrorType<ApiError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postNetworksPrune>>, TError,void, TContext>, request?: SecondParameter<typeof orvalInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postNetworksPrune>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getPostNetworksPruneMutationOptions(options), queryClient);
+    }
+    export const getDeleteNetworksNameUrl = (name: string,) => {
+
+
+
+
+  return `/api/networks/${name}`
+}
+
+/**
+ * @summary DELETE /api/networks/{name}
+ */
+export const deleteNetworksName = async (name: string, options?: Parameters<typeof orvalInstance>[1]): Promise<OKResponseBody> => {
+
+  return orvalInstance<OKResponseBody>(getDeleteNetworksNameUrl(name),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getDeleteNetworksNameMutationKey = () => ['deleteNetworksName'] as const;
+
+export const getDeleteNetworksNameMutationOptions = <TError = ErrorType<ApiError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteNetworksName>>, TError,DeleteNetworksNameMutationVariables, TContext>, request?: SecondParameter<typeof orvalInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteNetworksName>>, TError,DeleteNetworksNameMutationVariables, TContext> => {
+
+const mutationKey = getDeleteNetworksNameMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteNetworksName>>, DeleteNetworksNameMutationVariables> = (props) => {
+          const {name} = props ?? {};
+
+          return  deleteNetworksName(name,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteNetworksNameMutationResult = NonNullable<Awaited<ReturnType<typeof deleteNetworksName>>>
+
+    export type DeleteNetworksNameMutationError = ErrorType<ApiError>
+    export type DeleteNetworksNameMutationVariables = {name: string}
+
+    /**
+ * @summary DELETE /api/networks/{name}
+ */
+export const useDeleteNetworksName = <TError = ErrorType<ApiError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteNetworksName>>, TError,DeleteNetworksNameMutationVariables, TContext>, request?: SecondParameter<typeof orvalInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteNetworksName>>,
+        TError,
+        DeleteNetworksNameMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDeleteNetworksNameMutationOptions(options), queryClient);
+    }
+    export const getGetSettingsUrl = () => {
 
 
 

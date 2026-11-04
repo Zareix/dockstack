@@ -11,6 +11,10 @@ func (c *Client) ListNetworks(ctx context.Context) ([]network.Summary, error) {
 	return c.api.NetworkList(ctx, network.ListOptions{})
 }
 
+func (c *Client) NetworkRemove(ctx context.Context, id string) error {
+	return c.api.NetworkRemove(ctx, id)
+}
+
 func (c *Client) NetworkPrune(ctx context.Context) (PruneResult, error) {
 	report, err := c.api.NetworksPrune(ctx, filters.NewArgs())
 	if err != nil {
