@@ -8,7 +8,7 @@ Self-hosted Docker Compose stack management UI. Browse, edit, start, stop, resta
 - **Fast & self-contained** — a single Go binary that embeds the SPA frontend and serves the API
 - **Stateless and local-first** — SQLite used only for auth; stack state lives in Docker itself and on your filesystem
 - **Built-in editor** — edit compose files directly in the UI with YAML validation
-- **Webhook redeploy** — `POST /api/stacks/redeploy` pulls and restarts all running services (via API key)
+- **Webhook redeploy** — `POST /api/stacks/{name}/redeploy` pulls and recreates one stack's running services; `POST /api/stacks/redeploy` recreates all running services (via API key)
 - **Image update detection** — per-stack badge when a newer image digest is available, with a streamed one-click update (pull + recreate)
 - **Drift detection** — per-stack badge when the Compose file or `.env` no longer matches the running containers, with a one-click redeploy
 - **Auth** — email/username + password, passkeys (WebAuthn), OIDC / OAuth login, API keys

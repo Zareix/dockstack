@@ -63,7 +63,7 @@ All configuration is done through environment variables.
   </table>
 </div>
 
-See [redeploy](/en/docs/openapi/redeployAllRunningStacks) for <EnvVar name="REDEPLOY_SKIP" /> and
+See [webhook redeploys](/en/docs/dockstack/features/webhooks) for <EnvVar name="REDEPLOY_SKIP" /> and
 [Auto-detected service URLs](/en/docs/dockstack/features/auto-detect-urls) for <EnvVar name="AUTODETECT_URL_BASE_DOMAIN" />.
 
 The official docker image (`ghcr.io/zareix/dockstack`) sets <EnvVar name="STACKS_DIR" />, <EnvVar name="DATABASE_PATH" />, and <EnvVar name="DOCKER_CONFIG_DIR_PATH" /> itself — matching the volume paths used in the [installation](/en/docs/dockstack/installation) example. Override them only if you change those mount paths.

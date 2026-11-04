@@ -63,7 +63,7 @@ Toute la configuration se fait via des variables d'environnement.
   </table>
 </div>
 
-Voir [redeploy](/fr/docs/openapi/redeployAllRunningStacks) pour <EnvVar name="REDEPLOY_SKIP" /> et
+Voir [le redéploiement par webhook](/fr/docs/dockstack/features/webhooks) pour <EnvVar name="REDEPLOY_SKIP" /> et
 [URLs de services auto-détectées](/fr/docs/dockstack/features/auto-detect-urls) pour <EnvVar name="AUTODETECT_URL_BASE_DOMAIN" />.
 
 L'image Docker officielle (`ghcr.io/zareix/dockstack`) définit elle-même <EnvVar name="STACKS_DIR" />, <EnvVar name="DATABASE_PATH" /> et <EnvVar name="DOCKER_CONFIG_DIR_PATH" /> — correspondant aux chemins de volumes utilisés dans l'exemple d'[installation](/fr/docs/dockstack/installation). Ne les remplacez que si vous changez ces chemins de montage.

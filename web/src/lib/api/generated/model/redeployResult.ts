@@ -5,6 +5,8 @@
  */
 
 export interface RedeployResult {
+  /** A URL to the JSON Schema for this object. */
+  readonly $schema?: string;
   action: string;
   error?: string;
   name: string;

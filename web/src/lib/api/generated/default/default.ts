@@ -4422,6 +4422,73 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getPostStackActionPullMutationOptions(options), queryClient);
     }
+    export const getPostStackActionRedeployUrl = (name: string,) => {
+
+
+
+
+  return `/api/stacks/${name}/redeploy`
+}
+
+export const postStackActionRedeploy = async (name: string, options?: Parameters<typeof orvalInstance>[1]): Promise<RedeployResult> => {
+
+  return orvalInstance<RedeployResult>(getPostStackActionRedeployUrl(name),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getPostStackActionRedeployMutationKey = () => ['postStackActionRedeploy'] as const;
+
+export const getPostStackActionRedeployMutationOptions = <TError = ErrorType<ApiError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postStackActionRedeploy>>, TError,PostStackActionRedeployMutationVariables, TContext>, request?: SecondParameter<typeof orvalInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postStackActionRedeploy>>, TError,PostStackActionRedeployMutationVariables, TContext> => {
+
+const mutationKey = getPostStackActionRedeployMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postStackActionRedeploy>>, PostStackActionRedeployMutationVariables> = (props) => {
+          const {name} = props ?? {};
+
+          return  postStackActionRedeploy(name,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostStackActionRedeployMutationResult = NonNullable<Awaited<ReturnType<typeof postStackActionRedeploy>>>
+
+    export type PostStackActionRedeployMutationError = ErrorType<ApiError>
+    export type PostStackActionRedeployMutationVariables = {name: string}
+
+    export const usePostStackActionRedeploy = <TError = ErrorType<ApiError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postStackActionRedeploy>>, TError,PostStackActionRedeployMutationVariables, TContext>, request?: SecondParameter<typeof orvalInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postStackActionRedeploy>>,
+        TError,
+        PostStackActionRedeployMutationVariables,
+        TContext
+      > => {
+      return useMutation(getPostStackActionRedeployMutationOptions(options), queryClient);
+    }
     export const getPostStacksNameRenameUrl = (name: string,) => {
 
 

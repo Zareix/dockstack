@@ -394,6 +394,72 @@ func TestStackRename(t *testing.T) {
 	}
 }
 
+func TestStackRedeploy(t *testing.T) {
+	srv, _ := newTestServer(t)
+	h := srv.Handler()
+
+	if rr := doJSON(t, h, http.MethodPost, "/api/stacks/app/redeploy", nil, nil); rr.Code != http.StatusUnauthorized {
+		t.Fatalf("redeploy without auth: %d", rr.Code)
+	}
+
+	cookies := signInAsAdmin(t, h)
+	stacksDir := srv.deps().Stacks.Dir()
+
+	if rr := doJSON(t, h, http.MethodPost, "/api/stacks/bad.name/redeploy", nil, cookies); rr.Code != http.StatusBadRequest {
+		t.Fatalf("invalid name: %d %s", rr.Code, rr.Body.String())
+	}
+	if rr := doJSON(t, h, http.MethodPost, "/api/stacks/missing/redeploy", nil, cookies); rr.Code != http.StatusNotFound {
+		t.Fatalf("missing stack: %d %s", rr.Code, rr.Body.String())
+	}
+
+	if err := os.MkdirAll(filepath.Join(stacksDir, "excluded"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	srv.deps().Cfg.RedeploySkip = []string{"excluded"}
+	if rr := doJSON(t, h, http.MethodPost, "/api/stacks/excluded/redeploy", nil, cookies); rr.Code != http.StatusConflict {
+		t.Fatalf("skipped stack: %d %s", rr.Code, rr.Body.String())
+	}
+
+	if err := os.MkdirAll(filepath.Join(stacksDir, "app"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	rr := doJSON(t, h, http.MethodPost, "/api/stacks/app/redeploy", nil, cookies)
+	if rr.Code != http.StatusInternalServerError {
+		t.Fatalf("docker unavailable: %d %s", rr.Code, rr.Body.String())
+	}
+	if !strings.Contains(rr.Body.String(), `"error":"redeploy failed"`) {
+		t.Fatalf("unexpected error body: %s", rr.Body.String())
+	}
+
+	rr = doJSON(t, h, http.MethodPost, "/api/auth/api-keys", map[string]string{"name": "ci"}, cookies)
+	if rr.Code != http.StatusOK {
+		t.Fatalf("create key: %d %s", rr.Code, rr.Body.String())
+	}
+	var created struct {
+		Key string `json:"key"`
+	}
+	if err := json.Unmarshal(rr.Body.Bytes(), &created); err != nil || created.Key == "" {
+		t.Fatalf("parse key: %v %s", err, rr.Body.String())
+	}
+	req := httptest.NewRequest(http.MethodPost, "/api/stacks/missing/redeploy", nil)
+	req.Header.Set("Authorization", "Bearer "+created.Key)
+	rr = httptest.NewRecorder()
+	h.ServeHTTP(rr, req)
+	if rr.Code != http.StatusNotFound {
+		t.Fatalf("api key redeploy: %d %s", rr.Code, rr.Body.String())
+	}
+}
+
+func TestStacksRedeployGlobalRoute(t *testing.T) {
+	srv, _ := newTestServer(t)
+	h := srv.Handler()
+
+	cookies := signInAsAdmin(t, h)
+	if rr := doJSON(t, h, http.MethodPost, "/api/stacks/redeploy", nil, cookies); rr.Code != http.StatusOK {
+		t.Fatalf("global redeploy: %d %s", rr.Code, rr.Body.String())
+	}
+}
+
 func TestStacksDrift(t *testing.T) {
 	srv, _ := newTestServer(t)
 	h := srv.Handler()

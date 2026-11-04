@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strings"
 
 	"github.com/danielgtaylor/huma/v2"
@@ -323,6 +324,32 @@ func (d *Deps) handleStacksRedeploy(ctx context.Context, _ *struct{}) (*web.List
 	return &web.ListOutput[dockerapi.RedeployResult]{Body: results}, nil
 }
 
+func (d *Deps) handleStackRedeploy(ctx context.Context, in *nameInput) (*web.DataOutput[dockerapi.RedeployResult], error) {
+	if err := validateStackName(in.Name); err != nil {
+		return nil, err
+	}
+	exists, err := d.Stacks.StackExists(ctx, in.Name)
+	if err != nil {
+		web.LogError(web.RequestFrom(ctx), err)
+		return nil, huma.Error500InternalServerError("failed to check stack")
+	}
+	if !exists {
+		return nil, huma.Error404NotFound("stack not found")
+	}
+	if slices.Contains(d.Cfg.RedeploySkip, in.Name) {
+		return nil, huma.Error409Conflict("stack is excluded by REDEPLOY_SKIP")
+	}
+	res, err := d.Stacks.RedeployStack(ctx, in.Name)
+	if err != nil {
+		web.LogError(web.RequestFrom(ctx), err)
+		return nil, huma.Error500InternalServerError("redeploy failed")
+	}
+	if res.Action == "redeployed" {
+		d.Docker.InvalidateRemoteDigests()
+	}
+	return &web.DataOutput[dockerapi.RedeployResult]{Body: res}, nil
+}
+
 func (d *Deps) handleStackAction(ctx context.Context, in *nameInput, action stackAction) (*web.OKResponse, error) {
 	if err := validateStackName(in.Name); err != nil {
 		return nil, err
@@ -423,6 +450,14 @@ func (d *Deps) registerStacks(api huma.API, router chi.Router) {
 			})
 		}
 	})
+
+	redeployOp := huma.Operation{
+		Method:      "POST",
+		Path:        "/api/stacks/{name}/redeploy",
+		OperationID: "post-stack-action-redeploy",
+	}
+	d.AuthMW(&redeployOp)
+	huma.Register(api, redeployOp, d.handleStackRedeploy)
 
 	huma.Post(api, "/api/stacks/redeploy", d.handleStacksRedeploy, d.AuthMW)
 }

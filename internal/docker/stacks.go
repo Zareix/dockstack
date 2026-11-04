@@ -222,27 +222,24 @@ func (s *Stacks) RunCompose(ctx context.Context, stackName string, args ...strin
 	return <-waitErr
 }
 
-func (s *Stacks) UpServices(ctx context.Context, stackName string, services []string) error {
-	composePath, err := s.FindComposePath(stackName)
+func (s *Stacks) runComposeQuiet(ctx context.Context, stackName string, args ...string) error {
+	cmdArgs, err := s.composeCommand(stackName, args...)
 	if err != nil {
 		return err
 	}
-	cmdArgs := []string{}
-	if s.hasConfigFile() {
-		cmdArgs = append(cmdArgs, "--config", s.configDir)
-	}
-	cmdArgs = append(cmdArgs, "compose", "-f", composePath)
-	if envPath := s.FindEnvPath(stackName); envPath != "" {
-		cmdArgs = append(cmdArgs, "--env-file", envPath)
-	}
-	cmdArgs = append(cmdArgs, "up", "-d")
-	cmdArgs = append(cmdArgs, services...)
-
 	cmd := exec.CommandContext(ctx, "docker", cmdArgs...)
 	cmd.Env = getDockerEnv()
 	cmd.Stdout = io.Discard
 	cmd.Stderr = io.Discard
 	return cmd.Run()
+}
+
+func (s *Stacks) UpServices(ctx context.Context, stackName string, services []string) error {
+	return s.runComposeQuiet(ctx, stackName, append([]string{"up", "-d"}, services...)...)
+}
+
+func (s *Stacks) PullServices(ctx context.Context, stackName string, services []string) error {
+	return s.runComposeQuiet(ctx, stackName, append([]string{"pull", "--ignore-buildable"}, services...)...)
 }
 
 func (s *Stacks) GetRunningServices(ctx context.Context, stackName string) ([]string, error) {
@@ -260,6 +257,26 @@ func (s *Stacks) GetRunningServices(ctx context.Context, stackName string) ([]st
 	}
 	sort.Strings(services)
 	return services, nil
+}
+
+func (s *Stacks) RedeployStack(ctx context.Context, stackName string) (RedeployResult, error) {
+	res := RedeployResult{Name: stackName, Action: "skipped"}
+	services, err := s.GetRunningServices(ctx, stackName)
+	if err != nil {
+		return res, err
+	}
+	if len(services) == 0 {
+		return res, nil
+	}
+	if err := s.PullServices(ctx, stackName, services); err != nil {
+		return res, err
+	}
+	if err := s.UpServices(ctx, stackName, services); err != nil {
+		return res, err
+	}
+	res.Action = "redeployed"
+	res.Services = services
+	return res, nil
 }
 
 func (s *Stacks) GetStackStatus(ctx context.Context, stackName string) (StackStatus, error) {

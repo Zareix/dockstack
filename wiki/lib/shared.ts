@@ -85,7 +85,7 @@ export const envVars: Record<string, EnvVarInfo> = {
     default: "0 3 * * 1",
   },
   REDEPLOY_SKIP: {
-    description: "Comma-separated list of service names to skip during redeploy",
+    description: "Comma-separated list of stack names to skip during the global redeploy",
   },
   OTHER_INSTANCE_URLS: {
     description:

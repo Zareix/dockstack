@@ -1,0 +1,58 @@
+---
+title: Redéploiement par webhook
+---
+
+Dockstack expose deux endpoints authentifiés pour les jobs CI et les hooks Git. Les deux acceptent une [clé API](/fr/docs/dockstack/configuration/authentication#clés-api) envoyée en bearer token. Les clés API sont globales : elles ne sont pas limitées à une seule stack.
+
+## Redéployer une stack
+
+```sh
+curl -X POST https://dockstack.example.com/api/stacks/myapp/redeploy \
+  -H "Authorization: Bearer <api-key>"
+```
+
+Le nom de la stack doit correspondre au nom du répertoire sous `STACKS_DIR`. L'endpoint :
+
+1. récupère les services actuellement en cours d'exécution pour la stack ;
+2. pull leurs images avec `docker compose pull --ignore-buildable <services>` — les services avec une section `build:` sont ignorés ;
+3. les recrée avec `docker compose up -d <services>`.
+
+Seuls les services en cours d'exécution sont ciblés. Compose peut toutefois démarrer leurs dépendances si elles sont arrêtées. Une stack sans service running est un no-op : elle renvoie `200` avec `action: "skipped"` et ne démarre rien. Utilisez la page de la stack ou `POST /api/stacks/{name}/up` pour la démarrer.
+
+Réponse en cas de succès :
+
+```json
+{
+  "name": "myapp",
+  "action": "redeployed",
+  "services": ["api", "worker"]
+}
+```
+
+`docker compose up -d` ne recrée que les conteneurs dont l'image ou la configuration a changé ; il ne force pas un redémarrage si rien n'a changé. Il rend aussi la main avant que les conteneurs soient healthy : interrogez `GET /api/stacks/{name}` si le job CI doit attendre.
+
+## Redéployer toutes les stacks en cours d'exécution
+
+```sh
+curl -X POST https://dockstack.example.com/api/stacks/redeploy \
+  -H "Authorization: Bearer <api-key>"
+```
+
+Cet endpoint recrée les services running de toutes les stacks **sans pull**. Il renvoie un tableau de `RedeployResult`. Utilisez l'endpoint par stack (ou les actions `pull` / `update`) pour récupérer de nouvelles images.
+
+Les stacks listées dans <EnvVar name="REDEPLOY_SKIP" /> sont ignorées par cet appel global. Un appel direct à une stack exclue renvoie `409`.
+
+## Erreurs
+
+| Statut | Signification                                                        |
+| ------ | -------------------------------------------------------------------- |
+| `400`  | Nom de stack invalide                                                |
+| `401`  | Clé API absente ou invalide                                          |
+| `404`  | Répertoire de stack introuvable                                      |
+| `409`  | Stack listée dans `REDEPLOY_SKIP` (endpoint par stack)               |
+| `429`  | Rate limit de la clé API dépassé (100 requêtes/minute par défaut)    |
+| `500`  | Échec Docker ou `docker compose`                                     |
+
+## Timeouts
+
+Les redéploiements sont synchrones et ne streament aucune progression. Le pull de grosses images peut prendre plusieurs minutes : prévoyez un timeout client généreux (par exemple `curl --max-time 900`). Si le client se déconnecte, le contexte de la requête est annulé et le processus `docker compose` en cours est arrêté, ce qui peut laisser un déploiement partiel. Évitez de lancer deux redéploiements de la même stack en parallèle.

@@ -1,0 +1,58 @@
+---
+title: Webhook redeploys
+---
+
+Dockstack exposes two authenticated endpoints for CI jobs and Git hooks. Both accept an [API key](/en/docs/dockstack/configuration/authentication#api-keys) sent as a bearer token. API keys are global: they are not scoped to a single stack.
+
+## Redeploy one stack
+
+```sh
+curl -X POST https://dockstack.example.com/api/stacks/myapp/redeploy \
+  -H "Authorization: Bearer <api-key>"
+```
+
+The stack name must match the directory name under `STACKS_DIR`. The endpoint:
+
+1. finds the services currently running for the stack;
+2. pulls their images with `docker compose pull --ignore-buildable <services>` — services with a `build:` section are skipped;
+3. recreates them with `docker compose up -d <services>`.
+
+Only running services are targeted. Compose may still start their dependencies if they are stopped. A stack with no running service is a no-op: it returns `200` with `action: "skipped"` and does not start the stack. Use the stack page or `POST /api/stacks/{name}/up` to start it.
+
+Successful response:
+
+```json
+{
+  "name": "myapp",
+  "action": "redeployed",
+  "services": ["api", "worker"]
+}
+```
+
+`docker compose up -d` only recreates containers whose image or configuration changed; it does not force a restart when nothing changed. It also returns before containers report healthy, so poll `GET /api/stacks/{name}` if the CI job needs to wait for health.
+
+## Redeploy every running stack
+
+```sh
+curl -X POST https://dockstack.example.com/api/stacks/redeploy \
+  -H "Authorization: Bearer <api-key>"
+```
+
+This endpoint recreates the running services of every stack **without pulling**. It returns an array of `RedeployResult` objects. Use the per-stack endpoint (or the `pull` / `update` actions) when you need fresh images.
+
+Stacks listed in <EnvVar name="REDEPLOY_SKIP" /> are omitted from this global call. A direct call to an excluded stack returns `409`.
+
+## Errors
+
+| Status | Meaning                                                              |
+| ------ | -------------------------------------------------------------------- |
+| `400`  | Invalid stack name                                                   |
+| `401`  | Missing or invalid API key                                           |
+| `404`  | Stack directory not found                                            |
+| `409`  | Stack is listed in `REDEPLOY_SKIP` (per-stack endpoint)              |
+| `429`  | API key rate limit exceeded (100 requests/minute by default)         |
+| `500`  | Docker or `docker compose` failed                                    |
+
+## Timeouts
+
+Redeploys are synchronous and stream no progress. Pulling large images can take several minutes, so set a generous client timeout (for example `curl --max-time 900`). If the client disconnects, the request context is cancelled and the running `docker compose` process is stopped, which can leave a partial deployment. Avoid launching two redeploys of the same stack at the same time.
