@@ -9,6 +9,7 @@ import {
   type DataTableFeatures,
   FilterableHeader,
   SortableHeader,
+  TableSearch,
 } from "#/components/ui/data-table"
 import { Spinner } from "#/components/ui/spinner"
 import { useGetImages, useGetImagesStale } from "#/lib/api/generated"
@@ -44,6 +45,7 @@ function ImagesPage() {
   const columns: ColumnDef<DataTableFeatures, ImageInfo>[] = [
     {
       accessorKey: "tags",
+      filterFn: "includesString",
       header: ({ column }) => <SortableHeader column={column} label="Tag" />,
       cell: ({ row }) => {
         const tags: string[] = row.getValue("tags")
@@ -121,6 +123,11 @@ function ImagesPage() {
         columns={columns}
         data={imagesQuery.data ?? []}
         isLoading={imagesQuery.isLoading}
+        toolbar={(table) => (
+          <div className="mb-3 flex flex-row-reverse">
+            <TableSearch table={table} columnId="tags" placeholder="Search images..." />
+          </div>
+        )}
       />
     </>
   )
