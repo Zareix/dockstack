@@ -1,0 +1,38 @@
+---
+title: Validation Compose
+---
+
+Dockstack vérifie les fichiers Compose avec `docker compose config` après chaque sauvegarde. La vérification est informative : les fichiers sont toujours écrits d'abord, et un échec de validation ne bloque jamais la sauvegarde.
+
+## Fonctionnement
+
+Quand vous sauvegardez l'éditeur Compose, Dockstack :
+
+1. écrit `compose.yaml` (et `.env` s'il a changé) dans le répertoire de la stack ;
+2. lance `docker compose config` sur les fichiers sauvegardés, avec un délai de 10 secondes ;
+3. renvoie le résultat à l'éditeur, qui affiche une alerte persistante sous les fichiers.
+
+`docker compose config` résout le modèle Compose — interpolation depuis `.env` et l'environnement, syntaxe YAML, définitions de services, volumes, réseaux, etc. C'est la référence pour savoir si Docker peut utiliser la stack telle quelle. Dockstack ne réimplémente aucune de ces vérifications.
+
+:::note
+La commande lit uniquement les fichiers sur disque. Le contenu non sauvegardé de l'éditeur n'est pas validé ; sauvegardez pour obtenir un nouveau résultat.
+:::
+
+## Résultats
+
+| Résultat                     | Signification                                                                                        |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Aucune alerte                | `docker compose config` s'est terminé sans erreur ni sortie sur stderr.                               |
+| **Validation failed**        | La commande a échoué. L'alerte liste les lignes d'erreur rapportées par Compose.                     |
+| **Compose warnings**         | La commande a réussi mais a écrit des avertissements sur stderr (variables non définies, champs obsolètes, etc.). |
+| **Validation unavailable**   | La CLI `docker compose` n'est pas installée sur l'hôte Docker. Les fichiers ont été sauvegardés sans validation. |
+
+Les erreurs et avertissements sont nettoyés et limités à 20 lignes. Les sorties de type logrus `msg="..."` sont réduites au message.
+
+Les avertissements ne bloquent rien : une stack avec des avertissements peut toujours être déployée. Considérez-les comme des indices à corriger avant le prochain déploiement.
+
+## Corriger un fichier Compose invalide
+
+Lisez les lignes d'erreur affichées dans l'alerte ; elles indiquent en général le fichier et la ligne que Compose n'a pas pu analyser, ou une variable non résolue. Une fois corrigé, sauvegardez à nouveau : l'alerte précédente disparaît dès que vous modifiez l'un des fichiers, et le nouveau résultat la remplace après la sauvegarde.
+
+Sauvegarder le fichier ne l'applique pas aux conteneurs en cours d'exécution. Utilisez **Deploy** / **Start** pour recréer les services avec la nouvelle configuration ; voir [la détection de dérive de configuration](/fr/docs/dockstack/features/drift).

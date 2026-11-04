@@ -56,6 +56,7 @@ import type {
   StackCreateRequest,
   StackFilesResponseBody,
   StackFilesSaveRequest,
+  StackFilesSaveResponseBody,
   StackGetResponseBody,
   StackRenameRequest,
   UpdateUserRequest,
@@ -4279,7 +4280,7 @@ export const getPutStacksNameFilesUrl = (name: string,) => {
  * @summary PUT /api/stacks/{name}/files
  */
 export const putStacksNameFiles = async (name: string,
-    stackFilesSaveRequest: NonReadonly<StackFilesSaveRequest>, options?: Parameters<typeof orvalInstance>[1]): Promise<OKResponseBody> => {
+    stackFilesSaveRequest: NonReadonly<StackFilesSaveRequest>, options?: Parameters<typeof orvalInstance>[1]): Promise<StackFilesSaveResponseBody> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -4295,7 +4296,7 @@ export const putStacksNameFiles = async (name: string,
     }
     return headers;
   };
-return orvalInstance<OKResponseBody>(getPutStacksNameFilesUrl(name),
+return orvalInstance<StackFilesSaveResponseBody>(getPutStacksNameFilesUrl(name),
   {
     ...options,
     method: 'PUT',

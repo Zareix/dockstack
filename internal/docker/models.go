@@ -115,6 +115,13 @@ type LogEntry struct {
 	Timestamp     string `json:"timestamp"`
 }
 
+type ComposeValidation struct {
+	Valid            bool     `json:"valid"`
+	Errors           []string `json:"errors"`
+	Warnings         []string `json:"warnings"`
+	ComposeAvailable bool     `json:"composeAvailable"`
+}
+
 type RedeployResult struct {
 	Name     string   `json:"name"`
 	Action   string   `json:"action"`

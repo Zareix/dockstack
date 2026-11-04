@@ -164,10 +164,17 @@ type stackFilesSaveRequest struct {
 	Env         *string `json:"env,omitempty"`
 }
 
+type stackFilesSaveResponse struct {
+	Body struct {
+		Success    bool                        `json:"success"`
+		Validation dockerapi.ComposeValidation `json:"validation"`
+	}
+}
+
 func (d *Deps) handleStackFilesSave(ctx context.Context, in *struct {
 	Name string `path:"name"`
 	Body stackFilesSaveRequest
-}) (*web.OKResponse, error) {
+}) (*stackFilesSaveResponse, error) {
 	if err := validateStackName(in.Name); err != nil {
 		return nil, err
 	}
@@ -193,7 +200,10 @@ func (d *Deps) handleStackFilesSave(ctx context.Context, in *struct {
 			return nil, huma.Error500InternalServerError("failed to save env file")
 		}
 	}
-	return web.OK(), nil
+	resp := &stackFilesSaveResponse{}
+	resp.Body.Success = true
+	resp.Body.Validation = d.Stacks.ValidateCompose(ctx, in.Name)
+	return resp, nil
 }
 
 type stackCreateRequest struct {

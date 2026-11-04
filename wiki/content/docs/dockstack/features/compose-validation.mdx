@@ -1,0 +1,38 @@
+---
+title: Compose validation
+---
+
+Dockstack checks the Compose files with `docker compose config` after a save. The check is informational: the files are always written first, and a failed validation never blocks the save.
+
+## How it works
+
+When you save the Compose editor, Dockstack:
+
+1. writes `compose.yaml` (and `.env` if changed) to the stack directory;
+2. runs `docker compose config` on the saved files, with a 10-second timeout;
+3. returns the result to the editor, which shows a persistent alert below the files.
+
+`docker compose config` resolves the Compose model — interpolation from `.env` and the environment, YAML syntax, service definitions, volumes, networks and so on. It is the ground truth for whether Docker can use the stack as written. Dockstack does not reimplement any of these checks.
+
+:::note
+The command only reads the files on disk. Unsaved editor content is not validated; save to get a new result.
+:::
+
+## Results
+
+| Result                    | What it means                                                                                     |
+| ------------------------- | ------------------------------------------------------------------------------------------------- |
+| No alert                  | `docker compose config` exited successfully with no output on stderr.                              |
+| **Validation failed**     | The command exited with an error. The alert lists the error lines reported by Compose.              |
+| **Compose warnings**      | The command succeeded but wrote warnings on stderr (for example, unset variables or deprecated fields). |
+| **Validation unavailable**| The `docker compose` CLI is not installed on the Docker host. The files were saved without validation. |
+
+Errors and warnings are trimmed and limited to 20 lines. Logrus-style `msg="..."` output is reduced to the message itself.
+
+Warnings are not blocking: a stack with warnings can still be deployed. Treat them as hints to fix before the next deployment.
+
+## Fixing an invalid Compose file
+
+Read the error lines shown in the alert; they usually point to the file and line Compose could not parse or to an unresolved variable. Once fixed, save again: the previous alert is cleared as soon as you edit either file, and the new result replaces it after the save.
+
+Saving the file does not apply it to running containers. Use **Deploy** / **Start** to recreate the services with the new configuration; see [configuration drift detection](/en/docs/dockstack/features/drift).

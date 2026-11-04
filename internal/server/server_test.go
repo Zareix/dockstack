@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -495,5 +496,53 @@ func TestStackStreamGated(t *testing.T) {
 	h.ServeHTTP(rr, req)
 	if rr.Code == http.StatusUnauthorized {
 		t.Fatalf("stream with auth rejected: %s", rr.Body.String())
+	}
+}
+
+func TestStackFilesSaveValidation(t *testing.T) {
+	if _, err := exec.LookPath("docker"); err != nil {
+		t.Skip("docker CLI not available")
+	}
+	if err := exec.Command("docker", "compose", "version").Run(); err != nil {
+		t.Skip("docker compose not available")
+	}
+
+	srv, _ := newTestServer(t)
+	h := srv.Handler()
+	cookies := signInAsAdmin(t, h)
+
+	if err := os.MkdirAll(filepath.Join(srv.deps().Stacks.Dir(), "app"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	rr := doJSON(t, h, http.MethodPut, "/api/stacks/app/files", map[string]any{
+		"composeFile": "compose.yaml",
+		"compose":     "services:\n  app:\n    image: alpine\n   ports: ['80:80']\n",
+	}, cookies)
+	if rr.Code != http.StatusOK {
+		t.Fatalf("save invalid compose: %d %s", rr.Code, rr.Body.String())
+	}
+	var body struct {
+		Success    bool `json:"success"`
+		Validation struct {
+			Valid            bool     `json:"valid"`
+			Errors           []string `json:"errors"`
+			Warnings         []string `json:"warnings"`
+			ComposeAvailable bool     `json:"composeAvailable"`
+		} `json:"validation"`
+	}
+	if err := json.Unmarshal(rr.Body.Bytes(), &body); err != nil {
+		t.Fatal(err)
+	}
+	if !body.Success {
+		t.Fatalf("save should succeed: %s", rr.Body.String())
+	}
+	if !body.Validation.ComposeAvailable {
+		t.Fatalf("compose should be available: %s", rr.Body.String())
+	}
+	if body.Validation.Valid {
+		t.Fatalf("validation should fail: %s", rr.Body.String())
+	}
+	if len(body.Validation.Errors) == 0 {
+		t.Fatalf("expected validation errors: %s", rr.Body.String())
 	}
 }
