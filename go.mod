@@ -8,7 +8,7 @@ require (
 	github.com/danielgtaylor/huma/v2 v2.39.1
 	github.com/docker/docker v28.5.2+incompatible
 	github.com/go-chi/chi/v5 v5.5.0
-	github.com/go-co-op/gocron/v2 v2.22.0
+	github.com/go-co-op/gocron/v2 v2.23.0
 	github.com/go-webauthn/webauthn v0.18.2
 	github.com/joho/godotenv v1.5.1
 	golang.org/x/crypto v0.58.0
