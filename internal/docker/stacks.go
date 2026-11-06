@@ -131,6 +131,10 @@ func (s *Stacks) composeCommand(stackName string, args ...string) ([]string, err
 	if err != nil {
 		return nil, err
 	}
+	return s.composeCommandWithFile(stackName, composePath, args...), nil
+}
+
+func (s *Stacks) composeCommandWithFile(stackName, composePath string, args ...string) []string {
 	cmd := []string{}
 	if s.hasConfigFile() {
 		cmd = append(cmd, "--config", s.configDir)
@@ -139,8 +143,7 @@ func (s *Stacks) composeCommand(stackName string, args ...string) ([]string, err
 	if envPath := s.FindEnvPath(stackName); envPath != "" {
 		cmd = append(cmd, "--env-file", envPath)
 	}
-	cmd = append(cmd, args...)
-	return cmd, nil
+	return append(cmd, args...)
 }
 
 func (s *Stacks) StreamCompose(ctx context.Context, stackName string, args ...string) (<-chan string, <-chan error, error) {

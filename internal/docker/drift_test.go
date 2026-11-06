@@ -17,6 +17,31 @@ func TestParseServiceHashes(t *testing.T) {
 	}
 }
 
+func TestResolveServiceNetworkModes(t *testing.T) {
+	containers := []container.Summary{
+		{ID: "abc123", Labels: map[string]string{"com.docker.compose.service": "gluetun"}},
+	}
+	cases := []struct {
+		name       string
+		compose    string
+		want       string
+		wantChange bool
+	}{
+		{"plain", "network_mode: service:gluetun\n", "network_mode: container:abc123\n", true},
+		{"quoted", `  network_mode: "service:gluetun"` + "\n", "  network_mode: container:abc123\n", true},
+		{"comment", "network_mode: service:gluetun # vpn\n", "network_mode: container:abc123\n", true},
+		{"unknown target", "network_mode: service:missing\n", "network_mode: service:missing\n", false},
+		{"other mode", "network_mode: host\n", "network_mode: host\n", false},
+		{"commented out", "# network_mode: service:gluetun\n", "# network_mode: service:gluetun\n", false},
+	}
+	for _, c := range cases {
+		got, changed := resolveServiceNetworkModes([]byte(c.compose), containers)
+		if string(got) != c.want || changed != c.wantChange {
+			t.Errorf("%s: got %q changed=%v, want %q changed=%v", c.name, got, changed, c.want, c.wantChange)
+		}
+	}
+}
+
 func TestDriftFromContainers(t *testing.T) {
 	hashes := map[string]string{"app": "aaa", "web": "bbb"}
 	summary := func(service, hash, oneoff string) container.Summary {

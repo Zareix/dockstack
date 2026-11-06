@@ -3,7 +3,10 @@ package docker
 import (
 	"bytes"
 	"context"
+	"io"
+	"os"
 	"os/exec"
+	"regexp"
 	"strings"
 	"sync"
 	"time"
@@ -12,6 +15,30 @@ import (
 )
 
 const driftCheckTimeout = 10 * time.Second
+
+var serviceNetworkModeRe = regexp.MustCompile(`(?m)^(\s*network_mode:\s*)["']?service:([A-Za-z0-9_.-]+)["']?[ \t]*(?:#.*)?$`)
+
+// Compose records the resolved container ID (not service:X) in config-hash at
+// up time, so config --hash on the file alone never matches those services.
+func resolveServiceNetworkModes(compose []byte, containers []container.Summary) ([]byte, bool) {
+	ids := map[string]string{}
+	for _, c := range containers {
+		if svc, ok := c.Labels["com.docker.compose.service"]; ok {
+			ids[svc] = c.ID
+		}
+	}
+	resolved := false
+	out := serviceNetworkModeRe.ReplaceAllFunc(compose, func(line []byte) []byte {
+		m := serviceNetworkModeRe.FindSubmatch(line)
+		id, ok := ids[string(m[2])]
+		if !ok {
+			return line
+		}
+		resolved = true
+		return []byte(string(m[1]) + "container:" + id)
+	})
+	return out, resolved
+}
 
 func parseServiceHashes(stdout string) map[string]string {
 	out := map[string]string{}
@@ -55,15 +82,27 @@ func (s *Stacks) stackDrift(ctx context.Context, name string) DriftStatus {
 	if err != nil || len(containers) == 0 {
 		return DriftUnknown
 	}
-	cmdArgs, err := s.composeCommand(name, "config", "--hash=*")
+	composePath, err := s.FindComposePath(name)
 	if err != nil {
 		return DriftUnknown
+	}
+	cmdArgs := s.composeCommandWithFile(name, composePath, "config", "--hash=*")
+	var stdin io.Reader
+	if data, err := os.ReadFile(composePath); err == nil {
+		if resolved, ok := resolveServiceNetworkModes(data, containers); ok {
+			cmdArgs = s.composeCommandWithFile(name, "-", "config", "--hash=*")
+			stdin = bytes.NewReader(resolved)
+		}
 	}
 	ctx, cancel := context.WithTimeout(ctx, driftCheckTimeout)
 	defer cancel()
 	var stdout, stderr bytes.Buffer
 	cmd := exec.CommandContext(ctx, "docker", cmdArgs...)
 	cmd.Env = getDockerEnv()
+	cmd.Stdin = stdin
+	if stdin != nil {
+		cmd.Dir = s.stackDir(name)
+	}
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 	if err := cmd.Run(); err != nil {
