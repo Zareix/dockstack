@@ -1,4 +1,4 @@
-import { PlusIcon } from "@phosphor-icons/react"
+import { PlusIcon, WarningIcon } from "@phosphor-icons/react"
 import { useForm } from "@tanstack/react-form"
 import { useQueryClient } from "@tanstack/react-query"
 import { useNavigate } from "@tanstack/react-router"
@@ -6,6 +6,7 @@ import { useState } from "react"
 import { toast } from "sonner"
 import * as v from "valibot"
 
+import { Alert, AlertDescription, AlertTitle } from "#/components/ui/alert"
 import { Button } from "#/components/ui/button"
 import {
   Dialog,
@@ -24,6 +25,7 @@ import {
   getStacksName,
   usePostStacks,
 } from "#/lib/api/generated"
+import { importStack } from "#/lib/api/stacks-archive"
 
 const schema = v.object({
   name: v.pipe(
@@ -33,26 +35,39 @@ const schema = v.object({
   ),
 })
 
+function nameFromArchive(filename: string) {
+  return filename.replace(/\.zip$/i, "")
+}
+
 export function CreateStackButton() {
   const [open, setOpen] = useState(false)
+  const [archive, setArchive] = useState<File | null>(null)
+  const [archiveInputKey, setArchiveInputKey] = useState(0)
+  const [nameTouched, setNameTouched] = useState(false)
+  const [importing, setImporting] = useState(false)
   const navigate = useNavigate()
   const queryClient = useQueryClient()
 
+  const onDone = (name: string) => {
+    toast.success(`Stack "${name}" ${archive ? "imported" : "created"}`)
+    queryClient.invalidateQueries({ queryKey: getGetStacksQueryKey() })
+    queryClient.invalidateQueries({ queryKey: getGetStacksDriftQueryKey() })
+    setOpen(false)
+    setArchive(null)
+    setArchiveInputKey((key) => key + 1)
+    setNameTouched(false)
+    form.reset()
+    navigate({
+      to: `/stacks/${name}`,
+      search: {
+        tab: "files",
+      },
+    })
+  }
+
   const mutation = usePostStacks({
     mutation: {
-      onSuccess: (_, stack) => {
-        toast.success(`Stack "${stack.data.name}" created`)
-        queryClient.invalidateQueries({ queryKey: getGetStacksQueryKey() })
-        queryClient.invalidateQueries({ queryKey: getGetStacksDriftQueryKey() })
-        setOpen(false)
-        form.reset()
-        navigate({
-          to: `/stacks/${stack.data.name}`,
-          search: {
-            tab: "files",
-          },
-        })
-      },
+      onSuccess: (_, stack) => onDone(stack.data.name),
       onError: (e) => toast.error(e.message),
     },
   })
@@ -60,11 +75,31 @@ export function CreateStackButton() {
   const form = useForm({
     defaultValues: { name: "" },
     validators: { onSubmit: schema },
-    onSubmit: ({ value }) => mutation.mutate({ data: { name: value.name } }),
+    onSubmit: ({ value }) => {
+      if (!archive) {
+        mutation.mutate({ data: { name: value.name } })
+        return
+      }
+      setImporting(true)
+      importStack(value.name, archive)
+        .then(onDone)
+        .catch((e: Error) => toast.error(e.message))
+        .finally(() => setImporting(false))
+    },
   })
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        setOpen(next)
+        if (!next) {
+          setArchive(null)
+          setArchiveInputKey((key) => key + 1)
+          setNameTouched(false)
+        }
+      }}
+    >
       <DialogTrigger
         render={
           <Button size="sm">
@@ -83,7 +118,36 @@ export function CreateStackButton() {
             form.handleSubmit()
           }}
         >
-          <div className="grid gap-2">
+          <div className="grid gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="archive">Archive (optional)</Label>
+              <Input
+                key={archiveInputKey}
+                id="archive"
+                type="file"
+                accept=".zip,application/zip"
+                onChange={(e) => {
+                  const file = e.target.files?.[0] ?? null
+                  setArchive(file)
+                  if (file && !nameTouched) {
+                    form.setFieldValue("name", nameFromArchive(file.name))
+                  }
+                }}
+              />
+              <p className="text-xs text-muted-foreground">
+                Import an existing stack from a zip archive exported by Dockstack.
+              </p>
+              {archive && (
+                <Alert variant="destructive">
+                  <WarningIcon />
+                  <AlertTitle>Secrets warning</AlertTitle>
+                  <AlertDescription>
+                    The archive may contain a .env file with secrets. Make sure you trust its
+                    origin.
+                  </AlertDescription>
+                </Alert>
+              )}
+            </div>
             <form.Field
               name="name"
               validators={{
@@ -107,7 +171,10 @@ export function CreateStackButton() {
                       id={field.name}
                       placeholder="my-app"
                       value={field.state.value}
-                      onChange={(e) => field.handleChange(e.target.value)}
+                      onChange={(e) => {
+                        setNameTouched(true)
+                        field.handleChange(e.target.value)
+                      }}
                       onBlur={field.handleBlur}
                       aria-invalid={isInvalid}
                       aria-describedby={isInvalid ? `${field.name}-error` : undefined}
@@ -129,8 +196,14 @@ export function CreateStackButton() {
           <DialogFooter className="mt-4">
             <form.Subscribe selector={(state) => !state.canSubmit || state.isValidating}>
               {(disabled) => (
-                <Button type="submit" disabled={mutation.isPending || disabled}>
-                  {mutation.isPending ? "Creating..." : "Create"}
+                <Button type="submit" disabled={mutation.isPending || importing || disabled}>
+                  {importing
+                    ? "Importing..."
+                    : mutation.isPending
+                      ? "Creating..."
+                      : archive
+                        ? "Import"
+                        : "Create"}
                 </Button>
               )}
             </form.Subscribe>

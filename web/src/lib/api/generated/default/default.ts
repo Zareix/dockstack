@@ -36,6 +36,7 @@ import type {
   GetImagesStale200,
   GetSessionResponseBody,
   GetStacksDrift200,
+  GetStacksNameExportParams,
   GetStacksUpdates200,
   ImageInfo,
   NetworkInfo,
@@ -46,6 +47,7 @@ import type {
   PasskeyRegisterFinishOutputBody,
   PasskeyRegisterFinishRequest,
   PostAuthSignOut200,
+  PostStacksImportBody,
   PruneResult,
   RedeployResult,
   ResetPasswordRequest,
@@ -58,6 +60,7 @@ import type {
   StackFilesSaveRequest,
   StackFilesSaveResponseBody,
   StackGetResponseBody,
+  StackImportResponseBody,
   StackRenameRequest,
   UpdateUserRequest,
   UserBody,
@@ -3728,7 +3731,87 @@ export function useGetStacksDrift<TData = Awaited<ReturnType<typeof getStacksDri
 
 
 
-export const getPostStacksRedeployUrl = () => {
+export const getPostStacksImportUrl = () => {
+
+
+
+
+  return `/api/stacks/import`
+}
+
+/**
+ * @summary POST /api/stacks/import
+ */
+export const postStacksImport = async (postStacksImportBody?: PostStacksImportBody, options?: Parameters<typeof orvalInstance>[1]): Promise<StackImportResponseBody> => {
+    const formData = new FormData();
+if(postStacksImportBody?.file !== undefined) {
+ formData.append(`file`, postStacksImportBody.file);
+ }
+if(postStacksImportBody?.name !== undefined) {
+ formData.append(`name`, postStacksImportBody.name instanceof Blob ? postStacksImportBody.name : new Blob([postStacksImportBody.name], { type: 'text/plain' }));
+ }
+
+  return orvalInstance<StackImportResponseBody>(getPostStacksImportUrl(),
+  {
+    ...options,
+    method: 'POST'
+    ,
+    body: formData
+  }
+);}
+
+
+
+
+
+export const getPostStacksImportMutationKey = () => ['postStacksImport'] as const;
+
+export const getPostStacksImportMutationOptions = <TError = ErrorType<ApiError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postStacksImport>>, TError,PostStacksImportMutationVariables, TContext>, request?: SecondParameter<typeof orvalInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postStacksImport>>, TError,PostStacksImportMutationVariables, TContext> => {
+
+const mutationKey = getPostStacksImportMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postStacksImport>>, PostStacksImportMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  postStacksImport(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostStacksImportMutationResult = NonNullable<Awaited<ReturnType<typeof postStacksImport>>>
+    export type PostStacksImportMutationBody = PostStacksImportBody | undefined
+    export type PostStacksImportMutationError = ErrorType<ApiError>
+    export type PostStacksImportMutationVariables = {data?: PostStacksImportBody}
+
+    /**
+ * @summary POST /api/stacks/import
+ */
+export const usePostStacksImport = <TError = ErrorType<ApiError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postStacksImport>>, TError,PostStacksImportMutationVariables, TContext>, request?: SecondParameter<typeof orvalInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postStacksImport>>,
+        TError,
+        PostStacksImportMutationVariables,
+        TContext
+      > => {
+      return useMutation(getPostStacksImportMutationOptions(options), queryClient);
+    }
+    export const getPostStacksRedeployUrl = () => {
 
 
 
@@ -4314,7 +4397,123 @@ export const usePostStacksNameEnv = <TError = ErrorType<ApiError>,
       > => {
       return useMutation(getPostStacksNameEnvMutationOptions(options), queryClient);
     }
-    export const getGetStacksNameFilesUrl = (name: string,) => {
+    export const getGetStacksNameExportUrl = (name: string,
+    params?: GetStacksNameExportParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/stacks/${name}/export?${stringifiedParams}` : `/api/stacks/${name}/export`
+}
+
+/**
+ * Returns the stack directory as a zip archive. Use `includeEnv` to include the .env file, which may contain secrets.
+ * @summary Export a stack as a zip archive
+ */
+export const getStacksNameExport = async (name: string,
+    params?: GetStacksNameExportParams, options?: Parameters<typeof orvalInstance>[1]): Promise<Blob> => {
+
+  return orvalInstance<Blob>(getGetStacksNameExportUrl(name,params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetStacksNameExportQueryKey = (name: string,
+    params?: GetStacksNameExportParams,) => {
+    return [
+    `/api/stacks/${name}/export`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetStacksNameExportQueryOptions = <TData = Awaited<ReturnType<typeof getStacksNameExport>>, TError = ErrorType<ApiError>>(name: string,
+    params?: GetStacksNameExportParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStacksNameExport>>, TError, TData>>, request?: SecondParameter<typeof orvalInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetStacksNameExportQueryKey(name,params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getStacksNameExport>>> = ({ signal }) => getStacksNameExport(name,params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: name !== null && name !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getStacksNameExport>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetStacksNameExportQueryResult = NonNullable<Awaited<ReturnType<typeof getStacksNameExport>>>
+export type GetStacksNameExportQueryError = ErrorType<ApiError>
+
+
+export function useGetStacksNameExport<TData = Awaited<ReturnType<typeof getStacksNameExport>>, TError = ErrorType<ApiError>>(
+ name: string,
+    params: undefined |  GetStacksNameExportParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStacksNameExport>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getStacksNameExport>>,
+          TError,
+          Awaited<ReturnType<typeof getStacksNameExport>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof orvalInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetStacksNameExport<TData = Awaited<ReturnType<typeof getStacksNameExport>>, TError = ErrorType<ApiError>>(
+ name: string,
+    params?: GetStacksNameExportParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStacksNameExport>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getStacksNameExport>>,
+          TError,
+          Awaited<ReturnType<typeof getStacksNameExport>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof orvalInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetStacksNameExport<TData = Awaited<ReturnType<typeof getStacksNameExport>>, TError = ErrorType<ApiError>>(
+ name: string,
+    params?: GetStacksNameExportParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStacksNameExport>>, TError, TData>>, request?: SecondParameter<typeof orvalInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Export a stack as a zip archive
+ */
+
+export function useGetStacksNameExport<TData = Awaited<ReturnType<typeof getStacksNameExport>>, TError = ErrorType<ApiError>>(
+ name: string,
+    params?: GetStacksNameExportParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStacksNameExport>>, TError, TData>>, request?: SecondParameter<typeof orvalInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetStacksNameExportQueryOptions(name,params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getGetStacksNameFilesUrl = (name: string,) => {
 
 
 

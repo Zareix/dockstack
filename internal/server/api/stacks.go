@@ -2,6 +2,8 @@ package api
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -203,6 +205,73 @@ func (d *Deps) handleStackFilesSave(ctx context.Context, in *struct {
 	resp := &stackFilesSaveResponse{}
 	resp.Body.Success = true
 	resp.Body.Validation = d.Stacks.ValidateCompose(ctx, in.Name)
+	return resp, nil
+}
+
+type stackExportInput struct {
+	Name       string `path:"name"`
+	IncludeEnv bool   `query:"includeEnv" default:"true" doc:"Include the .env file, which may contain secrets"`
+}
+
+func (d *Deps) handleStackExport(ctx context.Context, in *stackExportInput) (*huma.StreamResponse, error) {
+	if err := validateStackName(in.Name); err != nil {
+		return nil, err
+	}
+	exists, err := d.Stacks.StackExists(ctx, in.Name)
+	if err != nil {
+		web.LogError(web.RequestFrom(ctx), err)
+		return nil, huma.Error500InternalServerError("failed to check stack")
+	}
+	if !exists {
+		return nil, huma.Error404NotFound("stack not found")
+	}
+	return &huma.StreamResponse{
+		Body: func(hctx huma.Context) {
+			hctx.SetHeader("Content-Type", "application/zip")
+			hctx.SetHeader("Content-Disposition", fmt.Sprintf(`attachment; filename="%s.zip"`, in.Name))
+			if err := d.Stacks.ExportStack(in.Name, in.IncludeEnv, hctx.BodyWriter()); err != nil {
+				web.LogError(web.RequestFrom(ctx), err)
+			}
+		},
+	}, nil
+}
+
+type stackImportForm struct {
+	File huma.FormFile `form:"file" required:"true" doc:"Zip archive of the stack directory"`
+	Name string        `form:"name" required:"true" doc:"Name of the imported stack"`
+}
+
+type stackImportInput struct {
+	RawBody huma.MultipartFormFiles[stackImportForm]
+}
+
+type stackImportResponse struct {
+	Body struct {
+		Name string `json:"name"`
+	}
+}
+
+func (d *Deps) handleStackImport(ctx context.Context, in *stackImportInput) (*stackImportResponse, error) {
+	data := in.RawBody.Data()
+	if err := validateStackName(data.Name); err != nil {
+		return nil, huma.Error400BadRequest("invalid stack name (allowed: a-zA-Z0-9_-)")
+	}
+	exists, err := d.Stacks.StackExists(ctx, data.Name)
+	if err != nil {
+		web.LogError(web.RequestFrom(ctx), err)
+		return nil, huma.Error500InternalServerError("failed to check stack")
+	}
+	if exists {
+		return nil, huma.Error409Conflict("stack already exists")
+	}
+	if err := d.Stacks.ImportStack(data.Name, data.File, data.File.Size); err != nil {
+		if errors.Is(err, dockerapi.ErrStackExists) {
+			return nil, huma.Error409Conflict("stack already exists")
+		}
+		return nil, huma.Error400BadRequest(err.Error())
+	}
+	resp := &stackImportResponse{}
+	resp.Body.Name = data.Name
 	return resp, nil
 }
 
@@ -431,6 +500,24 @@ func (d *Deps) handleStackActionStream(w http.ResponseWriter, r *http.Request, a
 func (d *Deps) registerStacks(api huma.API, router chi.Router) {
 	huma.Get(api, "/api/stacks", d.handleStacksList, d.AuthMW)
 	huma.Post(api, "/api/stacks", d.handleStackCreate, d.AuthMW)
+	huma.Post(api, "/api/stacks/import", d.handleStackImport, d.AuthMW)
+	exportOp := huma.Operation{
+		OperationID: "get-stacks-name-export",
+		Method:      http.MethodGet,
+		Path:        "/api/stacks/{name}/export",
+		Summary:     "Export a stack as a zip archive",
+		Description: "Returns the stack directory as a zip archive. Use `includeEnv` to include the .env file, which may contain secrets.",
+		Responses: map[string]*huma.Response{
+			"200": {
+				Description: "Zip archive of the stack directory",
+				Content: map[string]*huma.MediaType{
+					"application/zip": {Schema: &huma.Schema{Type: "string", Format: "binary"}},
+				},
+			},
+		},
+	}
+	d.AuthMW(&exportOp)
+	huma.Register(api, exportOp, d.handleStackExport)
 	huma.Get(api, "/api/stacks/updates", d.handleStackUpdates, d.AuthMW)
 	huma.Get(api, "/api/stacks/drift", d.handleStacksDrift, d.AuthMW)
 	huma.Get(api, "/api/stacks/{name}", d.handleStackGet, d.AuthMW)

@@ -1,6 +1,7 @@
 import {
   ArrowCircleUpIcon,
   DownloadIcon,
+  DownloadSimpleIcon,
   DotsThreeIcon,
   PauseIcon,
   PencilSimpleIcon,
@@ -17,6 +18,7 @@ import { toast } from "sonner"
 import * as v from "valibot"
 
 import { StackActionDialog } from "#/components/stacks/action-dialog"
+import { ExportStackDialog } from "#/components/stacks/export-stack-dialog"
 import { StackFiles } from "#/components/stacks/files"
 import { ContainerLogs } from "#/components/stacks/logs"
 import { RenameStackDialog } from "#/components/stacks/rename-stack-dialog"
@@ -142,6 +144,7 @@ function StackDetails({ name }: { name: string }) {
   const driftOutdated = driftQuery.data?.[name] === "outdated"
   const [pendingAction, setPendingAction] = useState<"pull" | "restart" | "down" | null>(null)
   const [destroyOpen, setDestroyOpen] = useState(false)
+  const [exportOpen, setExportOpen] = useState(false)
   const isRunning = statusQuery.data
     ? !["stopped", "down", "missing", "unknown"].includes(statusQuery.data)
     : false
@@ -282,6 +285,11 @@ function StackDetails({ name }: { name: string }) {
                 Down
               </DropdownMenuItem>
               <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => setExportOpen(true)}>
+                <DownloadSimpleIcon />
+                Export
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
               <DropdownMenuItem variant="destructive" onClick={() => setDestroyOpen(true)}>
                 <TrashIcon />
                 Destroy
@@ -332,6 +340,8 @@ function StackDetails({ name }: { name: string }) {
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
+
+          <ExportStackDialog stackName={name} open={exportOpen} onOpenChange={setExportOpen} />
         </div>
       </header>
 
