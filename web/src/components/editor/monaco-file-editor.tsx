@@ -75,19 +75,7 @@ export default function MonacoFileEditor({
   }
 
   return (
-    <div className="flex h-full flex-col">
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2 md:hidden">
-          <Button size="icon-sm" variant="outline" onClick={handleCopy}>
-            <CopyIcon data-icon="inline-start" />
-          </Button>
-          {!readOnly && (
-            <Button size="icon-sm" variant="outline" onClick={handlePaste}>
-              <ClipboardTextIcon data-icon="inline-start" />
-            </Button>
-          )}
-        </div>
-      </div>
+    <div className="relative flex h-full flex-col">
       <div className="min-h-0 flex-1">
         <Editor
           value={value}
@@ -131,6 +119,16 @@ export default function MonacoFileEditor({
           }}
           onChange={(v) => onChange?.(v ?? "")}
         />
+      </div>
+      <div className="absolute top-2 right-2 flex items-center gap-2 md:hidden">
+        <Button size="icon-sm" variant="outline" onClick={handleCopy}>
+          <CopyIcon data-icon="inline-start" />
+        </Button>
+        {!readOnly && (
+          <Button size="icon-sm" variant="outline" onClick={handlePaste}>
+            <ClipboardTextIcon data-icon="inline-start" />
+          </Button>
+        )}
       </div>
     </div>
   )

@@ -178,7 +178,7 @@ function StackDetails({ name }: { name: string }) {
 
   return (
     <>
-      <header className="items-center gap-2 md:flex">
+      <header className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="flex items-center gap-2 text-2xl font-bold">
           <span>{name}</span>
           <RenameStackDialog
@@ -200,7 +200,7 @@ function StackDetails({ name }: { name: string }) {
           <StackServiceLinks stackName={name} />
         </h2>
 
-        <div className="mt-4 ml-auto flex flex-wrap items-center gap-2 md:mt-0">
+        <div className="flex flex-wrap items-center gap-2 md:mt-0 md:ml-auto">
           {driftOutdated && (
             <Tooltip>
               <TooltipTrigger

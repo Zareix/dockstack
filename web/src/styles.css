@@ -143,6 +143,11 @@ body,
   @apply rounded-tr-lg rounded-b-lg;
 }
 
+[data-split-view] .monaco-editor,
+[data-split-view] .monaco-editor > .overflow-guard {
+  @apply rounded-lg;
+}
+
 .pulse-button {
   position: relative;
 }
