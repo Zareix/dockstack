@@ -1,11 +1,13 @@
 import { InfoIcon, PlusIcon, WarningIcon } from "@phosphor-icons/react"
+import { FloppyDiskIcon } from "@phosphor-icons/react/dist/ssr/FloppyDisk"
 import { useQueryClient } from "@tanstack/react-query"
-import { lazy, Suspense, useEffect, useState } from "react"
+import { lazy, Suspense, useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 
 import { Alert, AlertDescription, AlertTitle } from "#/components/ui/alert"
 import { Button } from "#/components/ui/button"
 import { Spinner } from "#/components/ui/spinner"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/components/ui/tabs"
 import {
   getGetStacksDriftQueryKey,
   getGetStacksNameFilesQueryKey,
@@ -71,11 +73,16 @@ export function StackFiles({ stackName }: { stackName: string }) {
   const [compose, setCompose] = useState("")
   const [envContent, setEnvContent] = useState<string | undefined>(undefined)
   const [validation, setValidation] = useState<ComposeValidation | null>(null)
+  const [activeTab, setActiveTab] = useState<string | null>(null)
+  const composeDirty = useRef(false)
+  const envDirty = useRef(false)
 
   const filesQuery = useGetStacksNameFiles(stackName)
   const saveMutation = usePutStacksNameFiles({
     mutation: {
       onSuccess: (data) => {
+        composeDirty.current = false
+        envDirty.current = false
         queryClient.invalidateQueries({ queryKey: getGetStacksNameFilesQueryKey(stackName) })
         queryClient.invalidateQueries({ queryKey: getGetStacksNameQueryKey(stackName) })
         queryClient.invalidateQueries({ queryKey: getGetStacksDriftQueryKey() })
@@ -91,79 +98,70 @@ export function StackFiles({ stackName }: { stackName: string }) {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: getGetStacksNameFilesQueryKey(stackName) })
         queryClient.invalidateQueries({ queryKey: getGetStacksDriftQueryKey() })
+        setActiveTab(".env")
+        toast.success("Created .env")
       },
+      onError: (error) => toast.error(error.message),
     },
   })
 
   useEffect(() => {
+    composeDirty.current = false
+    envDirty.current = false
+    setActiveTab(null)
+    setEnvContent(undefined)
+    setValidation(null)
+  }, [stackName])
+
+  useEffect(() => {
     if (!filesQuery.data) return
-    setCompose(filesQuery.data.compose)
-    if (filesQuery.data.env) setEnvContent(filesQuery.data.env)
+    if (!composeDirty.current) setCompose(filesQuery.data.compose)
+    if (!envDirty.current) setEnvContent(filesQuery.data.env ?? undefined)
   }, [filesQuery.data])
 
   const isDirty =
-    filesQuery.data && (compose !== filesQuery.data.compose || envContent !== filesQuery.data.env)
+    filesQuery.data &&
+    (compose !== filesQuery.data.compose || envContent !== (filesQuery.data.env ?? undefined))
+
+  const tab = activeTab ?? filesQuery.data?.composeFile
+  const showEnvTab = envContent !== undefined || activeTab === ".env"
 
   return (
     <>
       {filesQuery.isLoading && <p className="text-sm text-muted-foreground">Loading...</p>}
       {filesQuery.error && <p className="text-sm text-destructive">{filesQuery.error.message}</p>}
-      {filesQuery.data && (
+      {filesQuery.data && tab && (
         <>
-          <div className="grid gap-4 md:grid-cols-12">
-            <div className="md:col-span-7">
-              <div className="h-[60vh] md:h-[70vh]">
-                <Suspense fallback={<Spinner />}>
-                  <Editor
-                    value={compose}
-                    filename={filesQuery.data.composeFile}
-                    onChange={(value) => {
-                      setCompose(value)
-                      setValidation(null)
-                    }}
-                  />
-                </Suspense>
-              </div>
-            </div>
-            <div className="md:col-span-5 ">
-              {envContent !== undefined ? (
-                <div className="h-[60vh] md:h-[70vh]">
-                  <Suspense fallback={<Spinner />}>
-                    <Editor
-                      value={envContent}
-                      filename=".env"
-                      onChange={(value) => {
-                        setEnvContent(value)
-                        setValidation(null)
-                      }}
-                    />
-                  </Suspense>
-                </div>
-              ) : (
-                <div className="flex items-center rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
-                  <Button
-                    onClick={() =>
-                      createDotEnvMutation.mutate({
-                        name: stackName,
-                      })
-                    }
-                    variant="ghost"
-                  >
-                    <PlusIcon data-icon="inline-start" />
-                    Create .env
-                  </Button>
-                </div>
+          <Tabs
+            value={tab}
+            onValueChange={(value) => setActiveTab(String(value))}
+            className="gap-0"
+          >
+            <div className="flex items-center gap-2">
+              <TabsList className="rounded-b-none bg-[#1e1e1e]">
+                <TabsTrigger value={filesQuery.data.composeFile} className="font-mono">
+                  {filesQuery.data.composeFile}
+                </TabsTrigger>
+                {showEnvTab && (
+                  <TabsTrigger value=".env" className="font-mono">
+                    .env
+                  </TabsTrigger>
+                )}
+              </TabsList>
+              {envContent === undefined && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => createDotEnvMutation.mutate({ name: stackName })}
+                  disabled={createDotEnvMutation.isPending}
+                >
+                  <PlusIcon data-icon="inline-start" />
+                  Create .env
+                </Button>
               )}
-            </div>
-          </div>
-          {validation && (
-            <div className="mt-4">
-              <ValidationAlerts validation={validation} />
-            </div>
-          )}
-          {isDirty && (
-            <div className="mt-2 flex items-center justify-end gap-3">
               <Button
+                className="ml-auto"
+                size="sm"
                 onClick={() =>
                   saveMutation.mutate({
                     name: stackName,
@@ -174,10 +172,41 @@ export function StackFiles({ stackName }: { stackName: string }) {
                     },
                   })
                 }
-                disabled={saveMutation.isPending}
+                disabled={saveMutation.isPending || !isDirty}
               >
-                {saveMutation.isPending ? "Saving..." : "Save"}
+                {saveMutation.isPending ? (
+                  "Saving..."
+                ) : (
+                  <>
+                    <FloppyDiskIcon /> Save
+                  </>
+                )}
               </Button>
+            </div>
+            <TabsContent value={tab}>
+              <div className="h-[60vh] md:h-[75vh]">
+                <Suspense fallback={<Spinner />}>
+                  <Editor
+                    value={tab === filesQuery.data.composeFile ? compose : (envContent ?? "")}
+                    filename={tab}
+                    onChange={(value) => {
+                      if (tab === filesQuery.data.composeFile) {
+                        setCompose(value)
+                        composeDirty.current = true
+                      } else {
+                        setEnvContent(value)
+                        envDirty.current = true
+                      }
+                      setValidation(null)
+                    }}
+                  />
+                </Suspense>
+              </div>
+            </TabsContent>
+          </Tabs>
+          {validation && (
+            <div className="mt-4">
+              <ValidationAlerts validation={validation} />
             </div>
           )}
         </>

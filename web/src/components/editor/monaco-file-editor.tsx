@@ -75,9 +75,8 @@ export default function MonacoFileEditor({
   }
 
   return (
-    <div className="flex h-full flex-col gap-2">
+    <div className="flex h-full flex-col">
       <div className="flex items-center justify-between gap-2">
-        <p className="self-end font-mono text-xs text-muted-foreground">{filename}</p>
         <div className="flex items-center gap-2 md:hidden">
           <Button size="icon-sm" variant="outline" onClick={handleCopy}>
             <CopyIcon data-icon="inline-start" />

@@ -140,7 +140,7 @@ body,
 
 .monaco-editor,
 .monaco-editor > .overflow-guard {
-  @apply rounded-lg;
+  @apply rounded-tr-lg rounded-b-lg;
 }
 
 .pulse-button {
