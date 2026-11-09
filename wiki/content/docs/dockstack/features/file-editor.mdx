@@ -1,0 +1,20 @@
+---
+title: Stack file editor
+---
+
+The **Files** tab edits a stack's `compose.yaml` and `.env` directly in the browser.
+
+## Tabs or split view
+
+A toggle in the Files toolbar switches between two layouts:
+
+- **Tabs** (default) — one file at a time.
+- **Split** — Compose on the left, `.env` on the right. On mobile, it collapses to a single column.
+
+## Missing `.env`
+
+If the stack has no `.env`, the editor offers **Create .env**. In split view, the button appears in the right pane.
+
+## Saving
+
+**Save** writes the current compose and `.env` content, then returns diagnostics. Saving never blocks on validation, and the files are not applied to running containers — use **Deploy** / **Start** for that. See [Compose validation](/en/docs/dockstack/features/compose-validation).

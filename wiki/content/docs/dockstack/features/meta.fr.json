@@ -1,6 +1,15 @@
 {
   "title": "Fonctionnalités",
-  "pages": ["auto-detect-urls", "image-updates", "drift", "compose-validation", "webhooks", "wont-have"],
+  "pages": [
+    "file-editor",
+    "compose-validation",
+    "auto-detect-urls",
+    "image-updates",
+    "drift",
+    "webhooks",
+    "command-palette",
+    "wont-have"
+  ],
   "icon": "Function",
   "defaultOpen": true
 }

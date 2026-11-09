@@ -2,37 +2,42 @@
 title: Validation Compose
 ---
 
-Dockstack vérifie les fichiers Compose avec `docker compose config` après chaque sauvegarde. La vérification est informative : les fichiers sont toujours écrits d'abord, et un échec de validation ne bloque jamais la sauvegarde.
+Dockstack valide le fichier Compose et le `.env` en continu pendant l'édition dans l'onglet Files. La validation est informative : la sauvegarde n'est jamais bloquée, même si les fichiers sont invalides.
 
-## Fonctionnement
+## Quand elle s'exécute
 
-Quand vous sauvegardez l'éditeur Compose, Dockstack :
+- À l'ouverture de la page de la stack, les fichiers sauvegardés sont validés.
+- Chaque modification est validée immédiatement.
+- À la sauvegarde, les mêmes diagnostics sont renvoyés avec la réponse.
 
-1. écrit `compose.yaml` (et `.env` s'il a changé) dans le répertoire de la stack ;
-2. lance `docker compose config` sur les fichiers sauvegardés, avec un délai de 10 secondes ;
-3. renvoie le résultat à l'éditeur, qui affiche une alerte persistante sous les fichiers.
-
-`docker compose config` résout le modèle Compose — interpolation depuis `.env` et l'environnement, syntaxe YAML, définitions de services, volumes, réseaux, etc. C'est la référence pour savoir si Docker peut utiliser la stack telle quelle. Dockstack ne réimplémente aucune de ces vérifications.
-
-:::note
-La commande lit uniquement les fichiers sur disque. Le contenu non sauvegardé de l'éditeur n'est pas validé ; sauvegardez pour obtenir un nouveau résultat.
-:::
+La validation du brouillon lance `docker compose config` avec `--project-directory` et un fichier env temporaire : le répertoire de la stack n'est pas modifié. La commande a un timeout de 10 secondes.
 
 ## Résultats
 
-| Résultat                     | Signification                                                                                        |
-| ---------------------------- | ---------------------------------------------------------------------------------------------------- |
-| Aucune alerte                | `docker compose config` s'est terminé sans erreur ni sortie sur stderr.                               |
-| **Validation failed**        | La commande a échoué. L'alerte liste les lignes d'erreur rapportées par Compose.                     |
-| **Compose warnings**         | La commande a réussi mais a écrit des avertissements sur stderr (variables non définies, champs obsolètes, etc.). |
-| **Validation unavailable**   | La CLI `docker compose` n'est pas installée sur l'hôte Docker. Les fichiers ont été sauvegardés sans validation. |
+| Résultat                   | Signification                                                                                         |
+| -------------------------- | ----------------------------------------------------------------------------------------------------- |
+| Aucune alerte              | Les fichiers sont valides et aucun warning statique n'a été trouvé.                                   |
+| **Validation failed**      | `docker compose config` a échoué. L'alerte liste les lignes d'erreur rapportées par Compose.          |
+| **Compose warnings**       | Avertissements de Compose, plus les checks statiques de Dockstack.                                    |
+| **Env variables**          | Clés manquantes ou inutilisées dans `.env`. Voir ci-dessous.                                          |
 
-Les erreurs et avertissements sont nettoyés et limités à 20 lignes. Les sorties de type logrus `msg="..."` sont réduites au message.
+Les erreurs et avertissements sont nettoyés, limités à 20 lignes et affichés une par ligne.
 
-Les avertissements ne bloquent rien : une stack avec des avertissements peut toujours être déployée. Considérez-les comme des indices à corriger avant le prochain déploiement.
+## Variables d'environnement
 
-## Corriger un fichier Compose invalide
+Dockstack parcourt le fichier Compose à la recherche des références `${VAR}` et `$VAR` :
 
-Lisez les lignes d'erreur affichées dans l'alerte ; elles indiquent en général le fichier et la ligne que Compose n'a pas pu analyser, ou une variable non résolue. Une fois corrigé, sauvegardez à nouveau : l'alerte précédente disparaît dès que vous modifiez l'un des fichiers, et le nouveau résultat la remplace après la sauvegarde.
+- **Missing** — référencée sans valeur par défaut (`:-` / `-`), absente du `.env` et de l'environnement du process Dockstack. `Add to .env` ajoute les clés manquantes avec une valeur vide dans l'éditeur.
+- **Unused** — clé présente dans `.env` mais non référencée par le fichier Compose. `Clear unused` les retire de l'éditeur.
 
-Sauvegarder le fichier ne l'applique pas aux conteneurs en cours d'exécution. Utilisez **Deploy** / **Start** pour recréer les services avec la nouvelle configuration ; voir [la détection de dérive de configuration](/fr/docs/dockstack/features/drift).
+Les échappements `$$` sont ignorés. Les variables fournies par l'environnement de l'hôte ne sont pas signalées comme manquantes. Ces checks sont best-effort : les références dans les commentaires YAML comptent, et le contenu des `env_file` n'est pas analysé.
+
+## Warnings statiques
+
+En plus de `docker compose config`, Dockstack vérifie le modèle Compose résolu :
+
+- **Ports publiés en double** entre les services d'une même stack.
+- **Port hôte déjà utilisé** par un conteneur en cours d'exécution d'une autre stack. Les conteneurs de la stack courante sont ignorés.
+- **Résolution des images** — les images référencées sont résolues via le daemon Docker et le registry. Les images introuvables, non autorisées ou privées sans credentials sont signalées. Aucune image n'est pull ; les résultats sont cachés (1 heure en succès, 5 minutes en échec).
+
+Les checks de ports tiennent compte de tcp/udp et des IP d'écoute (`0.0.0.0` / `::` entrent en conflit avec une adresse spécifique, deux adresses spécifiques différentes non).

@@ -11,7 +11,8 @@ Dockstack is a self-hosted web UI for managing Docker Compose stacks. Browse, ed
 - **Docker Compose first** — stacks are plain directories with a `compose.yaml` (and `.env`), managed on disk
 - **Fast** — built on Bun + TanStack Start
 - **Stateless and local-first** — SQLite used only for auth; stack state lives in Docker itself and on your filesystem
-- **Built-in editor** — edit compose files directly in the UI with YAML validation
+- **Built-in editor** — edit compose and `.env` in tabs or a split view, with live Compose diagnostics (missing env vars, port conflicts, image resolution)
+- **Command palette** — `Cmd/Ctrl+K` to jump to stacks, resources or settings
 - **Webhook redeploy** — pull and recreate one stack from CI or a Git hook (`POST /api/stacks/{name}/redeploy`), or recreate every running stack at once
 - **Image update detection** — per-stack badge when a newer image digest is available, with a streamed one-click update
 - **Drift detection** — per-stack badge when the compose file or `.env` no longer matches the running containers

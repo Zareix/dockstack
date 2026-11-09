@@ -1,0 +1,20 @@
+---
+title: Éditeur de fichiers de stack
+---
+
+L'onglet **Files** permet de modifier directement le `compose.yaml` et le `.env` d'une stack depuis le navigateur.
+
+## Onglets ou vue split
+
+Un bouton dans la barre d'outils des fichiers bascule entre deux dispositions :
+
+- **Tabs** (par défaut) — un fichier à la fois.
+- **Split** — Compose à gauche, `.env` à droite. Sur mobile, la vue passe en une seule colonne.
+
+## `.env` manquant
+
+Si la stack n'a pas de `.env`, l'éditeur propose **Create .env**. En vue split, le bouton apparaît dans le panneau de droite.
+
+## Sauvegarde
+
+**Save** écrit le contenu courant de compose et du `.env`, puis renvoie les diagnostics. La sauvegarde n'est jamais bloquée par la validation, et les fichiers ne sont pas appliqués aux conteneurs en cours d'exécution — utilisez **Deploy** / **Start** pour cela. Voir [la validation Compose](/fr/docs/dockstack/features/compose-validation).
