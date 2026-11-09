@@ -4,7 +4,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
 	"testing"
 )
 
@@ -83,9 +82,6 @@ func TestValidateComposeValid(t *testing.T) {
 	}
 	if got.Validation.Errors == nil || got.Validation.Warnings == nil {
 		t.Fatalf("errors and warnings must be non-nil arrays: %+v", got)
-	}
-	if !strings.Contains(got.Resolved, "services:") {
-		t.Fatalf("expected resolved config: %q", got.Resolved)
 	}
 }
 

@@ -176,19 +176,16 @@ func TestValidateComposeReportsStaticWarnings(t *testing.T) {
 func TestValidateComposeContentUsesDraftEnv(t *testing.T) {
 	skipWithoutCompose(t)
 	root := t.TempDir()
-	writeCompose(t, root, "app", "services:\n  app:\n    image: alpine:${TAG}\n")
+	writeCompose(t, root, "app", "services:\n  app:\n    image: alpine:${TAG:?tag required}\n")
 	if err := os.WriteFile(filepath.Join(root, "app", ".env"), []byte("TAG=3.19\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	s := NewStacks(nil, root, "", "localhost", "")
 
 	draftEnv := "TAG=3.20\n"
-	got := s.ValidateComposeContent(t.Context(), "app", "services:\n  app:\n    image: alpine:${TAG}\n", &draftEnv)
+	got := s.ValidateComposeContent(t.Context(), "app", "services:\n  app:\n    image: alpine:${TAG:?tag required}\n", &draftEnv)
 	if !got.Validation.Valid {
 		t.Fatalf("expected valid compose: %+v", got)
-	}
-	if !strings.Contains(got.Resolved, "alpine:3.20") {
-		t.Fatalf("draft env not used: %q", got.Resolved)
 	}
 	if strings.Join(got.Env.Used, ",") != "TAG" {
 		t.Fatalf("used: got %v", got.Env.Used)

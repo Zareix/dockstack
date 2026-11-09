@@ -1,5 +1,4 @@
 import {
-  CopyIcon,
   InfoIcon,
   PlusIcon,
   SquareSplitVerticalIcon,
@@ -15,7 +14,6 @@ import { toast } from "sonner"
 
 import { Alert, AlertAction, AlertDescription, AlertTitle } from "#/components/ui/alert"
 import { Button } from "#/components/ui/button"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "#/components/ui/collapsible"
 import { Spinner } from "#/components/ui/spinner"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/components/ui/tabs"
 import { Tooltip, TooltipContent, TooltipTrigger } from "#/components/ui/tooltip"
@@ -206,15 +204,6 @@ function SplitEditors({
   )
 }
 
-async function copyText(text: string) {
-  try {
-    await navigator.clipboard.writeText(text)
-    toast.success("Copied")
-  } catch {
-    toast.error("Failed to copy")
-  }
-}
-
 function DiagnosticsPanel({
   diagnostics,
   onAddMissingEnv,
@@ -229,7 +218,6 @@ function DiagnosticsPanel({
   const warnings = validation?.warnings ?? []
   const unused = diagnostics?.env.unused ?? []
   const missing = diagnostics?.env.missing ?? []
-  const resolved = diagnostics?.resolved ?? ""
 
   return (
     <div className="space-y-2">
@@ -311,32 +299,6 @@ function DiagnosticsPanel({
             )}
           </AlertAction>
         </Alert>
-      )}
-      {resolved && (
-        <Collapsible>
-          <CollapsibleTrigger
-            render={
-              <Button variant="outline" size="sm">
-                Resolved config
-              </Button>
-            }
-          />
-          <CollapsibleContent>
-            <div className="mt-2 overflow-hidden rounded-lg border">
-              <div className="flex items-center justify-end border-b p-1">
-                <Button
-                  size="icon-sm"
-                  variant="ghost"
-                  onClick={() => copyText(resolved)}
-                  aria-label="Copy resolved config"
-                >
-                  <CopyIcon />
-                </Button>
-              </div>
-              <pre className="max-h-64 overflow-auto p-3 font-mono text-xs">{resolved}</pre>
-            </div>
-          </CollapsibleContent>
-        </Collapsible>
       )}
     </div>
   )

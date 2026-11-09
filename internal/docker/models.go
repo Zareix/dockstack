@@ -130,7 +130,6 @@ type ComposeEnvUsage struct {
 
 type ComposeDiagnostics struct {
 	Validation ComposeValidation `json:"validation"`
-	Resolved   string            `json:"resolved"`
 	Env        ComposeEnvUsage   `json:"env"`
 }
 

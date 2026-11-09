@@ -155,8 +155,9 @@ func (s *Stacks) ValidateComposeContent(ctx context.Context, stackName, compose 
 	}
 
 	diags.Validation.Warnings = cleanComposeOutput(stderr.String())
-	diags.Resolved = stdout.String()
-	diags.Validation.Warnings = append(diags.Validation.Warnings, composeStaticWarnings(diags.Resolved)...)
+	resolved := stdout.String()
+	diags.Validation.Warnings = append(diags.Validation.Warnings, composeStaticWarnings(resolved)...)
+	diags.Validation.Warnings = append(diags.Validation.Warnings, s.containerPortWarnings(ctx, stackName, resolved)...)
 	return diags
 }
 

@@ -129,15 +129,51 @@ func sortedKeys(set map[string]struct{}) []string {
 }
 
 func composeStaticWarnings(resolved string) []string {
-	if strings.TrimSpace(resolved) == "" {
-		return nil
-	}
-	var cfg resolvedComposeConfig
-	if err := yaml.Unmarshal([]byte(resolved), &cfg); err != nil {
+	cfg, ok := parseResolvedCompose(resolved)
+	if !ok {
 		return nil
 	}
 	warnings := invalidImageWarnings(cfg)
 	return append(warnings, duplicatePortWarnings(cfg)...)
+}
+
+func parseResolvedCompose(resolved string) (resolvedComposeConfig, bool) {
+	var cfg resolvedComposeConfig
+	if strings.TrimSpace(resolved) == "" {
+		return cfg, false
+	}
+	if err := yaml.Unmarshal([]byte(resolved), &cfg); err != nil {
+		return cfg, false
+	}
+	return cfg, true
+}
+
+func composePortBindings(cfg resolvedComposeConfig) []hostBinding {
+	bindings := []hostBinding{}
+	for _, name := range sortedServiceNames(cfg) {
+		for _, port := range cfg.Services[name].Ports {
+			published := strings.TrimSpace(fmt.Sprint(port.Published))
+			if published == "" || published == "<nil>" {
+				continue
+			}
+			start, end, ok := parsePortRange(published)
+			if !ok {
+				continue
+			}
+			protocol := port.Protocol
+			if protocol == "" {
+				protocol = "tcp"
+			}
+			bindings = append(bindings, hostBinding{
+				service:  name,
+				hostIP:   normalizeHostIP(port.HostIP),
+				protocol: protocol,
+				start:    start,
+				end:      end,
+			})
+		}
+	}
+	return bindings
 }
 
 func sortedServiceNames(cfg resolvedComposeConfig) []string {
@@ -166,42 +202,20 @@ func invalidImageWarnings(cfg resolvedComposeConfig) []string {
 func duplicatePortWarnings(cfg resolvedComposeConfig) []string {
 	warnings := []string{}
 	seen := map[string]struct{}{}
-	bindings := []hostBinding{}
-	for _, name := range sortedServiceNames(cfg) {
-		for _, port := range cfg.Services[name].Ports {
-			published := strings.TrimSpace(fmt.Sprint(port.Published))
-			if published == "" || published == "<nil>" {
+	bindings := composePortBindings(cfg)
+	for index, binding := range bindings {
+		for _, existing := range bindings[:index] {
+			if existing.protocol != binding.protocol ||
+				!portRangesOverlap(binding.start, binding.end, existing.start, existing.end) ||
+				!hostIPsConflict(binding.hostIP, existing.hostIP) {
 				continue
 			}
-			start, end, ok := parsePortRange(published)
-			if !ok {
+			key := fmt.Sprintf("%s/%d-%d/%s/%s", binding.protocol, binding.start, binding.end, existing.service, binding.service)
+			if _, ok := seen[key]; ok {
 				continue
 			}
-			protocol := port.Protocol
-			if protocol == "" {
-				protocol = "tcp"
-			}
-			hostIP := normalizeHostIP(port.HostIP)
-			for _, existing := range bindings {
-				if existing.protocol != protocol ||
-					!portRangesOverlap(start, end, existing.start, existing.end) ||
-					!hostIPsConflict(hostIP, existing.hostIP) {
-					continue
-				}
-				key := fmt.Sprintf("%s/%d-%d/%s/%s", protocol, start, end, existing.service, name)
-				if _, ok := seen[key]; ok {
-					continue
-				}
-				seen[key] = struct{}{}
-				warnings = append(warnings, portWarning(name, existing.service, protocol, start, end))
-			}
-			bindings = append(bindings, hostBinding{
-				service:  name,
-				hostIP:   hostIP,
-				protocol: protocol,
-				start:    start,
-				end:      end,
-			})
+			seen[key] = struct{}{}
+			warnings = append(warnings, portWarning(binding.service, existing.service, binding.protocol, binding.start, binding.end))
 		}
 	}
 	return warnings

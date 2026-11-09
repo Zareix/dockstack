@@ -10,6 +10,5 @@ export interface ComposeDiagnostics {
   /** A URL to the JSON Schema for this object. */
   readonly $schema?: string;
   env: ComposeEnvUsage;
-  resolved: string;
   validation: ComposeValidation;
 }

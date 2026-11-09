@@ -539,7 +539,7 @@ func TestStackValidateDraft(t *testing.T) {
 		t.Fatal(err)
 	}
 	rr := doJSON(t, h, http.MethodPost, "/api/stacks/app/validate", map[string]any{
-		"compose": "services:\n  app:\n    image: alpine:${TAG}\n",
+		"compose": "services:\n  app:\n    image: alpine:${TAG:?tag required}\n",
 		"env":     "TAG=3.20\n",
 	}, cookies)
 	if rr.Code != http.StatusOK {
@@ -550,8 +550,7 @@ func TestStackValidateDraft(t *testing.T) {
 			Valid  bool     `json:"valid"`
 			Errors []string `json:"errors"`
 		} `json:"validation"`
-		Resolved string `json:"resolved"`
-		Env      struct {
+		Env struct {
 			Used   []string `json:"used"`
 			Unused []string `json:"unused"`
 		} `json:"env"`
@@ -561,9 +560,6 @@ func TestStackValidateDraft(t *testing.T) {
 	}
 	if !body.Validation.Valid || len(body.Validation.Errors) != 0 {
 		t.Fatalf("expected valid draft: %s", rr.Body.String())
-	}
-	if !strings.Contains(body.Resolved, "alpine:3.20") {
-		t.Fatalf("draft env not used: %s", rr.Body.String())
 	}
 	if len(body.Env.Used) != 1 || body.Env.Used[0] != "TAG" {
 		t.Fatalf("unexpected env usage: %s", rr.Body.String())
