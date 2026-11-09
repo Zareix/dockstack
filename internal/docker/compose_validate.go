@@ -157,6 +157,9 @@ func (s *Stacks) ValidateComposeContent(ctx context.Context, stackName, compose 
 	diags.Validation.Warnings = cleanComposeOutput(stderr.String())
 	resolved := stdout.String()
 	diags.Validation.Warnings = append(diags.Validation.Warnings, composeStaticWarnings(resolved)...)
+	if cfg, ok := parseResolvedCompose(resolved); ok {
+		diags.Validation.Warnings = append(diags.Validation.Warnings, s.imageWarnings(ctx, cfg)...)
+	}
 	diags.Validation.Warnings = append(diags.Validation.Warnings, s.containerPortWarnings(ctx, stackName, resolved)...)
 	return diags
 }

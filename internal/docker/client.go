@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"io"
 	"net"
 	"net/http"
@@ -18,8 +20,11 @@ import (
 
 type remoteDigestEntry struct {
 	digest string
+	err    string
 	at     time.Time
 }
+
+var errRegistryUnavailable = errors.New("registry lookup unavailable")
 
 type Client struct {
 	api        *client.Client
@@ -52,26 +57,31 @@ func NewClient(dockerHost, configDir string) (*Client, error) {
 }
 
 func (c *Client) RemoteDigest(ctx context.Context, tag string) (string, bool) {
+	digest, err := c.remoteDigest(ctx, tag)
+	return digest, err == nil
+}
+
+func (c *Client) remoteDigest(ctx context.Context, image string) (string, error) {
 	auth := map[string]string{}
-	if u, p, server, ok := c.RegistryAuth(tag); ok {
+	if u, p, server, ok := c.RegistryAuth(image); ok {
 		auth = map[string]string{"username": u, "password": p, "serveraddress": server}
 	}
 	authJSON, _ := json.Marshal(auth)
-	url := "http://docker/distribution/" + tag + "/json"
+	url := "http://docker/distribution/" + image + "/json"
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
-		return "", false
+		return "", err
 	}
 	req.Header.Set("X-Registry-Auth", base64.StdEncoding.EncodeToString(authJSON))
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
-		return "", false
+		return "", fmt.Errorf("%w: %v", errRegistryUnavailable, err)
 	}
 	defer func() { _ = resp.Body.Close() }()
 	if resp.StatusCode != http.StatusOK {
-		_, _ = io.Copy(io.Discard, resp.Body)
-		return "", false
+		body, _ := io.ReadAll(io.LimitReader(resp.Body, 4*1024))
+		return "", registryError(resp.StatusCode, body)
 	}
 	var data struct {
 		Descriptor struct {
@@ -79,18 +89,51 @@ func (c *Client) RemoteDigest(ctx context.Context, tag string) (string, bool) {
 		} `json:"Descriptor"`
 	}
 	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
-		return "", false
+		return "", fmt.Errorf("invalid registry response: %w", err)
 	}
-	return data.Descriptor.Digest, true
+	if data.Descriptor.Digest == "" {
+		return "", errors.New("registry returned an empty digest")
+	}
+	return data.Descriptor.Digest, nil
 }
 
-const remoteDigestTTL = time.Hour
+func registryError(status int, body []byte) error {
+	var payload struct {
+		Message string `json:"message"`
+	}
+	message := ""
+	if json.Unmarshal(body, &payload) == nil {
+		message = strings.Join(strings.Fields(payload.Message), " ")
+	}
+	switch status {
+	case http.StatusNotFound:
+		if message == "" {
+			message = "not found"
+		}
+		return errors.New(message)
+	case http.StatusUnauthorized, http.StatusForbidden:
+		if message == "" {
+			message = "unauthorized"
+		}
+		return errors.New(message)
+	default:
+		if message == "" {
+			message = http.StatusText(status)
+		}
+		return fmt.Errorf("registry error: %s", message)
+	}
+}
+
+const (
+	remoteDigestTTL      = time.Hour
+	imageResolveErrorTTL = 5 * time.Minute
+)
 
 func (c *Client) RemoteDigestCached(ctx context.Context, tag string) (string, bool) {
 	c.digestMu.Lock()
 	entry, ok := c.digests[tag]
 	c.digestMu.Unlock()
-	if ok && time.Since(entry.at) < remoteDigestTTL {
+	if ok && entry.err == "" && time.Since(entry.at) < remoteDigestTTL {
 		return entry.digest, true
 	}
 
@@ -106,6 +149,43 @@ func (c *Client) RemoteDigestCached(ctx context.Context, tag string) (string, bo
 	c.digests[tag] = remoteDigestEntry{digest: digest, at: time.Now()}
 	c.digestMu.Unlock()
 	return digest, true
+}
+
+func (c *Client) ResolveImage(ctx context.Context, image string) (string, error) {
+	c.digestMu.Lock()
+	entry, ok := c.digests[image]
+	c.digestMu.Unlock()
+	if ok {
+		ttl := remoteDigestTTL
+		if entry.err != "" {
+			ttl = imageResolveErrorTTL
+		}
+		if time.Since(entry.at) < ttl {
+			if entry.err != "" {
+				return "", errors.New(entry.err)
+			}
+			return entry.digest, nil
+		}
+	}
+
+	digest, err := c.remoteDigest(ctx, image)
+	if err != nil && errors.Is(err, errRegistryUnavailable) {
+		return "", err
+	}
+
+	entry = remoteDigestEntry{at: time.Now()}
+	if err != nil {
+		entry.err = err.Error()
+	} else {
+		entry.digest = digest
+	}
+	c.digestMu.Lock()
+	if c.digests == nil {
+		c.digests = map[string]remoteDigestEntry{}
+	}
+	c.digests[image] = entry
+	c.digestMu.Unlock()
+	return digest, err
 }
 
 func (c *Client) InvalidateRemoteDigests() {
