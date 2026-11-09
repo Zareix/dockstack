@@ -1,9 +1,11 @@
 import {
+  CopyIcon,
   InfoIcon,
   PlusIcon,
   SquareSplitVerticalIcon,
   TabsIcon,
   WarningIcon,
+  WarningOctagonIcon,
 } from "@phosphor-icons/react"
 import { FloppyDiskIcon } from "@phosphor-icons/react/dist/ssr/FloppyDisk"
 import { useQueryClient } from "@tanstack/react-query"
@@ -11,8 +13,9 @@ import { lazy, Suspense, useEffect, useRef, useState } from "react"
 import type { ReactNode } from "react"
 import { toast } from "sonner"
 
-import { Alert, AlertDescription, AlertTitle } from "#/components/ui/alert"
+import { Alert, AlertAction, AlertDescription, AlertTitle } from "#/components/ui/alert"
 import { Button } from "#/components/ui/button"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "#/components/ui/collapsible"
 import { Spinner } from "#/components/ui/spinner"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/components/ui/tabs"
 import { Tooltip, TooltipContent, TooltipTrigger } from "#/components/ui/tooltip"
@@ -22,9 +25,10 @@ import {
   getGetStacksNameQueryKey,
   useGetStacksNameFiles,
   usePostStacksNameEnv,
+  usePostStacksNameValidate,
   usePutStacksNameFiles,
 } from "#/lib/api/generated"
-import type { ComposeValidation } from "#/lib/api/generated/model"
+import type { ComposeDiagnostics } from "#/lib/api/generated/model"
 import { cn } from "#/lib/utils"
 
 const Editor = lazy(() => import("#/components/editor/monaco-file-editor"))
@@ -202,29 +206,48 @@ function SplitEditors({
   )
 }
 
-function ValidationAlerts({ validation }: { validation: ComposeValidation }) {
-  if (!validation.composeAvailable) {
-    return (
-      <Alert>
-        <InfoIcon />
-        <AlertTitle>Validation unavailable</AlertTitle>
-        <AlertDescription>
-          docker compose CLI not found; the files were saved without validation.
-        </AlertDescription>
-      </Alert>
-    )
+async function copyText(text: string) {
+  try {
+    await navigator.clipboard.writeText(text)
+    toast.success("Copied")
+  } catch {
+    toast.error("Failed to copy")
   }
-  const errors = validation.errors ?? []
-  const warnings = validation.warnings ?? []
-  if (errors.length === 0 && warnings.length === 0) return null
+}
+
+function DiagnosticsPanel({
+  diagnostics,
+  onAddMissingEnv,
+  onClearUnusedEnv,
+}: {
+  diagnostics: ComposeDiagnostics | null
+  onAddMissingEnv: (keys: string[]) => void
+  onClearUnusedEnv: () => void
+}) {
+  const validation = diagnostics?.validation
+  const errors = validation?.errors ?? []
+  const warnings = validation?.warnings ?? []
+  const unused = diagnostics?.env.unused ?? []
+  const missing = diagnostics?.env.missing ?? []
+  const resolved = diagnostics?.resolved ?? ""
+
   return (
     <div className="space-y-2">
+      {validation && !validation.composeAvailable && (
+        <Alert>
+          <InfoIcon />
+          <AlertTitle>Validation unavailable</AlertTitle>
+          <AlertDescription>
+            docker compose CLI not found; the files were saved without validation.
+          </AlertDescription>
+        </Alert>
+      )}
       {errors.length > 0 && (
         <Alert variant="destructive">
           <WarningIcon />
           <AlertTitle>Compose validation failed</AlertTitle>
           <AlertDescription>
-            <ul className="list-disc pl-4">
+            <ul className="list-disc space-y-1 pl-4">
               {errors.map((error, index) => (
                 <li key={`${index}-${error}`}>{error}</li>
               ))}
@@ -237,7 +260,7 @@ function ValidationAlerts({ validation }: { validation: ComposeValidation }) {
           <WarningIcon />
           <AlertTitle>Compose warnings</AlertTitle>
           <AlertDescription>
-            <ul className="list-disc pl-4">
+            <ul className="list-disc space-y-1 pl-4">
               {warnings.map((warning, index) => (
                 <li key={`${index}-${warning}`}>{warning}</li>
               ))}
@@ -245,8 +268,89 @@ function ValidationAlerts({ validation }: { validation: ComposeValidation }) {
           </AlertDescription>
         </Alert>
       )}
+      {(missing.length > 0 || unused.length > 0) && (
+        <Alert variant="warning">
+          <WarningOctagonIcon />
+          <AlertTitle>Env variables</AlertTitle>
+          <AlertDescription>
+            <div className="mt-1 space-y-1 text-xs">
+              {missing.length > 0 && (
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-medium">Missing:</span>
+                  <span className="font-mono">{missing.join(", ")}</span>
+                </div>
+              )}
+              {unused.length > 0 && (
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-medium">Unused:</span>
+                  <span className="font-mono">{unused.join(", ")}</span>
+                </div>
+              )}
+            </div>
+          </AlertDescription>
+          <AlertAction className="flex gap-2">
+            {missing.length > 0 && (
+              <Button
+                size="xs"
+                variant="outline"
+                className="border-current text-current"
+                onClick={() => onAddMissingEnv(missing)}
+              >
+                Add missing to .env
+              </Button>
+            )}
+            {unused.length > 0 && (
+              <Button
+                size="xs"
+                variant="outline"
+                className="border-current text-current"
+                onClick={onClearUnusedEnv}
+              >
+                Clear unused
+              </Button>
+            )}
+          </AlertAction>
+        </Alert>
+      )}
+      {resolved && (
+        <Collapsible>
+          <CollapsibleTrigger
+            render={
+              <Button variant="outline" size="sm">
+                Resolved config
+              </Button>
+            }
+          />
+          <CollapsibleContent>
+            <div className="mt-2 overflow-hidden rounded-lg border">
+              <div className="flex items-center justify-end border-b p-1">
+                <Button
+                  size="icon-sm"
+                  variant="ghost"
+                  onClick={() => copyText(resolved)}
+                  aria-label="Copy resolved config"
+                >
+                  <CopyIcon />
+                </Button>
+              </div>
+              <pre className="max-h-64 overflow-auto p-3 font-mono text-xs">{resolved}</pre>
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
+      )}
     </div>
   )
+}
+
+function envKeys(content: string) {
+  const keys = new Set<string>()
+  for (const line of content.split("\n")) {
+    const trimmed = line.trim().replace(/^export /, "")
+    if (!trimmed || trimmed.startsWith("#")) continue
+    const key = trimmed.split("=")[0]?.trim()
+    if (key) keys.add(key)
+  }
+  return keys
 }
 
 export function StackFiles({ stackName }: { stackName: string }) {
@@ -254,13 +358,15 @@ export function StackFiles({ stackName }: { stackName: string }) {
 
   const [compose, setCompose] = useState("")
   const [envContent, setEnvContent] = useState<string | undefined>(undefined)
-  const [validation, setValidation] = useState<ComposeValidation | null>(null)
+  const [diagnostics, setDiagnostics] = useState<ComposeDiagnostics | null>(null)
   const [activeTab, setActiveTab] = useState<string | null>(null)
   const [viewMode, setViewMode] = useViewMode()
   const composeDirty = useRef(false)
   const envDirty = useRef(false)
+  const validationSeq = useRef(0)
 
   const filesQuery = useGetStacksNameFiles(stackName)
+  const savedCompose = filesQuery.data?.compose
   const saveMutation = usePutStacksNameFiles({
     mutation: {
       onSuccess: (data) => {
@@ -269,12 +375,14 @@ export function StackFiles({ stackName }: { stackName: string }) {
         queryClient.invalidateQueries({ queryKey: getGetStacksNameFilesQueryKey(stackName) })
         queryClient.invalidateQueries({ queryKey: getGetStacksNameQueryKey(stackName) })
         queryClient.invalidateQueries({ queryKey: getGetStacksDriftQueryKey() })
-        setValidation(data.validation)
+        setDiagnostics(data.diagnostics)
         toast.success("Saved")
       },
       onError: () => toast.error("Failed to save"),
     },
   })
+
+  const validateMutation = usePostStacksNameValidate()
 
   const createDotEnvMutation = usePostStacksNameEnv({
     mutation: {
@@ -289,11 +397,12 @@ export function StackFiles({ stackName }: { stackName: string }) {
   })
 
   useEffect(() => {
+    validationSeq.current++
     composeDirty.current = false
     envDirty.current = false
     setActiveTab(null)
     setEnvContent(undefined)
-    setValidation(null)
+    setDiagnostics(null)
   }, [stackName])
 
   useEffect(() => {
@@ -301,6 +410,22 @@ export function StackFiles({ stackName }: { stackName: string }) {
     if (!composeDirty.current) setCompose(filesQuery.data.compose)
     if (!envDirty.current) setEnvContent(filesQuery.data.env ?? undefined)
   }, [filesQuery.data])
+
+  useEffect(() => {
+    const seq = ++validationSeq.current
+    if (savedCompose === undefined || compose.trim() === "") return
+    const timer = setTimeout(() => {
+      validateMutation.mutate(
+        { name: stackName, data: { compose, env: envContent } },
+        {
+          onSuccess: (data) => {
+            if (seq === validationSeq.current) setDiagnostics(data)
+          },
+        },
+      )
+    }, 800)
+    return () => clearTimeout(timer)
+  }, [compose, envContent, savedCompose, stackName])
 
   const isDirty =
     filesQuery.data &&
@@ -312,13 +437,42 @@ export function StackFiles({ stackName }: { stackName: string }) {
   const changeCompose = (value: string) => {
     setCompose(value)
     composeDirty.current = true
-    setValidation(null)
   }
 
   const changeEnv = (value: string) => {
     setEnvContent(value)
     envDirty.current = true
-    setValidation(null)
+  }
+
+  const addMissingEnvKeys = (keys: string[]) => {
+    const existing = envKeys(envContent ?? "")
+    const additions = keys.filter((key) => !existing.has(key))
+    if (additions.length === 0) return
+    const current = envContent ?? ""
+    const prefix = current === "" || current.endsWith("\n") ? current : `${current}\n`
+    setEnvContent(`${prefix}${additions.map((key) => `${key}=`).join("\n")}\n`)
+    envDirty.current = true
+    if (viewMode === "tabs") setActiveTab(".env")
+  }
+
+  const clearUnusedEnvKeys = () => {
+    const unused = diagnostics?.env.unused ?? []
+    if (envContent === undefined || unused.length === 0) return
+    const unusedSet = new Set(unused)
+    let removed = 0
+    const lines = envContent.split("\n").filter((line) => {
+      const trimmed = line.trim().replace(/^export /, "")
+      if (!trimmed || trimmed.startsWith("#")) return true
+      const key = trimmed.split("=")[0]?.trim()
+      if (key && unusedSet.has(key)) {
+        removed++
+        return false
+      }
+      return true
+    })
+    if (removed === 0) return
+    setEnvContent(lines.join("\n"))
+    envDirty.current = true
   }
 
   const save = () => {
@@ -401,9 +555,13 @@ export function StackFiles({ stackName }: { stackName: string }) {
               />
             </div>
           )}
-          {validation && (
+          {(diagnostics || validateMutation.isPending) && (
             <div className="mt-4">
-              <ValidationAlerts validation={validation} />
+              <DiagnosticsPanel
+                diagnostics={diagnostics}
+                onAddMissingEnv={addMissingEnvKeys}
+                onClearUnusedEnv={clearUnusedEnvKeys}
+              />
             </div>
           )}
         </>

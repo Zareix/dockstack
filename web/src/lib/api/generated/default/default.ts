@@ -28,6 +28,7 @@ import type {
   AuthSessionResponse,
   ChangeEmailRequest,
   ChangePasswordRequest,
+  ComposeDiagnostics,
   ContainerInfo,
   ContainerStats,
   CreateAPIKeyOutputBody,
@@ -62,6 +63,7 @@ import type {
   StackGetResponseBody,
   StackImportResponseBody,
   StackRenameRequest,
+  StackValidateRequest,
   UpdateUserRequest,
   UserBody,
   UsernameAvailableOutputBody,
@@ -5190,6 +5192,94 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getPostStackActionUpdateMutationOptions(options), queryClient);
+    }
+    export const getPostStacksNameValidateUrl = (name: string,) => {
+
+
+
+
+  return `/api/stacks/${name}/validate`
+}
+
+/**
+ * @summary POST /api/stacks/{name}/validate
+ */
+export const postStacksNameValidate = async (name: string,
+    stackValidateRequest: NonReadonly<StackValidateRequest>, options?: Parameters<typeof orvalInstance>[1]): Promise<ComposeDiagnostics> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return orvalInstance<ComposeDiagnostics>(getPostStacksNameValidateUrl(name),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(stackValidateRequest)
+  }
+);}
+
+
+
+
+
+export const getPostStacksNameValidateMutationKey = () => ['postStacksNameValidate'] as const;
+
+export const getPostStacksNameValidateMutationOptions = <TError = ErrorType<ApiError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postStacksNameValidate>>, TError,PostStacksNameValidateMutationVariables, TContext>, request?: SecondParameter<typeof orvalInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postStacksNameValidate>>, TError,PostStacksNameValidateMutationVariables, TContext> => {
+
+const mutationKey = getPostStacksNameValidateMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postStacksNameValidate>>, PostStacksNameValidateMutationVariables> = (props) => {
+          const {name,data} = props ?? {};
+
+          return  postStacksNameValidate(name,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostStacksNameValidateMutationResult = NonNullable<Awaited<ReturnType<typeof postStacksNameValidate>>>
+    export type PostStacksNameValidateMutationBody = NonReadonly<StackValidateRequest>
+    export type PostStacksNameValidateMutationError = ErrorType<ApiError>
+    export type PostStacksNameValidateMutationVariables = {name: string;data: NonReadonly<StackValidateRequest>}
+
+    /**
+ * @summary POST /api/stacks/{name}/validate
+ */
+export const usePostStacksNameValidate = <TError = ErrorType<ApiError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postStacksNameValidate>>, TError,PostStacksNameValidateMutationVariables, TContext>, request?: SecondParameter<typeof orvalInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postStacksNameValidate>>,
+        TError,
+        PostStacksNameValidateMutationVariables,
+        TContext
+      > => {
+      return useMutation(getPostStacksNameValidateMutationOptions(options), queryClient);
     }
     export const getGetVolumesUrl = () => {
 

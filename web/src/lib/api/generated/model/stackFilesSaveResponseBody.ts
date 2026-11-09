@@ -3,11 +3,11 @@
  * Do not edit manually.
  * Dockstack API
  */
-import type { ComposeValidation } from './composeValidation.ts';
+import type { ComposeDiagnostics } from './composeDiagnostics.ts';
 
 export interface StackFilesSaveResponseBody {
   /** A URL to the JSON Schema for this object. */
   readonly $schema?: string;
+  diagnostics: ComposeDiagnostics;
   success: boolean;
-  validation: ComposeValidation;
 }

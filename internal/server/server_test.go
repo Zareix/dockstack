@@ -522,6 +522,57 @@ func TestStackStreamGated(t *testing.T) {
 	}
 }
 
+func TestStackValidateDraft(t *testing.T) {
+	if _, err := exec.LookPath("docker"); err != nil {
+		t.Skip("docker CLI not available")
+	}
+	if err := exec.Command("docker", "compose", "version").Run(); err != nil {
+		t.Skip("docker compose not available")
+	}
+
+	srv, _ := newTestServer(t)
+	h := srv.Handler()
+	cookies := signInAsAdmin(t, h)
+
+	stackDir := filepath.Join(srv.deps().Stacks.Dir(), "app")
+	if err := os.MkdirAll(stackDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	rr := doJSON(t, h, http.MethodPost, "/api/stacks/app/validate", map[string]any{
+		"compose": "services:\n  app:\n    image: alpine:${TAG}\n",
+		"env":     "TAG=3.20\n",
+	}, cookies)
+	if rr.Code != http.StatusOK {
+		t.Fatalf("validate draft: %d %s", rr.Code, rr.Body.String())
+	}
+	var body struct {
+		Validation struct {
+			Valid  bool     `json:"valid"`
+			Errors []string `json:"errors"`
+		} `json:"validation"`
+		Resolved string `json:"resolved"`
+		Env      struct {
+			Used   []string `json:"used"`
+			Unused []string `json:"unused"`
+		} `json:"env"`
+	}
+	if err := json.Unmarshal(rr.Body.Bytes(), &body); err != nil {
+		t.Fatal(err)
+	}
+	if !body.Validation.Valid || len(body.Validation.Errors) != 0 {
+		t.Fatalf("expected valid draft: %s", rr.Body.String())
+	}
+	if !strings.Contains(body.Resolved, "alpine:3.20") {
+		t.Fatalf("draft env not used: %s", rr.Body.String())
+	}
+	if len(body.Env.Used) != 1 || body.Env.Used[0] != "TAG" {
+		t.Fatalf("unexpected env usage: %s", rr.Body.String())
+	}
+	if _, err := os.Stat(filepath.Join(stackDir, "compose.yaml")); !os.IsNotExist(err) {
+		t.Fatalf("draft validation should not write files: %v", err)
+	}
+}
+
 func TestStackFilesSaveValidation(t *testing.T) {
 	if _, err := exec.LookPath("docker"); err != nil {
 		t.Skip("docker CLI not available")
@@ -545,13 +596,15 @@ func TestStackFilesSaveValidation(t *testing.T) {
 		t.Fatalf("save invalid compose: %d %s", rr.Code, rr.Body.String())
 	}
 	var body struct {
-		Success    bool `json:"success"`
-		Validation struct {
-			Valid            bool     `json:"valid"`
-			Errors           []string `json:"errors"`
-			Warnings         []string `json:"warnings"`
-			ComposeAvailable bool     `json:"composeAvailable"`
-		} `json:"validation"`
+		Success     bool `json:"success"`
+		Diagnostics struct {
+			Validation struct {
+				Valid            bool     `json:"valid"`
+				Errors           []string `json:"errors"`
+				Warnings         []string `json:"warnings"`
+				ComposeAvailable bool     `json:"composeAvailable"`
+			} `json:"validation"`
+		} `json:"diagnostics"`
 	}
 	if err := json.Unmarshal(rr.Body.Bytes(), &body); err != nil {
 		t.Fatal(err)
@@ -559,13 +612,13 @@ func TestStackFilesSaveValidation(t *testing.T) {
 	if !body.Success {
 		t.Fatalf("save should succeed: %s", rr.Body.String())
 	}
-	if !body.Validation.ComposeAvailable {
+	if !body.Diagnostics.Validation.ComposeAvailable {
 		t.Fatalf("compose should be available: %s", rr.Body.String())
 	}
-	if body.Validation.Valid {
+	if body.Diagnostics.Validation.Valid {
 		t.Fatalf("validation should fail: %s", rr.Body.String())
 	}
-	if len(body.Validation.Errors) == 0 {
+	if len(body.Diagnostics.Validation.Errors) == 0 {
 		t.Fatalf("expected validation errors: %s", rr.Body.String())
 	}
 }

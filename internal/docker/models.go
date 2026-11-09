@@ -122,6 +122,18 @@ type ComposeValidation struct {
 	ComposeAvailable bool     `json:"composeAvailable"`
 }
 
+type ComposeEnvUsage struct {
+	Used    []string `json:"used"`
+	Unused  []string `json:"unused"`
+	Missing []string `json:"missing"`
+}
+
+type ComposeDiagnostics struct {
+	Validation ComposeValidation `json:"validation"`
+	Resolved   string            `json:"resolved"`
+	Env        ComposeEnvUsage   `json:"env"`
+}
+
 type RedeployResult struct {
 	Name     string   `json:"name"`
 	Action   string   `json:"action"`

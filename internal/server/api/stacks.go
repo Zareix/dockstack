@@ -168,8 +168,8 @@ type stackFilesSaveRequest struct {
 
 type stackFilesSaveResponse struct {
 	Body struct {
-		Success    bool                        `json:"success"`
-		Validation dockerapi.ComposeValidation `json:"validation"`
+		Success     bool                         `json:"success"`
+		Diagnostics dockerapi.ComposeDiagnostics `json:"diagnostics"`
 	}
 }
 
@@ -204,7 +204,36 @@ func (d *Deps) handleStackFilesSave(ctx context.Context, in *struct {
 	}
 	resp := &stackFilesSaveResponse{}
 	resp.Body.Success = true
-	resp.Body.Validation = d.Stacks.ValidateCompose(ctx, in.Name)
+	resp.Body.Diagnostics = d.Stacks.ValidateCompose(ctx, in.Name)
+	return resp, nil
+}
+
+type stackValidateRequest struct {
+	Compose string  `json:"compose"`
+	Env     *string `json:"env,omitempty"`
+}
+
+type stackValidateResponse struct {
+	Body dockerapi.ComposeDiagnostics
+}
+
+func (d *Deps) handleStackValidate(ctx context.Context, in *struct {
+	Name string `path:"name"`
+	Body stackValidateRequest
+}) (*stackValidateResponse, error) {
+	if err := validateStackName(in.Name); err != nil {
+		return nil, err
+	}
+	exists, err := d.Stacks.StackExists(ctx, in.Name)
+	if err != nil {
+		web.LogError(web.RequestFrom(ctx), err)
+		return nil, huma.Error500InternalServerError("failed to check stack")
+	}
+	if !exists {
+		return nil, huma.Error404NotFound("stack not found")
+	}
+	resp := &stackValidateResponse{}
+	resp.Body = d.Stacks.ValidateComposeContent(ctx, in.Name, in.Body.Compose, in.Body.Env)
 	return resp, nil
 }
 
@@ -524,6 +553,7 @@ func (d *Deps) registerStacks(api huma.API, router chi.Router) {
 	huma.Get(api, "/api/stacks/{name}/containers", d.handleStackContainers, d.AuthMW)
 	huma.Get(api, "/api/stacks/{name}/files", d.handleStackFilesGet, d.AuthMW)
 	huma.Put(api, "/api/stacks/{name}/files", d.handleStackFilesSave, d.AuthMW)
+	huma.Post(api, "/api/stacks/{name}/validate", d.handleStackValidate, d.AuthMW)
 	huma.Post(api, "/api/stacks/{name}/env", d.handleStackCreateEnv, d.AuthMW)
 	huma.Post(api, "/api/stacks/{name}/rename", d.handleStackRename, d.AuthMW)
 	huma.Delete(api, "/api/stacks/{name}", d.handleStackDestroy, d.AuthMW)
