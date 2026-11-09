@@ -2,6 +2,7 @@ import { ArrowDownIcon, ArrowUpIcon, FunnelIcon, MagnifyingGlassIcon } from "@ph
 import {
   type Column,
   type ColumnDef,
+  type ColumnFiltersState,
   columnFilteringFeature,
   createFilteredRowModel,
   createSortedRowModel,
@@ -150,6 +151,7 @@ interface DataTableProps<TData extends RowData> {
   columns: ColumnDef<DataTableFeatures, TData>[]
   data: TData[]
   isLoading?: boolean
+  initialFilters?: ColumnFiltersState
   toolbar?: (table: TanstackTable<DataTableFeatures, TData>) => React.ReactNode
   onRowClick?: (row: TData) => void
   getRowAriaLabel?: (row: TData) => string
@@ -159,6 +161,7 @@ export function DataTable<TData extends RowData>({
   columns,
   data,
   isLoading,
+  initialFilters,
   toolbar,
   onRowClick,
   getRowAriaLabel,
@@ -167,6 +170,7 @@ export function DataTable<TData extends RowData>({
     features: dataTableFeatures,
     data,
     columns,
+    initialState: initialFilters ? { columnFilters: initialFilters } : undefined,
   })
 
   return (

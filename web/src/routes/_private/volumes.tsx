@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 import type { ColumnDef } from "@tanstack/react-table"
+import * as v from "valibot"
 
 import { StatusBadge } from "#/components/status-badge.tsx"
 import {
@@ -15,10 +16,12 @@ import { VolumeActions } from "#/components/volumes/volume-actions"
 import { useGetVolumes } from "#/lib/api/generated/default/default"
 import type { VolumeInfo } from "#/lib/api/generated/model"
 export const Route = createFileRoute("/_private/volumes")({
+  validateSearch: v.object({ q: v.optional(v.string()) }),
   component: VolumesPage,
 })
 
 function VolumesPage() {
+  const { q } = Route.useSearch()
   const volumesQuery = useGetVolumes()
 
   const columns: ColumnDef<DataTableFeatures, VolumeInfo>[] = [
@@ -98,9 +101,11 @@ function VolumesPage() {
         <div>Error: {volumesQuery.error.message}</div>
       ) : (
         <DataTable
+          key={q ?? "all"}
           columns={columns}
           data={volumesQuery.data ?? []}
           isLoading={volumesQuery.isLoading}
+          initialFilters={q ? [{ id: "name", value: q }] : undefined}
           toolbar={(table) => (
             <div className="mb-3 flex flex-row-reverse">
               <TableSearch table={table} columnId="name" placeholder="Search volumes..." />

@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 import type { ColumnDef } from "@tanstack/react-table"
+import * as v from "valibot"
 
 import { ImageActions } from "#/components/images/image-actions"
 import { PruneImagesButton } from "#/components/images/prune-images-button"
@@ -16,6 +17,7 @@ import { useGetImages, useGetImagesStale } from "#/lib/api/generated"
 import type { GetImagesStale200, ImageInfo } from "#/lib/api/generated/model"
 import { formatSize } from "#/lib/utils"
 export const Route = createFileRoute("/_private/images")({
+  validateSearch: v.object({ q: v.optional(v.string()) }),
   component: ImagesPage,
 })
 
@@ -36,6 +38,7 @@ function StaleCell({
 }
 
 function ImagesPage() {
+  const { q } = Route.useSearch()
   const imagesQuery = useGetImages()
 
   const staleQuery = useGetImagesStale({
@@ -120,9 +123,11 @@ function ImagesPage() {
         <PruneImagesButton />
       </div>
       <DataTable
+        key={q ?? "all"}
         columns={columns}
         data={imagesQuery.data ?? []}
         isLoading={imagesQuery.isLoading}
+        initialFilters={q ? [{ id: "tags", value: q }] : undefined}
         toolbar={(table) => (
           <div className="mb-3 flex flex-row-reverse">
             <TableSearch table={table} columnId="tags" placeholder="Search images..." />

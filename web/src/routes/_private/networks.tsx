@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 import type { ColumnDef } from "@tanstack/react-table"
+import * as v from "valibot"
 
 import { NetworkActions } from "#/components/networks/network-actions"
 import { PruneNetworksButton } from "#/components/networks/prune-networks-button"
@@ -16,10 +17,12 @@ import { useGetNetworks } from "#/lib/api/generated/default/default"
 import type { NetworkInfo } from "#/lib/api/generated/model"
 
 export const Route = createFileRoute("/_private/networks")({
+  validateSearch: v.object({ q: v.optional(v.string()) }),
   component: NetworksPage,
 })
 
 function NetworksPage() {
+  const { q } = Route.useSearch()
   const query = useGetNetworks()
 
   const columns: ColumnDef<DataTableFeatures, NetworkInfo>[] = [
@@ -80,9 +83,11 @@ function NetworksPage() {
         <div>{query.error.message}</div>
       ) : (
         <DataTable
+          key={q ?? "all"}
           columns={columns}
           data={query.data ?? []}
           isLoading={query.isLoading}
+          initialFilters={q ? [{ id: "name", value: q }] : undefined}
           toolbar={(table) => (
             <div className="mb-3 flex flex-row-reverse">
               <TableSearch table={table} columnId="name" placeholder="Search networks..." />

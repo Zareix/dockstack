@@ -1,5 +1,6 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router"
 
+import { CommandPalette } from "#/components/command-palette"
 import { getAuthSession, getGetAuthSessionQueryKey } from "#/lib/api/generated"
 import { queryClient } from "#/lib/query-client"
 
@@ -24,5 +25,10 @@ export const Route = createFileRoute("/_private")({
 })
 
 function PrivateLayout() {
-  return <Outlet />
+  return (
+    <>
+      <CommandPalette />
+      <Outlet />
+    </>
+  )
 }

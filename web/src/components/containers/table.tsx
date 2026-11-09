@@ -1,6 +1,6 @@
 import { ArrowSquareOutIcon } from "@phosphor-icons/react/dist/ssr/ArrowSquareOut"
 import { Link } from "@tanstack/react-router"
-import type { ColumnDef } from "@tanstack/react-table"
+import type { ColumnDef, ColumnFiltersState } from "@tanstack/react-table"
 
 import { useGetContainersStats } from "#/lib/api/generated"
 import type { ContainerInfo, ContainerStats } from "#/lib/api/generated/model"
@@ -20,9 +20,10 @@ type Props = {
   showStack?: boolean
   data: ContainerInfo[]
   isLoading: boolean
+  initialFilters?: ColumnFiltersState
 }
 
-export const ContainersTable = ({ data, isLoading, showStack = true }: Props) => {
+export const ContainersTable = ({ data, isLoading, showStack = true, initialFilters }: Props) => {
   const statsQuery = useGetContainersStats({ query: { refetchInterval: 5000 } })
   const statsMap = new Map<string, ContainerStats>(
     (statsQuery.data ?? []).map((s) => [s.containerId, s]),
@@ -173,6 +174,7 @@ export const ContainersTable = ({ data, isLoading, showStack = true }: Props) =>
       columns={columns.filter((c): c is ColumnDef<DataTableFeatures, ContainerInfo> => Boolean(c))}
       data={data}
       isLoading={isLoading}
+      initialFilters={initialFilters}
       toolbar={
         showStack
           ? (table) => (
